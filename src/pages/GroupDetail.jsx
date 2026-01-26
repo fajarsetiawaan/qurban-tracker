@@ -312,9 +312,12 @@ export default function GroupDetail() {
                 <button onClick={() => navigate(-1)} className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
                     <ArrowLeft size={20} />
                 </button>
-                <div className="relative">
+                <div className="relative pointer-events-auto">
                     <button
-                        onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setIsHeaderMenuOpen(!isHeaderMenuOpen)
+                        }}
                         className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-slate-100 transition"
                     >
                         <MoreVertical size={20} />
@@ -322,11 +325,12 @@ export default function GroupDetail() {
 
                     {/* Header Dropdown */}
                     {isHeaderMenuOpen && (
-                        <div className="absolute right-0 top-14 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-scale-up">
+                        <div className="absolute right-0 top-14 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-scale-up">
                             <button
-                                onClick={() => {
-                                    openEditModal()
+                                onClick={(e) => {
+                                    e.stopPropagation()
                                     setIsHeaderMenuOpen(false)
+                                    setIsEditModalOpen(true)
                                 }}
                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
                             >
@@ -334,9 +338,10 @@ export default function GroupDetail() {
                                 <span>Edit Grup</span>
                             </button>
                             <button
-                                onClick={() => {
-                                    handleDeleteGroup()
+                                onClick={(e) => {
+                                    e.stopPropagation()
                                     setIsHeaderMenuOpen(false)
+                                    handleDeleteGroup()
                                 }}
                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
                             >
