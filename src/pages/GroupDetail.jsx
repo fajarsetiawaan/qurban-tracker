@@ -20,6 +20,10 @@ export default function GroupDetail() {
     const [trxLoading, setTrxLoading] = useState(false)
     const [lastTransaction, setLastTransaction] = useState(null)
 
+    // New Transaction State
+    const [trxDate, setTrxDate] = useState(new Date().toISOString().split('T')[0])
+    const [trxReceiptFile, setTrxReceiptFile] = useState(null)
+
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '' })
@@ -170,13 +174,35 @@ export default function GroupDetail() {
             // Get user for RLS
             const { data: { user } } = await supabase.auth.getUser()
 
+            // Upload Receipt if exists
+            let receiptUrl = null
+            if (trxReceiptFile) {
+                const fileExt = trxReceiptFile.name.split('.').pop()
+                const fileName = `${Date.now()}_${Math.random()}.${fileExt}`
+                const filePath = `${fileName}`
+
+                const { error: uploadError } = await supabase.storage
+                    .from('receipts')
+                    .upload(filePath, trxReceiptFile)
+
+                if (uploadError) throw uploadError
+
+                const { data: urlData } = supabase.storage
+                    .from('receipts')
+                    .getPublicUrl(filePath)
+
+                receiptUrl = urlData.publicUrl
+            }
+
             const { data: newTrx, error } = await supabase
                 .from('transactions')
                 .insert({
                     participant_id: trxParticipantId,
                     amount: rawAmount,
                     payment_method: trxMethod,
-                    user_id: user.id // Required for RLS
+                    user_id: user.id, // Required for RLS
+                    transaction_date: trxDate,
+                    receipt_url: receiptUrl
                 })
                 .select()
                 .single()
@@ -410,6 +436,27 @@ export default function GroupDetail() {
                                 </div>
 
                                 <div>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</p>
+                                    <input
+                                        type="date"
+                                        value={trxDate}
+                                        onChange={(e) => setTrxDate(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</p>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setTrxReceiptFile(e.target.files[0])}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                    />
+                                </div>
+
+                                <div>
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</p>
                                     <div className="flex space-x-3">
                                         {['Tunai', 'Transfer'].map(m => (
@@ -449,7 +496,7 @@ export default function GroupDetail() {
                                     <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
                                         <div className="flex justify-between">
                                             <span className="text-slate-500 text-sm">Tanggal</span>
-                                            <span className="font-medium text-slate-800 text-sm">{lastTransaction.formattedDate.split(',')[0]}</span>
+                                            <span className="font-medium text-slate-800 text-sm">{new Date(lastTransaction.transaction_date || lastTransaction.created_at).toLocaleDateString('id-ID')}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-slate-500 text-sm">Pengirim</span>
@@ -459,6 +506,19 @@ export default function GroupDetail() {
                                             <span className="text-slate-500 text-sm">Metode</span>
                                             <span className="font-medium text-slate-800 text-sm">{lastTransaction.payment_method}</span>
                                         </div>
+
+                                        {lastTransaction.receipt_url && (
+                                            <div className="pt-2 text-center">
+                                                <a
+                                                    href={lastTransaction.receipt_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                                >
+                                                    <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
