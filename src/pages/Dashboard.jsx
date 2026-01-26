@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function Dashboard() {
     const [groups, setGroups] = useState([])
@@ -25,7 +27,7 @@ export default function Dashboard() {
     }
 
     return (
-        <div>
+        <div className="relative min-h-[80vh]">
             <h1 className="text-2xl font-bold mb-4">Ringkasan Qurban</h1>
 
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-4">
@@ -49,6 +51,15 @@ export default function Dashboard() {
                     </ul>
                 )}
             </div>
+
+            {/* Floating Action Button */}
+            <Link
+                to="/onboarding"
+                className="fixed bottom-20 right-4 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition z-50 transform hover:scale-105"
+                style={{ right: 'max(1rem, calc(50% - 224px + 1rem))' }} // Keep inside max-w-md on desktop
+            >
+                <Plus size={24} />
+            </Link>
         </div>
     )
 }

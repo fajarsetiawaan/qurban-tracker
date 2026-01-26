@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import MobileLayout from './components/Layout/MobileLayout'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
+import Onboarding from './pages/Onboarding'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -35,6 +36,7 @@ function App() {
 
         <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
           <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
         </Route>
