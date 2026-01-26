@@ -10,43 +10,14 @@ export default function MobileLayout() {
                 </main>
 
                 {/* Floating Glass Navigation */}
-                <div className="fixed bottom-6 left-0 right-0 z-50 pointer-events-none">
-                    <nav className="max-w-[90%] mx-auto bg-white/80 backdrop-blur-lg border border-white/20 shadow-xl rounded-2xl pointer-events-auto">
-                        <div className="flex justify-around items-center p-2">
+                <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+                    <nav className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-lg border-t border-white/20 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] rounded-t-3xl pointer-events-auto px-4 pb-6 pt-4">
+                        <div className="flex justify-center items-center">
                             <NavLink
                                 to="/"
-                                className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all duration-300 w-16 ${isActive ? 'text-emerald-600 scale-105 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={({ isActive }) => `flex flex-col items-center p-3 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 bg-emerald-50 scale-110 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                {({ isActive }) => (
-                                    <>
-                                        <Home size={22} strokeWidth={isActive ? 2.5 : 2} />
-                                        <span className={`text-[10px] mt-1 font-medium ${isActive ? 'block' : 'hidden'}`}>Home</span>
-                                    </>
-                                )}
-                            </NavLink>
-
-                            <NavLink
-                                to="/groups"
-                                className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all duration-300 w-16 ${isActive ? 'text-emerald-600 scale-105 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                {({ isActive }) => (
-                                    <>
-                                        <Users size={22} strokeWidth={isActive ? 2.5 : 2} />
-                                        <span className={`text-[10px] mt-1 font-medium ${isActive ? 'block' : 'hidden'}`}>Grup</span>
-                                    </>
-                                )}
-                            </NavLink>
-
-                            <NavLink
-                                to="/account"
-                                className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all duration-300 w-16 ${isActive ? 'text-emerald-600 scale-105 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                {({ isActive }) => (
-                                    <>
-                                        <User size={22} strokeWidth={isActive ? 2.5 : 2} />
-                                        <span className={`text-[10px] mt-1 font-medium ${isActive ? 'block' : 'hidden'}`}>Akun</span>
-                                    </>
-                                )}
+                                <Home size={28} strokeWidth={2.5} />
                             </NavLink>
                         </div>
                     </nav>
