@@ -144,7 +144,74 @@ export default function Dashboard() {
         }
     }
 
-    // ... (handleLogout, handleDeleteGroup, openEditModal, handleUpdateGroup remain same) ...
+    const handleLogout = async () => {
+        try {
+            const { error } = await supabase.auth.signOut()
+            if (error) throw error
+            navigate('/login')
+        } catch (error) {
+            console.error('Error logging out:', error.message)
+        }
+    }
+
+    const handleDeleteGroup = async (groupId, e) => {
+        e.stopPropagation()
+        if (window.confirm('Yakin ingin menghapus grup ini?')) {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('User not authenticated')
+
+                const { error } = await supabase.from('groups').delete().eq('id', groupId)
+                if (error) throw error
+
+                fetchDashboardData()
+                setActiveDropdown(null)
+            } catch (error) {
+                console.error('Error deleting group:', error)
+                alert('Gagal menghapus grup')
+            }
+        }
+    }
+
+    const openEditModal = (group, e) => {
+        e.stopPropagation()
+        setEditFormData({
+            id: group.id,
+            name: group.name,
+            target_animal: group.target_animal,
+            total_price: group.total_price
+        })
+        setIsEditModalOpen(true)
+        setActiveDropdown(null)
+    }
+
+    const handleUpdateGroup = async (e) => {
+        e.preventDefault()
+        setEditLoading(true)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
+            const { error } = await supabase
+                .from('groups')
+                .update({
+                    name: editFormData.name,
+                    target_animal: editFormData.target_animal,
+                    total_price: parseInt(editFormData.total_price) || 0
+                })
+                .eq('id', editFormData.id)
+
+            if (error) throw error
+
+            setIsEditModalOpen(false)
+            fetchDashboardData()
+        } catch (error) {
+            console.error('Error updating group:', error)
+            alert('Gagal mengupdate grup')
+        } finally {
+            setEditLoading(false)
+        }
+    }
 
     // Filter Logic...
     const filteredGroups = groups.filter(group => {
