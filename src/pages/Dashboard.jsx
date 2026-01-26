@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
 export default function Dashboard() {
+    const navigate = useNavigate()
     const [groups, setGroups] = useState([])
     const [loading, setLoading] = useState(true)
     const [totalSavings, setTotalSavings] = useState(0)
+
+    // Filter & UI State
+    const [filterStatus, setFilterStatus] = useState('Semua')
+    const [showFilterMenu, setShowFilterMenu] = useState(false)
+    const [activeDropdown, setActiveDropdown] = useState(null)
+
+    // Edit Group State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [editFormData, setEditFormData] = useState({ id: null, name: '', target_animal: 'sapi', total_price: '' })
+    const [editLoading, setEditLoading] = useState(false)
 
     useEffect(() => {
         fetchGroups()
@@ -78,6 +89,65 @@ export default function Dashboard() {
         }
     }
 
+    const handleDeleteGroup = async (id, e) => {
+        e.preventDefault() // Prevent link navigation
+        e.stopPropagation()
+        if (window.confirm('Yakin ingin menghapus grup ini beserta semua data pesertanya?')) {
+            try {
+                const { error } = await supabase.from('groups').delete().eq('id', id)
+                if (error) throw error
+                fetchGroups() // Refresh
+            } catch (error) {
+                console.error('Error deleting group:', error)
+                alert('Gagal menghapus grup')
+            }
+        }
+        setActiveDropdown(null)
+    }
+
+    const openEditModal = (group, e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setEditFormData({
+            id: group.id,
+            name: group.name,
+            target_animal: group.target_animal,
+            total_price: group.total_price
+        })
+        setIsEditModalOpen(true)
+        setActiveDropdown(null)
+    }
+
+    const handleUpdateGroup = async (e) => {
+        e.preventDefault()
+        setEditLoading(true)
+        try {
+            const { error } = await supabase
+                .from('groups')
+                .update({
+                    name: editFormData.name,
+                    target_animal: editFormData.target_animal,
+                    total_price: parseInt(editFormData.total_price) || 0
+                })
+                .eq('id', editFormData.id)
+
+            if (error) throw error
+
+            setIsEditModalOpen(false)
+            fetchGroups() // Refresh data
+        } catch (error) {
+            console.error('Error updating group:', error)
+            alert('Gagal mengupdate grup')
+        } finally {
+            setEditLoading(false)
+        }
+    }
+
+    const filteredGroups = groups.filter(group => {
+        if (filterStatus === 'Semua') return true
+        return group.target_animal.toLowerCase() === filterStatus.toLowerCase()
+    })
+
     return (
         <div className="relative min-h-[80vh] p-6">
             {/* Header */}
@@ -119,9 +189,42 @@ export default function Dashboard() {
 
             {/* Groups List */}
             <div className="mb-24">
-                <div className="flex justify-between items-end mb-4">
-                    <h2 className="text-lg font-bold text-slate-800">Grup Qurban Anda</h2>
-                    <button className="text-xs font-bold text-emerald-600 hover:text-emerald-700">Lihat Semua</button>
+                <div className="flex justify-between items-end mb-4 relative z-10">
+                    <h2 className="text-lg font-bold text-slate-800">
+                        {filterStatus === 'Semua' ? 'Grup Qurban Anda' : `Grup ${filterStatus}`}
+                    </h2>
+                    <div className="flex space-x-2">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowFilterMenu(!showFilterMenu)}
+                                className={`p-2 rounded-full transition ${showFilterMenu || filterStatus !== 'Semua' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
+                            >
+                                <Filter size={20} />
+                            </button>
+
+                            {/* Filter Dropdown */}
+                            {showFilterMenu && (
+                                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-fade-in">
+                                    {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={() => {
+                                                setFilterStatus(status)
+                                                setShowFilterMenu(false)
+                                            }}
+                                            className={`w-full text-left px-4 py-2 rounded-xl text-sm font-bold ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-500 hover:bg-slate-50'}`}
+                                        >
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <Link to="/onboarding" className="p-2 bg-slate-900 text-white rounded-full hover:bg-black transition shadow-lg shadow-slate-300">
+                            <Plus size={20} />
+                        </Link>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -140,8 +243,8 @@ export default function Dashboard() {
                     </div>
                 ) : (
                     <ul className="space-y-4">
-                        {groups.map((group) => (
-                            <li key={group.id}>
+                        {filteredGroups.map((group) => (
+                            <li key={group.id} className="relative">
                                 <Link
                                     to={`/groups/${group.id}`}
                                     className="block bg-white p-5 rounded-3xl shadow-[0_4px_20px_-12px_rgba(0,0,0,0.1)] border border-slate-50 hover:border-emerald-200 hover:shadow-emerald-100/50 transition duration-300 group"
@@ -158,9 +261,18 @@ export default function Dashboard() {
                                             </div>
                                             <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition">{group.name}</h3>
                                         </div>
-                                        <div className="bg-slate-50 p-2 rounded-full text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition">
-                                            <ChevronRight size={20} />
-                                        </div>
+
+                                        {/* Quick Actions Trigger */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                            }}
+                                            className="bg-slate-50 p-2 rounded-full text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition relative z-10"
+                                        >
+                                            <MoreVertical size={20} />
+                                        </button>
                                     </div>
 
                                     {/* Progress Visual */}
@@ -177,20 +289,91 @@ export default function Dashboard() {
                                         </div>
                                     </div>
                                 </Link>
+
+                                {/* Dropdown Menu */}
+                                {activeDropdown === group.id && (
+                                    <div className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
+                                        <button
+                                            onClick={(e) => openEditModal(group, e)}
+                                            className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                                        >
+                                            <Pencil size={16} />
+                                            <span>Edit</span>
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeleteGroup(group.id, e)}
+                                            className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+                                        >
+                                            <Trash2 size={16} />
+                                            <span>Hapus</span>
+                                        </button>
+                                    </div>
+                                )}
                             </li>
                         ))}
                     </ul>
                 )}
             </div>
 
-            {/* Floating Action Button */}
-            <Link
-                to="/onboarding"
-                className="fixed bottom-24 right-6 bg-slate-900 text-white p-4 rounded-full shadow-2xl shadow-slate-400/50 hover:bg-black transition z-40 transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white"
-                style={{ right: 'max(1.5rem, calc(50% - 224px + 1.5rem))' }}
-            >
-                <Plus size={24} />
-            </Link>
+            {/* Edit Group Modal (Reused) */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-slate-800">Edit Grup</h2>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
+                                <select
+                                    value={editFormData.target_animal}
+                                    onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                >
+                                    <option value="sapi">Sapi</option>
+                                    <option value="kambing">Kambing</option>
+                                    <option value="domba">Domba</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                <input
+                                    type="number"
+                                    value={editFormData.total_price}
+                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={editLoading}
+                                className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                            >
+                                {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
+
