@@ -44,8 +44,18 @@ export default function Dashboard() {
                 ) : (
                     <ul className="space-y-2">
                         {groups.map((group) => (
-                            <li key={group.id} className="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                {group.name}
+                            <li key={group.id}>
+                                <Link
+                                    to={`/groups/${group.id}`}
+                                    className="block bg-white p-3 rounded shadow-sm border border-gray-100 hover:border-blue-300 transition"
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium text-gray-800">{group.name}</span>
+                                        <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full capitalize">
+                                            {group.target_animal}
+                                        </span>
+                                    </div>
+                                </Link>
                             </li>
                         ))}
                     </ul>
