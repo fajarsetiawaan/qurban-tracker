@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal } from 'lucide-react'
+import Skeleton from '../components/Skeleton'
 
 export default function GroupDetail() {
     const { id } = useParams()
@@ -62,7 +63,7 @@ export default function GroupDetail() {
         } catch (error) {
             console.error('Error fetching detail:', error)
         } finally {
-            setLoading(false)
+            setTimeout(() => setLoading(false), 500)
         }
     }
 
@@ -85,7 +86,6 @@ export default function GroupDetail() {
         }
     }
 
-    // Format Helper
     const formatRupiahInput = (value) => {
         const numberString = value.replace(/[^,\d]/g, '').toString()
         const split = numberString.split(',')
@@ -125,7 +125,6 @@ export default function GroupDetail() {
 
             if (error) throw error
 
-            // Prepare data for invoice
             const participantName = data.participants.find(p => p.id === trxParticipantId)?.name
             setLastTransaction({
                 ...newTrx,
@@ -152,39 +151,65 @@ export default function GroupDetail() {
         setLastTransaction(null)
     }
 
-    if (loading) return <div className="p-4 text-center">Memuat data...</div>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 pb-20">
+                <div className="bg-transparent p-6 sticky top-0 z-10 flex items-center">
+                    <Skeleton className="h-8 w-8 mr-3 rounded-full" />
+                </div>
+                <div className="p-6 space-y-6">
+                    <div className="bg-white p-8 rounded-3xl shadow-sm flex flex-col items-center">
+                        <Skeleton className="h-56 w-56 rounded-full" />
+                    </div>
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="bg-white p-5 rounded-3xl shadow-sm flex items-center space-x-4">
+                            <Skeleton className="h-12 w-12 rounded-full" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-4 w-1/2" />
+                                <Skeleton className="h-3 w-1/3" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    }
+
     if (!data) return <div className="p-4 text-center">Grup tidak ditemukan</div>
 
     const chartData = [
         { name: 'Terkumpul', value: data.totalCollected, color: '#10B981' },
-        { name: 'Kekurangan', value: data.shortage, color: '#E5E7EB' }
+        { name: 'Kekurangan', value: data.shortage, color: '#F1F5F9' }
     ]
     const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20 relative">
-            {/* Header */}
-            <div className="bg-white p-4 sticky top-0 z-10 shadow-sm flex items-center">
-                <button onClick={() => navigate(-1)} className="mr-3 text-gray-600">
-                    <ArrowLeft size={24} />
+        <div className="min-h-screen bg-slate-50 pb-20 relative font-sans">
+            {/* Transparent Header */}
+            <div className="p-6 sticky top-0 z-10 flex items-center justify-between pointer-events-none">
+                <button onClick={() => navigate(-1)} className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
+                    <ArrowLeft size={20} />
                 </button>
-                <div>
-                    <h1 className="text-lg font-bold text-gray-800">{data.name}</h1>
-                    <p className="text-xs text-gray-500 capitalize">{data.target_animal} • Rp {data.total_price.toLocaleString()}</p>
-                </div>
+                <button className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
+                    <MoreHorizontal size={20} />
+                </button>
             </div>
 
-            <div className="p-4 space-y-6">
+            <div className="px-6 pb-6 -mt-4">
+                <h1 className="text-2xl font-bold text-slate-800 text-center mb-1">{data.name}</h1>
+                <p className="text-sm text-slate-500 text-center capitalize">{data.target_animal} • Target Rp {data.total_price.toLocaleString()}</p>
+
                 {/* Chart Section */}
-                <section className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center">
-                    <div className="w-48 h-48 relative">
+                <div className="bg-white mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden">
+                    <div className="w-56 h-56 relative z-10">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={chartData}
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
+                                    innerRadius={65}
+                                    outerRadius={90}
+                                    cornerRadius={10}
+                                    paddingAngle={4}
                                     dataKey="value"
                                     stroke="none"
                                 >
@@ -196,96 +221,101 @@ export default function GroupDetail() {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-xs text-gray-400">Terkumpul</span>
-                            <span className="text-md font-bold text-green-600">
-                                {Math.round((data.totalCollected / data.total_price) * 100)}%
+                            <span className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">Terkumpul</span>
+                            <span className="text-3xl font-bold text-emerald-600">
+                                {Math.round((data.totalCollected / data.total_price) * 100)}<span className="text-lg text-emerald-500">%</span>
                             </span>
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex justify-between w-full mt-4 text-sm px-4">
-                        <div className="text-center">
-                            <p className="text-gray-400 text-xs">Masuk</p>
-                            <p className="font-bold text-green-600">Rp {data.totalCollected.toLocaleString()}</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-gray-400 text-xs">Kurang</p>
-                            <p className="font-bold text-gray-600">Rp {data.shortage.toLocaleString()}</p>
-                        </div>
+                {/* Breakdown Stats */}
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="bg-emerald-50 p-4 rounded-3xl">
+                        <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-1">Masuk</p>
+                        <p className="text-lg font-bold text-emerald-800">Rp {data.totalCollected.toLocaleString()}</p>
                     </div>
-                </section>
+                    <div className="bg-slate-100 p-4 rounded-3xl">
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Kurang</p>
+                        <p className="text-lg font-bold text-slate-700">Rp {data.shortage.toLocaleString()}</p>
+                    </div>
+                </div>
 
                 {/* Participants Section */}
-                <section>
-                    <h2 className="text-lg font-bold text-gray-800 mb-3 ml-1">Peserta ({data.participants.length})</h2>
-                    <div className="space-y-3">
-                        {data.participants.map((participant) => {
+                <div className="mt-8">
+                    <h2 className="text-lg font-bold text-slate-800 mb-4 ml-2">Peserta ({data.participants.length})</h2>
+                    <div className="space-y-4">
+                        {data.participants.map((participant, idx) => {
                             const percentage = perPersonTarget > 0 ? Math.min(100, (participant.totalPaid / perPersonTarget) * 100) : 0
+                            // Generate random pastel color based on index
+                            const colors = ['bg-orange-100 text-orange-600', 'bg-blue-100 text-blue-600', 'bg-purple-100 text-purple-600', 'bg-pink-100 text-pink-600']
+                            const avatarColor = colors[idx % colors.length]
+
                             return (
-                                <div key={participant.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                                <User size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-gray-800">{participant.name}</p>
-                                                <p className="text-xs text-gray-500">{participant.phone || '-'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-blue-600">Rp {participant.totalPaid.toLocaleString()}</p>
-                                            <p className="text-xs text-gray-400">Target: Rp {Math.ceil(perPersonTarget).toLocaleString()}</p>
-                                        </div>
+                                <div key={participant.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4">
+                                    {/* Avatar */}
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor}`}>
+                                        {participant.name.substring(0, 2).toUpperCase()}
                                     </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2.5 mt-2">
-                                        <div className={`h-2.5 rounded-full ${percentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${percentage}%` }}></div>
+
+                                    {/* Info */}
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <h3 className="font-bold text-slate-800">{participant.name}</h3>
+                                            <span className="font-bold text-slate-800">Rp {participant.totalPaid.toLocaleString()}</span>
+                                        </div>
+
+                                        {/* Progress Bar */}
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1">
+                                            <div
+                                                className={`h-1.5 rounded-full transition-all duration-1000 ${percentage >= 100 ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                                                style={{ width: `${percentage}%` }}
+                                            ></div>
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 text-right">
+                                            {percentage >= 100 ? 'LUNAS' : `Sisa Rp ${(perPersonTarget - participant.totalPaid).toLocaleString()}`}
+                                        </p>
                                     </div>
                                 </div>
                             )
                         })}
                     </div>
-                </section>
+                </div>
             </div>
 
             {/* FAB */}
             <button
                 onClick={() => setShowModal(true)}
-                className="fixed bottom-6 right-4 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition z-40 transform hover:scale-105 flex items-center justify-center"
-                style={{ right: 'max(1rem, calc(50% - 224px + 1rem))' }}
+                className="fixed bottom-24 right-6 bg-slate-900 text-white p-4 rounded-full shadow-2xl shadow-slate-400/50 hover:bg-black transition z-40 transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white"
+                style={{ right: 'max(1.5rem, calc(50% - 224px + 1.5rem))' }}
             >
                 <Plus size={24} />
             </button>
 
-            {/* Modal Overlay */}
+            {/* Modal Overlay (Same implementation, cleaner style) */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-
-                    {/* Modal Content */}
-                    <div className="bg-white w-full max-w-sm rounded-t-xl sm:rounded-xl shadow-2xl overflow-hidden animate-slide-up">
-
-                        {/* Header */}
-                        <div className="flex justify-between items-center p-4 border-b">
-                            <h2 className="text-lg font-bold text-gray-800">
-                                {trxStep === 'form' ? 'Tambah Transaksi' : 'Transaksi Berhasil'}
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up pb-6">
+                        <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100">
+                            <h2 className="text-lg font-bold text-slate-800">
+                                {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
                             </h2>
-                            <button onClick={resetModal} className="text-gray-400 hover:text-gray-600">
-                                <X size={24} />
+                            <button onClick={resetModal} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
                             </button>
                         </div>
 
-                        {/* Step 1: Form */}
                         {trxStep === 'form' && (
-                            <form onSubmit={handleSaveTransaction} className="p-4 space-y-4">
+                            <form onSubmit={handleSaveTransaction} className="p-6 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Peserta</label>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sumber Dana</p>
                                     <select
                                         value={trxParticipantId}
                                         onChange={(e) => setTrxParticipantId(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                        className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                         required
                                     >
-                                        <option value="">-- Pilih Peserta --</option>
+                                        <option value="">Pilih Peserta...</option>
                                         {data.participants.map(p => (
                                             <option key={p.id} value={p.id}>{p.name}</option>
                                         ))}
@@ -293,78 +323,76 @@ export default function GroupDetail() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nominal (Rp)</label>
-                                    <input
-                                        type="text"
-                                        value={trxAmount}
-                                        onChange={handleAmountChange}
-                                        placeholder="0"
-                                        className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-bold text-gray-800"
-                                        required
-                                    />
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</p>
+                                    <div className="relative">
+                                        <span className="absolute left-6 top-4 text-emerald-600 font-bold text-xl">Rp</span>
+                                        <input
+                                            type="text"
+                                            value={trxAmount}
+                                            onChange={handleAmountChange}
+                                            placeholder="0"
+                                            className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                            required
+                                        />
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Metode Bayar</label>
-                                    <select
-                                        value={trxMethod}
-                                        onChange={(e) => setTrxMethod(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                    >
-                                        <option value="Tunai">Tunai</option>
-                                        <option value="Transfer">Transfer</option>
-                                    </select>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</p>
+                                    <div className="flex space-x-3">
+                                        {['Tunai', 'Transfer'].map(m => (
+                                            <button
+                                                key={m}
+                                                type="button"
+                                                onClick={() => setTrxMethod(m)}
+                                                className={`flex-1 py-3 rounded-xl font-bold transition ${trxMethod === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
+                                            >
+                                                {m}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={trxLoading}
-                                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold mt-4 hover:bg-blue-700 disabled:opacity-50"
+                                    className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200 mt-4"
                                 >
-                                    {trxLoading ? 'Menyimpan...' : 'Simpan Transaksi'}
+                                    {trxLoading ? 'Memproses...' : 'Kirim Setoran'}
                                 </button>
                             </form>
                         )}
 
-                        {/* Step 2: Invoice */}
                         {trxStep === 'invoice' && lastTransaction && (
-                            <div className="p-6 bg-gray-50 flex flex-col items-center">
-                                <div className="bg-white w-full p-4 shadow-sm border border-gray-200 rounded-lg relative">
-                                    {/* Cut circles effect */}
-                                    <div className="absolute -left-2 top-1/2 w-4 h-4 bg-gray-50 rounded-full"></div>
-                                    <div className="absolute -right-2 top-1/2 w-4 h-4 bg-gray-50 rounded-full"></div>
-
-                                    <div className="text-center border-b-2 border-dashed border-gray-200 pb-4 mb-4">
-                                        <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                                            <CheckCircle className="text-green-600" size={24} />
+                            <div className="p-6 flex flex-col items-center">
+                                <div className="bg-white w-full p-0 relative">
+                                    <div className="text-center pb-8">
+                                        <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
+                                            <CheckCircle className="text-emerald-600" size={40} />
                                         </div>
-                                        <p className="text-green-600 font-bold text-sm">PEMBAYARAN BERHASIL</p>
-                                        <h3 className="text-2xl font-bold text-gray-800 mt-1">{lastTransaction.formattedAmount}</h3>
+                                        <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastTransaction.formattedAmount}</h3>
+                                        <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
                                     </div>
 
-                                    <div className="space-y-2 text-sm font-mono text-gray-600">
+                                    <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
                                         <div className="flex justify-between">
-                                            <span>Tanggal</span>
-                                            <span>{lastTransaction.formattedDate.split(',')[0]}</span>
+                                            <span className="text-slate-500 text-sm">Tanggal</span>
+                                            <span className="font-medium text-slate-800 text-sm">{lastTransaction.formattedDate.split(',')[0]}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span>Peserta</span>
-                                            <span className="font-bold">{lastTransaction.participantName}</span>
+                                            <span className="text-slate-500 text-sm">Pengirim</span>
+                                            <span className="font-bold text-slate-800 text-sm">{lastTransaction.participantName}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span>Metode</span>
-                                            <span>{lastTransaction.payment_method}</span>
-                                        </div>
-                                        <div className="flex justify-between text-black font-bold pt-2 border-t border-dashed mt-2">
-                                            <span>Total</span>
-                                            <span>{lastTransaction.formattedAmount}</span>
+                                            <span className="text-slate-500 text-sm">Metode</span>
+                                            <span className="font-medium text-slate-800 text-sm">{lastTransaction.payment_method}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={resetModal}
-                                    className="w-full bg-gray-800 text-white py-3 rounded-lg font-bold mt-6 hover:bg-gray-900"
+                                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
                                 >
                                     Selesai
                                 </button>

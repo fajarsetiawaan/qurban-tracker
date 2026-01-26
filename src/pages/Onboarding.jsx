@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { Trash2, Plus } from 'lucide-react'
+import { Trash2, Plus, ArrowLeft } from 'lucide-react'
 
 export default function Onboarding() {
     const navigate = useNavigate()
@@ -92,8 +92,11 @@ export default function Onboarding() {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
-            <div className="bg-blue-600 text-white p-4 sticky top-0 z-10 shadow-md">
-                <h1 className="text-lg font-bold">Buat Grup Baru</h1>
+            <div className="bg-white p-4 sticky top-0 z-10 shadow-sm flex items-center border-b border-gray-100">
+                <button onClick={() => navigate(-1)} className="mr-3 text-gray-600 hover:bg-gray-100 p-2 rounded-full transition">
+                    <ArrowLeft size={24} />
+                </button>
+                <h1 className="text-lg font-bold text-gray-800">Buat Grup Baru</h1>
             </div>
 
             <form onSubmit={handleSave} className="p-4 space-y-6">
@@ -105,8 +108,8 @@ export default function Onboarding() {
                 )}
 
                 {/* Section 1: Data Grup */}
-                <section className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <h2 className="text-md font-semibold text-gray-800 mb-4 border-b pb-2">Data Grup</h2>
+                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Grup</h2>
 
                     <div className="space-y-4">
                         <div>
@@ -116,45 +119,47 @@ export default function Onboarding() {
                                 placeholder="Contoh: Kelompok Masjid Al-Hidayah"
                                 value={groupName}
                                 onChange={(e) => setGroupName(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
                                 required
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Target Hewan</label>
-                            <select
-                                value={targetAnimal}
-                                onChange={(e) => setTargetAnimal(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                            >
-                                <option value="sapi">Sapi</option>
-                                <option value="kambing">Kambing</option>
-                                <option value="domba">Domba</option>
-                            </select>
-                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
+                                <select
+                                    value={targetAnimal}
+                                    onChange={(e) => setTargetAnimal(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                >
+                                    <option value="sapi">Sapi</option>
+                                    <option value="kambing">Kambing</option>
+                                    <option value="domba">Domba</option>
+                                </select>
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Total Harga (Estimasi)</label>
-                            <input
-                                type="number"
-                                placeholder="Rp"
-                                value={totalPrice}
-                                onChange={(e) => setTotalPrice(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                                <input
+                                    type="number"
+                                    placeholder="Contoh: 21000000"
+                                    value={totalPrice}
+                                    onChange={(e) => setTotalPrice(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
+                                />
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 {/* Section 2: Data Peserta */}
-                <section className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-center mb-4 border-b pb-2">
-                        <h2 className="text-md font-semibold text-gray-800">Peserta</h2>
+                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                        <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wide">Daftar Peserta</h2>
                         <button
                             type="button"
                             onClick={addParticipant}
-                            className="text-blue-600 text-sm font-medium flex items-center hover:text-blue-700"
+                            className="text-emerald-600 text-sm font-bold flex items-center hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition"
                         >
                             <Plus size={16} className="mr-1" /> Tambah
                         </button>
@@ -162,29 +167,32 @@ export default function Onboarding() {
 
                     <div className="space-y-4">
                         {participants.map((participant, index) => (
-                            <div key={index} className="flex items-start space-x-2 bg-gray-50 p-3 rounded-md">
-                                <div className="flex-1 space-y-2">
+                            <div key={index} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fade-in">
+                                <div className="pt-2 text-xs font-bold text-gray-400 w-6 text-center">
+                                    {index + 1}
+                                </div>
+                                <div className="flex-1 space-y-3">
                                     <input
                                         type="text"
                                         placeholder="Nama Peserta"
                                         value={participant.name}
                                         onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
-                                        className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
-
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                        required
                                     />
                                     <input
                                         type="tel"
                                         placeholder="No HP (Opsional)"
                                         value={participant.phone}
                                         onChange={(e) => handleParticipantChange(index, 'phone', e.target.value)}
-                                        className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
                                     />
                                 </div>
                                 {participants.length > 1 && (
                                     <button
                                         type="button"
                                         onClick={() => removeParticipant(index)}
-                                        className="text-red-400 hover:text-red-600 p-1"
+                                        className="text-gray-400 hover:text-red-500 p-2 mt-1"
                                         title="Hapus Peserta"
                                     >
                                         <Trash2 size={18} />
@@ -200,7 +208,7 @@ export default function Onboarding() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition disabled:opacity-50"
+                        className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition disabled:opacity-70 transform active:scale-[0.98]"
                     >
                         {loading ? 'Menyimpan...' : 'Simpan Grup & Peserta'}
                     </button>
