@@ -11,13 +11,13 @@ export default function MobileLayout() {
 
                 {/* Floating Glass Navigation */}
                 <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-                    <nav className="w-full max-w-md mx-auto bg-white/80 backdrop-blur-lg border-t border-white/20 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] rounded-t-3xl pointer-events-auto px-4 pb-6 pt-4">
+                    <nav className="w-full max-w-md mx-auto bg-white/70 backdrop-blur-md pointer-events-auto pb-6 pt-4">
                         <div className="flex justify-center items-center">
                             <NavLink
                                 to="/"
-                                className={({ isActive }) => `flex flex-col items-center p-3 rounded-2xl transition-all duration-300 ${isActive ? 'text-emerald-600 bg-emerald-50 scale-110 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={({ isActive }) => `flex items-center justify-center p-4 rounded-full transition-all duration-300 ${isActive ? 'text-emerald-600 bg-white/50 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                <Home size={28} strokeWidth={2.5} />
+                                <Home size={32} strokeWidth={2.5} />
                             </NavLink>
                         </div>
                     </nav>
