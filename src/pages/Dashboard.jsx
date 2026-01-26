@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X } from 'lucide-react'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
@@ -13,7 +13,12 @@ export default function Dashboard() {
     // Filter & UI State
     const [filterStatus, setFilterStatus] = useState('Semua')
     const [showFilterMenu, setShowFilterMenu] = useState(false)
+
     const [activeDropdown, setActiveDropdown] = useState(null)
+
+    // Profile Menu State
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+    const [userEmail, setUserEmail] = useState('')
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -38,8 +43,12 @@ export default function Dashboard() {
                 // Looking at file content from previous turn: 'import { Link } from 'react-router-dom''. No useNavigate.
                 // I will add window.location.href = '/login' for safety.
                 window.location.href = '/login'
+                // I will add window.location.href = '/login' for safety.
+                window.location.href = '/login'
                 return
             }
+
+            setUserEmail(session.user.email)
 
             // 2. Simplified Query (No transactions)
             const { data, error } = await supabase
@@ -86,6 +95,15 @@ export default function Dashboard() {
             console.error('Error fetching groups:', error.message)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleLogout = async () => {
+        try {
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+        } catch (error) {
+            console.error('Error logging out:', error)
         }
     }
 
@@ -156,9 +174,31 @@ export default function Dashboard() {
                     <h1 className="text-xl font-bold text-slate-800">Assalamu'alaikum,</h1>
                     <p className="text-sm text-slate-500">Selamat datang kembali</p>
                 </div>
-                <div className="w-10 h-10 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                    {/* Avatar Placeholder */}
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
+
+                <div className="relative">
+                    <button
+                        onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                        className="w-10 h-10 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-sm focus:ring-2 focus:ring-emerald-500 transition"
+                    >
+                        <span className="text-2xl" role="img" aria-label="user">🐏</span>
+                    </button>
+
+                    {/* Profile Dropdown */}
+                    {isProfileMenuOpen && (
+                        <div className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-scale-up">
+                            <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akun</p>
+                                <p className="text-sm font-bold text-slate-800 truncate">{userEmail}</p>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+                            >
+                                <LogOut size={16} />
+                                <span>Keluar</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
