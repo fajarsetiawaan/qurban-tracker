@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import Skeleton from '../components/Skeleton'
 
 export default function GroupDetail() {
@@ -19,6 +19,60 @@ export default function GroupDetail() {
     const [trxMethod, setTrxMethod] = useState('Tunai')
     const [trxLoading, setTrxLoading] = useState(false)
     const [lastTransaction, setLastTransaction] = useState(null)
+
+    // Edit Group State
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+    const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '' })
+    const [editLoading, setEditLoading] = useState(false)
+
+    const handleDeleteGroup = async () => {
+        if (window.confirm('Yakin ingin menghapus grup ini beserta semua data pesertanya?')) {
+            try {
+                const { error } = await supabase.from('groups').delete().eq('id', id)
+                if (error) throw error
+                navigate('/')
+            } catch (error) {
+                console.error('Error deleting group:', error)
+                alert('Gagal menghapus grup')
+            }
+        }
+    }
+
+    const openEditModal = () => {
+        if (data) {
+            setEditFormData({
+                name: data.name,
+                target_animal: data.target_animal,
+                total_price: data.total_price
+            })
+            setIsEditModalOpen(true)
+        }
+    }
+
+    const handleUpdateGroup = async (e) => {
+        e.preventDefault()
+        setEditLoading(true)
+        try {
+            const { error } = await supabase
+                .from('groups')
+                .update({
+                    name: editFormData.name,
+                    target_animal: editFormData.target_animal,
+                    total_price: parseInt(editFormData.total_price) || 0
+                })
+                .eq('id', id)
+
+            if (error) throw error
+
+            setIsEditModalOpen(false)
+            fetchData() // Refresh data
+        } catch (error) {
+            console.error('Error updating group:', error)
+            alert('Gagal mengupdate grup')
+        } finally {
+            setEditLoading(false)
+        }
+    }
 
     useEffect(() => {
         fetchData()
@@ -113,17 +167,24 @@ export default function GroupDetail() {
         const rawAmount = parseInt(trxAmount.replace(/\./g, ''))
 
         try {
+            // Get user for RLS
+            const { data: { user } } = await supabase.auth.getUser()
+
             const { data: newTrx, error } = await supabase
                 .from('transactions')
                 .insert({
                     participant_id: trxParticipantId,
                     amount: rawAmount,
-                    payment_method: trxMethod
+                    payment_method: trxMethod,
+                    user_id: user.id // Required for RLS
                 })
                 .select()
                 .single()
 
             if (error) throw error
+
+            // Update UI immediately as requested
+            await fetchData()
 
             const participantName = data.participants.find(p => p.id === trxParticipantId)?.name
             setLastTransaction({
@@ -190,9 +251,20 @@ export default function GroupDetail() {
                 <button onClick={() => navigate(-1)} className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
                     <ArrowLeft size={20} />
                 </button>
-                <button className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
-                    <MoreHorizontal size={20} />
-                </button>
+                <div className="flex space-x-2 pointer-events-auto">
+                    <button
+                        onClick={openEditModal}
+                        className="text-emerald-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-emerald-50 transition"
+                    >
+                        <Pencil size={20} />
+                    </button>
+                    <button
+                        onClick={handleDeleteGroup}
+                        className="text-red-500 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-red-50 transition"
+                    >
+                        <Trash2 size={20} />
+                    </button>
+                </div>
             </div>
 
             <div className="px-6 pb-6 -mt-4">
@@ -398,6 +470,65 @@ export default function GroupDetail() {
                                 </button>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Group Modal */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-slate-800">Edit Grup</h2>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
+                                <select
+                                    value={editFormData.target_animal}
+                                    onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                >
+                                    <option value="sapi">Sapi</option>
+                                    <option value="kambing">Kambing</option>
+                                    <option value="domba">Domba</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                <input
+                                    type="number"
+                                    value={editFormData.total_price}
+                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={editLoading}
+                                className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                            >
+                                {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}
