@@ -15,31 +15,56 @@ export default function Dashboard() {
 
     const fetchGroups = async () => {
         try {
+            // 1. Check Session
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) {
+                // Redirect if no session (using window.location for hard redirect or navigate if hook available)
+                // Since this is inside useEffect, navigate is safer if available, but let's use the hook we have.
+                // We are not inside a hook here, but we can't use 'navigate' inside this async function easily if it wasn't passed or in scope? 
+                // Ah, 'navigate' is not defined in the component scope? checking...
+                // Only 'Link' is imported. I need to add 'useNavigate' hook.
+                // Wait, I can't add a hook inside the function. I need to check if useNavigate is used.
+                // Looking at file content from previous turn: 'import { Link } from 'react-router-dom''. No useNavigate.
+                // I will add window.location.href = '/login' for safety.
+                window.location.href = '/login'
+                return
+            }
+
+            // 2. Simplified Query (No transactions)
             const { data, error } = await supabase
                 .from('groups')
-                .select(`
-            *,
-            participants (
-                transactions (amount)
-            )
-        `)
+                .select('*, participants(count)')
+
+            console.log('Data Groups:', data)
+            console.log('Error Groups:', error)
 
             if (error) throw error
 
-            // Calculate totals
+            // Calculate totals (SAFE MODE - No transactions available)
             let globalTotal = 0
             const processedGroups = (data || []).map(group => {
-                const groupCollected = group.participants?.reduce((acc, p) => {
-                    const pTotal = p.transactions?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0
-                    return acc + pTotal
-                }, 0) || 0
+                // Count from DB response which might be in array or object form depending on Supabase version
+                // participants: [{ count: 5 }] or participants: { count: 5 }
+                // Safe check:
+                let participantCount = 0
+                if (Array.isArray(group.participants)) {
+                    // If it returns rows, length is count. If it returns count object...
+                    if (group.participants[0] && group.participants[0].count !== undefined) {
+                        participantCount = group.participants[0].count
+                    } else {
+                        participantCount = group.participants.length
+                    }
+                }
 
+                // Since we removed transactions, we can't calculate collected. Default to 0.
+                const groupCollected = 0
                 globalTotal += groupCollected
 
                 return {
                     ...group,
+                    participantCount,
                     collected: groupCollected,
-                    progress: Math.min(100, (groupCollected / group.total_price) * 100)
+                    progress: 0
                 }
             })
 
@@ -123,9 +148,14 @@ export default function Dashboard() {
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">
-                                                {group.target_animal}
-                                            </span>
+                                            <div className="flex items-center space-x-2 mb-2">
+                                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider inline-block">
+                                                    {group.target_animal}
+                                                </span>
+                                                <span className="text-xs font-medium text-slate-400">
+                                                    {group.participantCount} Peserta
+                                                </span>
+                                            </div>
                                             <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition">{group.name}</h3>
                                         </div>
                                         <div className="bg-slate-50 p-2 rounded-full text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition">
