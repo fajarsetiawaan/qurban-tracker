@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal, Pencil, Trash2, MoreVertical, UserPlus } from 'lucide-react'
 import Skeleton from '../components/Skeleton'
 
 export default function GroupDetail() {
@@ -27,7 +27,14 @@ export default function GroupDetail() {
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '' })
+
     const [editLoading, setEditLoading] = useState(false)
+    const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false)
+
+    // Add Participant State
+    const [isAddParticipantModalOpen, setIsAddParticipantModalOpen] = useState(false)
+    const [newParticipant, setNewParticipant] = useState({ name: '', phone: '' })
+    const [addParticipantLoading, setAddParticipantLoading] = useState(false)
 
     const handleDeleteGroup = async () => {
         if (window.confirm('Yakin ingin menghapus grup ini beserta semua data pesertanya?')) {
@@ -75,6 +82,34 @@ export default function GroupDetail() {
             alert('Gagal mengupdate grup')
         } finally {
             setEditLoading(false)
+        }
+    }
+
+    const handleAddParticipant = async (e) => {
+        e.preventDefault()
+        setAddParticipantLoading(true)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+
+            const { error } = await supabase
+                .from('participants')
+                .insert({
+                    group_id: id,
+                    name: newParticipant.name,
+                    phone: newParticipant.phone,
+                    user_id: user.id
+                })
+
+            if (error) throw error
+
+            setIsAddParticipantModalOpen(false)
+            setNewParticipant({ name: '', phone: '' })
+            fetchData() // Refresh list
+        } catch (error) {
+            console.error('Error adding participant:', error)
+            alert('Gagal menambahkan peserta')
+        } finally {
+            setAddParticipantLoading(false)
         }
     }
 
@@ -277,19 +312,39 @@ export default function GroupDetail() {
                 <button onClick={() => navigate(-1)} className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
                     <ArrowLeft size={20} />
                 </button>
-                <div className="flex space-x-2 pointer-events-auto">
+                <div className="relative">
                     <button
-                        onClick={openEditModal}
-                        className="text-emerald-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-emerald-50 transition"
+                        onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
+                        className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-slate-100 transition"
                     >
-                        <Pencil size={20} />
+                        <MoreVertical size={20} />
                     </button>
-                    <button
-                        onClick={handleDeleteGroup}
-                        className="text-red-500 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-red-50 transition"
-                    >
-                        <Trash2 size={20} />
-                    </button>
+
+                    {/* Header Dropdown */}
+                    {isHeaderMenuOpen && (
+                        <div className="absolute right-0 top-14 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-scale-up">
+                            <button
+                                onClick={() => {
+                                    openEditModal()
+                                    setIsHeaderMenuOpen(false)
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                            >
+                                <Pencil size={16} />
+                                <span>Edit Grup</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleDeleteGroup()
+                                    setIsHeaderMenuOpen(false)
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+                            >
+                                <Trash2 size={16} />
+                                <span>Hapus Grup</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -341,7 +396,15 @@ export default function GroupDetail() {
 
                 {/* Participants Section */}
                 <div className="mt-8">
-                    <h2 className="text-lg font-bold text-slate-800 mb-4 ml-2">Peserta ({data.participants.length})</h2>
+                    <div className="flex justify-between items-center mb-4 ml-2 mr-2">
+                        <h2 className="text-lg font-bold text-slate-800">Peserta ({data.participants.length})</h2>
+                        <button
+                            onClick={() => setIsAddParticipantModalOpen(true)}
+                            className="bg-emerald-100 text-emerald-600 p-2 rounded-full hover:bg-emerald-200 transition"
+                        >
+                            <UserPlus size={18} />
+                        </button>
+                    </div>
                     <div className="space-y-4">
                         {data.participants.map((participant, idx) => {
                             const percentage = perPersonTarget > 0 ? Math.min(100, (participant.totalPaid / perPersonTarget) * 100) : 0
@@ -587,6 +650,52 @@ export default function GroupDetail() {
                                 className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
                             >
                                 {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {/* Add Participant Modal */}
+            {isAddParticipantModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-slate-800">Tambah Peserta</h2>
+                            <button onClick={() => setIsAddParticipantModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAddParticipant} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
+                                <input
+                                    type="text"
+                                    value={newParticipant.name}
+                                    onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 hover:bg-slate-100 transition"
+                                    placeholder="Contoh: Budi Santoso"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor Telepon (Opsional)</label>
+                                <input
+                                    type="tel"
+                                    value={newParticipant.phone}
+                                    onChange={(e) => setNewParticipant({ ...newParticipant, phone: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 hover:bg-slate-100 transition"
+                                    placeholder="0812..."
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={addParticipantLoading}
+                                className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                            >
+                                {addParticipantLoading ? 'Menyimpan...' : 'Simpan Peserta'}
                             </button>
                         </form>
                     </div>
