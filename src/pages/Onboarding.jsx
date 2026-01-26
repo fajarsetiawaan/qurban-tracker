@@ -39,11 +39,14 @@ export default function Onboarding() {
         setError(null)
 
         try {
-            // 1. Get User ID
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) throw new Error('Sesi tidak ditemukan, silakan login ulang.')
+            // 1. Get User ID (using getUser as requested)
+            const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-            const userId = session.user.id
+            if (authError || !user) {
+                throw new Error('Sesi tidak valid, silakan login ulang.')
+            }
+
+            const userId = user.id
 
             // 2. Insert Group
             const { data: groupData, error: groupError } = await supabase
@@ -65,18 +68,22 @@ export default function Onboarding() {
             const validParticipants = participants.filter(p => p.name.trim() !== '')
 
             if (validParticipants.length > 0) {
+                // Explicit mapping with user_id for RLS
                 const participantsToInsert = validParticipants.map(p => ({
-                    group_id: groupId,
-                    user_id: userId, // Assuming owner creates them, or linked to owner
                     name: p.name,
-                    phone: p.phone
+                    phone: p.phone,
+                    group_id: groupId,
+                    user_id: userId // Required for RLS
                 }))
 
                 const { error: participantsError } = await supabase
                     .from('participants')
                     .insert(participantsToInsert)
 
-                if (participantsError) throw participantsError
+                if (participantsError) {
+                    console.error('Error Insert Participants:', participantsError)
+                    throw participantsError
+                }
             }
 
             // 4. Redirect
