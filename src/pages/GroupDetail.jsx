@@ -36,11 +36,28 @@ export default function GroupDetail() {
     const [newParticipant, setNewParticipant] = useState({ name: '', phone: '' })
     const [addParticipantLoading, setAddParticipantLoading] = useState(false)
 
+    // Pre-fill form when Edit Modal opens
+    useEffect(() => {
+        if (isEditModalOpen && data) {
+            setEditFormData({
+                name: data.name,
+                target_animal: data.target_animal,
+                total_price: data.total_price
+            })
+        }
+    }, [isEditModalOpen, data])
+
     const handleDeleteGroup = async () => {
         if (window.confirm('Yakin ingin menghapus grup ini beserta semua data pesertanya?')) {
             try {
+                // RLS Policy normally handles checks, but we ensure we are logged in
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) throw new Error('User not authenticated')
+
                 const { error } = await supabase.from('groups').delete().eq('id', id)
                 if (error) throw error
+
+                // Navigate back to Dashboard
                 navigate('/')
             } catch (error) {
                 console.error('Error deleting group:', error)
@@ -50,20 +67,18 @@ export default function GroupDetail() {
     }
 
     const openEditModal = () => {
-        if (data) {
-            setEditFormData({
-                name: data.name,
-                target_animal: data.target_animal,
-                total_price: data.total_price
-            })
-            setIsEditModalOpen(true)
-        }
+        setIsEditModalOpen(true)
+        setIsHeaderMenuOpen(false)
     }
 
     const handleUpdateGroup = async (e) => {
         e.preventDefault()
         setEditLoading(true)
         try {
+            // RLS Check
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
             const { error } = await supabase
                 .from('groups')
                 .update({
@@ -90,6 +105,7 @@ export default function GroupDetail() {
         setAddParticipantLoading(true)
         try {
             const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
 
             const { error } = await supabase
                 .from('participants')
@@ -401,13 +417,17 @@ export default function GroupDetail() {
 
                 {/* Participants Section */}
                 <div className="mt-8">
-                    <div className="flex justify-between items-center mb-4 ml-2 mr-2">
-                        <h2 className="text-lg font-bold text-slate-800">Peserta ({data.participants.length})</h2>
+                    <div className="flex justify-between items-center mb-6 px-1">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-800">Peserta</h2>
+                            <p className="text-xs text-slate-400 font-medium">{data.participants.length} Orang Terdaftar</p>
+                        </div>
                         <button
                             onClick={() => setIsAddParticipantModalOpen(true)}
-                            className="bg-emerald-100 text-emerald-600 p-2 rounded-full hover:bg-emerald-200 transition"
+                            className="flex items-center space-x-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full hover:bg-emerald-200 transition shadow-sm"
                         >
-                            <UserPlus size={18} />
+                            <UserPlus size={16} />
+                            <span className="text-xs font-bold">Tambah</span>
                         </button>
                     </div>
                     <div className="space-y-4">
@@ -449,14 +469,15 @@ export default function GroupDetail() {
                 </div>
             </div>
 
-            {/* FAB */}
-            <button
-                onClick={() => setShowModal(true)}
-                className="fixed bottom-24 right-6 bg-slate-900 text-white p-4 rounded-full shadow-2xl shadow-slate-400/50 hover:bg-black transition z-40 transform hover:scale-110 active:scale-95 flex items-center justify-center border-4 border-white"
-                style={{ right: 'max(1.5rem, calc(50% - 224px + 1.5rem))' }}
-            >
-                <Plus size={24} />
-            </button>
+            {/* Bottom Glass Navbar */}
+            <div className="fixed bottom-0 left-0 w-full h-24 bg-white/80 backdrop-blur-md z-50 flex justify-center items-center border-t border-slate-100/50 shadow-[0_-4px_30px_rgba(0,0,0,0.03)] pb-2">
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-black transition active:scale-95 shadow-xl shadow-slate-900/20"
+                >
+                    <Plus size={32} strokeWidth={2.5} />
+                </button>
+            </div>
 
             {/* Modal Overlay (Same implementation, cleaner style) */}
             {showModal && (
