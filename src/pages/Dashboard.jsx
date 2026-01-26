@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut } from 'lucide-react'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
@@ -53,7 +53,7 @@ export default function Dashboard() {
             // 2. Simplified Query (No transactions)
             const { data, error } = await supabase
                 .from('groups')
-                .select('*, participants(count)')
+                .select('*, participants(id, transactions(amount))')
 
             console.log('Data Groups:', data)
             console.log('Error Groups:', error)
@@ -64,27 +64,36 @@ export default function Dashboard() {
             let globalTotal = 0
             const processedGroups = (data || []).map(group => {
                 // Count from DB response which might be in array or object form depending on Supabase version
-                // participants: [{ count: 5 }] or participants: { count: 5 }
-                // Safe check:
+                // participants: [{ id: ..., transactions: [{amount: 1000}, ...] }]
+
                 let participantCount = 0
+                let groupCollected = 0
+
                 if (Array.isArray(group.participants)) {
-                    // If it returns rows, length is count. If it returns count object...
-                    if (group.participants[0] && group.participants[0].count !== undefined) {
-                        participantCount = group.participants[0].count
-                    } else {
-                        participantCount = group.participants.length
-                    }
+                    participantCount = group.participants.length
+
+                    // Calculate Total Collected
+                    group.participants.forEach(p => {
+                        if (p.transactions && Array.isArray(p.transactions)) {
+                            const pTotal = p.transactions.reduce((sum, t) => sum + (t.amount || 0), 0)
+                            groupCollected += pTotal
+                        }
+                    })
                 }
 
-                // Since we removed transactions, we can't calculate collected. Default to 0.
-                const groupCollected = 0
                 globalTotal += groupCollected
+
+                // Calculate Progress Percentage
+                const totalPrice = parseInt(group.total_price) || 0
+                const progress = totalPrice > 0
+                    ? Math.min(100, (groupCollected / totalPrice) * 100)
+                    : 0
 
                 return {
                     ...group,
                     participantCount,
                     collected: groupCollected,
-                    progress: 0
+                    progress
                 }
             })
 
@@ -227,6 +236,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
+
+
             {/* Groups List */}
             <div className="mb-24">
                 <div className="flex justify-between items-end mb-4 relative z-10">
@@ -291,7 +302,7 @@ export default function Dashboard() {
                                 >
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <div className="flex items-center space-x-2 mb-2">
+                                            <div className="flex justify-start items-center space-x-2 mb-2">
                                                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider inline-block">
                                                     {group.target_animal}
                                                 </span>
@@ -299,7 +310,7 @@ export default function Dashboard() {
                                                     {group.participantCount} Peserta
                                                 </span>
                                             </div>
-                                            <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition">{group.name}</h3>
+                                            <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition mb-3">{group.name}</h3>
                                         </div>
 
                                         {/* Quick Actions Trigger */}
@@ -318,13 +329,13 @@ export default function Dashboard() {
                                     {/* Progress Visual */}
                                     <div className="space-y-1">
                                         <div className="flex justify-between text-xs font-medium text-slate-500">
-                                            <span>Terkumpul {group.progress.toFixed(0)}%</span>
+                                            <span>Terkumpul {Math.round(group.progress)}%</span>
                                             <span>Rp {group.collected.toLocaleString()}</span>
                                         </div>
                                         <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                                             <div
                                                 className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-1000"
-                                                style={{ width: `${group.progress}%` }}
+                                                style={{ width: `${Math.round(group.progress)}%` }}
                                             ></div>
                                         </div>
                                     </div>
