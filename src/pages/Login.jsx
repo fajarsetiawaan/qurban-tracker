@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { Mail } from 'lucide-react'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -9,6 +10,13 @@ export default function Login() {
     const [error, setError] = useState(null)
     const [isSignUp, setIsSignUp] = useState(false)
     const [successMsg, setSuccessMsg] = useState(null)
+    const [isRegistered, setIsRegistered] = useState(false)
+
+    // Metadata states
+    const [fullName, setFullName] = useState('')
+    const [phoneNumber, setPhoneNumber] = useState('')
+    const [institutionName, setInstitutionName] = useState('')
+    const [address, setAddress] = useState('')
     const navigate = useNavigate()
 
     const handleAuth = async (e) => {
@@ -19,12 +27,22 @@ export default function Login() {
 
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            phone_number: phoneNumber,
+                            institution_name: institutionName,
+                            address: address,
+                        }
+                    }
                 })
                 if (error) throw error
-                setSuccessMsg('Registrasi berhasil! Silakan cek email Anda untuk verifikasi, atau login jika auto-confirm aktif.')
+                if (error) throw error
+                // setSuccessMsg('Registrasi berhasil! Silakan cek email Anda untuk verifikasi, atau login jika auto-confirm aktif.') // Removed old success msg
+                setIsRegistered(true)
                 // Optional: Switch to login or just wait
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
@@ -73,55 +91,132 @@ export default function Login() {
                     </div>
                 )}
 
-                <form onSubmit={handleAuth} className="space-y-6">
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
-                            placeholder="nama@email.com"
-                            required
-                        />
+                {isRegistered ? (
+                    <div className="text-center py-8">
+                        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                            <Mail className="w-10 h-10 text-emerald-600" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-3">📩 Cek Email Anda!</h2>
+                        <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+                            Link verifikasi telah dikirim ke email Anda. Silakan klik link tersebut untuk mulai menggunakan Dombantara.id.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setIsRegistered(false)
+                                setIsSignUp(false)
+                                setError(null)
+                                setSuccessMsg(null)
+                            }}
+                            className="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 focus:ring-4 focus:ring-slate-300 transition-all duration-300"
+                        >
+                            Kembali ke Login
+                        </button>
                     </div>
+                ) : (
+                    <form onSubmit={handleAuth} className="space-y-6">
+                        {isSignUp && (
+                            <>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                                    <input
+                                        type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
+                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        placeholder="Nama Lengkap Anda"
+                                        required
+                                    />
+                                </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
-                            placeholder="••••••••"
-                            required
-                        />
-                    </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        placeholder="08xxxxxxxxxx"
+                                        required
+                                    />
+                                </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-4 rounded-2xl font-bold text-lg hover:from-emerald-700 hover:to-teal-600 focus:ring-4 focus:ring-emerald-300 transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-emerald-500/25 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
-                    >
-                        {loading ? 'Memproses...' : (isSignUp ? 'Daftar Akun' : 'Masuk Aplikasi')}
-                    </button>
-                </form>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Masjid/Instansi</label>
+                                    <input
+                                        type="text"
+                                        value={institutionName}
+                                        onChange={(e) => setInstitutionName(e.target.value)}
+                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        placeholder="Nama Masjid atau Instansi"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Alamat</label>
+                                    <textarea
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300 resize-none"
+                                        placeholder="Alamat Lengkap"
+                                        rows="2"
+                                        required
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                placeholder="nama@email.com"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 text-white py-4 rounded-2xl font-bold text-lg hover:from-emerald-700 hover:to-teal-600 focus:ring-4 focus:ring-emerald-300 transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-emerald-500/25 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                        >
+                            {loading ? 'Memproses...' : (isSignUp ? 'Daftar Akun' : 'Masuk Aplikasi')}
+                        </button>
+                    </form>
+                )}
 
                 <div className="mt-8 text-center">
-                    <button
-                        onClick={() => {
-                            setIsSignUp(!isSignUp)
-                            setError(null)
-                            setSuccessMsg(null)
-                        }}
-                        className="text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors duration-300"
-                    >
-                        {isSignUp ? (
-                            <span>Sudah punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Masuk disini</span></span>
-                        ) : (
-                            <span>Belum punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Daftar sekarang</span></span>
-                        )}
-                    </button>
+                    {!isRegistered && ( // Hide toggle button when success state is active
+                        <button
+                            onClick={() => {
+                                setIsSignUp(!isSignUp)
+                                setError(null)
+                                setSuccessMsg(null)
+                            }}
+                            className="text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors duration-300"
+                        >
+                            {isSignUp ? (
+                                <span>Sudah punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Masuk disini</span></span>
+                            ) : (
+                                <span>Belum punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Daftar sekarang</span></span>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
 
