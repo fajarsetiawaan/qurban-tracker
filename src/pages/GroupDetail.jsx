@@ -753,48 +753,65 @@ export default function GroupDetail() {
             )}
             {/* History Modal */}
             {isHistoryModalOpen && selectedParticipantForHistory && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-bold text-slate-800">
-                                Riwayat Transfer - {selectedParticipantForHistory.name}
-                            </h2>
-                            <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all">
+                        {/* Header */}
+                        <div className="flex justify-between items-start p-6 border-b border-gray-100">
+                            <div>
+                                <p className="text-sm font-medium text-gray-500 mb-1">Riwayat Transfer</p>
+                                <h3 className="text-xl font-bold text-gray-900 leading-tight">
+                                    {selectedParticipantForHistory.name}
+                                </h3>
+                            </div>
+                            <button
+                                onClick={() => setIsHistoryModalOpen(false)}
+                                className="p-2 -mr-2 -mt-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                            >
                                 <X size={20} />
                             </button>
                         </div>
 
+                        {/* Content */}
                         <div className="p-6">
                             {selectedParticipantForHistory.transactions && selectedParticipantForHistory.transactions.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-1">
                                     {selectedParticipantForHistory.transactions.map((trx) => (
-                                        <div key={trx.id} className="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                                            <div>
-                                                <p className="text-sm font-bold text-slate-700">Rp {trx.amount.toLocaleString()}</p>
-                                                <p className="text-xs text-slate-400">
-                                                    {trx.transaction_date
-                                                        ? new Date(trx.transaction_date).toLocaleDateString('id-ID')
-                                                        : 'Tanggal tidak tersedia'}
-                                                </p>
-                                            </div>
-                                            <div className="p-2 bg-emerald-50 rounded-full">
-                                                <CheckCircle size={16} className="text-emerald-500" />
+                                        <div key={trx.id} className="flex justify-between items-center py-4 border-b border-gray-50 last:border-0 last:pb-0 group hover:bg-gray-50/50 transition px-2 rounded-xl -mx-2">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                                                    <CheckCircle size={18} className="text-emerald-500" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-lg font-bold text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
+                                                    <p className="text-xs font-medium text-gray-400">
+                                                        {trx.transaction_date
+                                                            ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                            : 'Tanggal tidak tersedia'}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-8 text-slate-400 text-sm">
-                                    Belum ada riwayat transfer.
+                                <div className="flex flex-col items-center justify-center py-12 text-center">
+                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                        <User size={32} className="text-gray-300" />
+                                    </div>
+                                    <h4 className="text-gray-900 font-medium mb-1">Belum ada transaksi</h4>
+                                    <p className="text-gray-400 text-sm">Peserta ini belum melakukan pembayaran apapun.</p>
                                 </div>
                             )}
 
-                            <button
-                                onClick={() => setIsHistoryModalOpen(false)}
-                                className="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold mt-8 hover:bg-slate-200 transition"
-                            >
-                                Tutup
-                            </button>
+                            {/* Footer Button */}
+                            <div className="mt-8 pt-2">
+                                <button
+                                    onClick={() => setIsHistoryModalOpen(false)}
+                                    className="w-full bg-gray-100 text-gray-700 py-3.5 rounded-xl font-bold hover:bg-gray-200 transition active:scale-[0.98]"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
