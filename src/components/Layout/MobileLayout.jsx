@@ -15,9 +15,16 @@ export default function MobileLayout() {
                         <div className="flex justify-center items-center">
                             <NavLink
                                 to="/"
-                                className={({ isActive }) => `flex items-center justify-center p-4 rounded-full transition-all duration-300 ${isActive ? 'text-emerald-600 bg-white/50 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={({ isActive }) => `flex items-center justify-center transition-all duration-300 ${isActive ? '' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                <Home size={32} strokeWidth={2.5} />
+                                <div className="bg-emerald-600 rounded-full p-2 w-12 h-12 flex items-center justify-center -mt-4 shadow-lg border-4 border-white transition-transform hover:scale-105">
+                                    <img
+                                        src="/logo-domba.png"
+                                        alt="Home"
+                                        className="w-full h-full object-contain"
+                                        style={{ filter: 'brightness(0) invert(1)' }}
+                                    />
+                                </div>
                             </NavLink>
                         </div>
                     </nav>

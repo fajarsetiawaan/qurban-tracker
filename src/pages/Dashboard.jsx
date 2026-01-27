@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid } from 'lucide-react'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
@@ -231,9 +231,9 @@ export default function Dashboard() {
                 <div className="relative">
                     <button
                         onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                        className="w-10 h-10 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-sm focus:ring-2 focus:ring-emerald-500 transition"
+                        className="p-2 rounded-full hover:bg-slate-100 transition"
                     >
-                        <span className="text-2xl" role="img" aria-label="user">🐏</span>
+                        <User className="text-gray-600 w-6 h-6" />
                     </button>
 
                     {/* Profile Dropdown */}
