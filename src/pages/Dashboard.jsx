@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User, Settings, Info, Moon, Sun, Mail, Phone, Building } from 'lucide-react'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User, Settings, Info, Moon, Sun, Mail, Phone, Building, MapPin } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
@@ -24,7 +24,7 @@ export default function Dashboard() {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
     const [isEditingProfile, setIsEditingProfile] = useState(false)
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
-    const [profileFormData, setProfileFormData] = useState({ full_name: '', phone_number: '', institution_name: '' })
+    const [profileFormData, setProfileFormData] = useState({ full_name: '', phone_number: '', institution_name: '', address: '' })
     const [userEmail, setUserEmail] = useState('')
 
     // Edit Group State
@@ -66,16 +66,21 @@ export default function Dashboard() {
             // 2.b Fetch User Profile
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('full_name, phone_number, institution_name')
+                .select('full_name, phone_number, institution_name, address')
                 .eq('id', session.user.id)
-                .single()
+                .maybeSingle() // Use maybeSingle to avoid 406 if not found immediately (though it should exist)
 
-            if (!profileError && profileData) {
+            if (profileError && profileError.code !== 'PGRST116') { // Ignore 'no rows' error if just created
+                console.error('Profile fetch error:', profileError)
+            }
+
+            if (profileData) {
                 setProfile(profileData)
                 setProfileFormData({
                     full_name: profileData.full_name || '',
                     phone_number: profileData.phone_number || '',
-                    institution_name: profileData.institution_name || ''
+                    institution_name: profileData.institution_name || '',
+                    address: profileData.address || ''
                 })
             }
             // 3. Process Groups Data (Calculate per-group totals)
@@ -235,28 +240,69 @@ export default function Dashboard() {
         }
     }
 
+    const fetchUserProfile = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) return
+
+            console.log('Fetching fresh profile data...')
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('full_name, phone_number, institution_name, address')
+                .eq('id', session.user.id)
+                .maybeSingle()
+
+            if (profileError && profileError.code !== 'PGRST116') {
+                console.error('Profile fetch error:', profileError)
+            }
+
+            if (profileData) {
+                setProfile(profileData)
+                setProfileFormData({
+                    full_name: profileData.full_name || '',
+                    phone_number: profileData.phone_number || '',
+                    institution_name: profileData.institution_name || '',
+                    address: profileData.address || ''
+                })
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error)
+        }
+    }
+
     const handleUpdateProfile = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('User not authenticated')
+            console.log("Memulai proses update...")
+
+            // Pastikan variabel session tersedia
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session?.user?.id) throw new Error("User ID tidak ditemukan")
+
+            const updates = {
+                full_name: profileFormData.full_name || '',
+                phone_number: profileFormData.phone_number || '',
+                institution_name: profileFormData.institution_name || '',
+                address: profileFormData.address || ''
+            }
+
+            console.log('Payload yang dikirim:', updates)
 
             const { error } = await supabase
                 .from('profiles')
-                .update({
-                    full_name: profileFormData.full_name,
-                    phone_number: profileFormData.phone_number,
-                    institution_name: profileFormData.institution_name
-                })
-                .eq('id', user.id)
+                .update(updates)
+                .eq('id', session.user.id)
 
             if (error) throw error
 
-            setProfile({ ...profile, ...profileFormData })
+            alert("Data berhasil diperbarui!")
             setIsEditingProfile(false)
-            alert('Profil berhasil diperbarui!')
-        } catch (error) {
-            console.error('Error updating profile:', error)
-            alert('Gagal mengupdate profil')
+            // setIsAccountModalOpen(false) // Keep modal open to show changes, or close per instruction? Instruction says close.
+            setIsAccountModalOpen(false)
+            fetchDashboardData() // Refresh data di header
+
+        } catch (err) {
+            console.error("Error Detail:", err.message)
+            alert("Gagal menyimpan: " + err.message)
         }
     }
 
@@ -306,6 +352,7 @@ export default function Dashboard() {
                             </div>
                             <button
                                 onClick={() => {
+                                    fetchUserProfile() // Fetch fresh data on open
                                     setIsAccountModalOpen(true)
                                     setIsProfileMenuOpen(false)
                                 }}
@@ -671,6 +718,24 @@ export default function Dashboard() {
                                         )}
                                     </div>
 
+                                    {/* Alamat */}
+                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <div className="flex items-center space-x-3 text-slate-400 mb-1">
+                                            <MapPin size={16} />
+                                            <span className="text-xs font-bold uppercase">Alamat</span>
+                                        </div>
+                                        {isEditingProfile ? (
+                                            <textarea
+                                                value={profileFormData.address}
+                                                onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
+                                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1 resize-none"
+                                                rows="2"
+                                            />
+                                        ) : (
+                                            <p className="text-slate-800 font-bold ml-7">{profile?.address || '-'}</p>
+                                        )}
+                                    </div>
+
                                     {isEditingProfile && (
                                         <div className="flex space-x-3 pt-2">
                                             <button
@@ -678,7 +743,8 @@ export default function Dashboard() {
                                                     setProfileFormData({
                                                         full_name: profile?.full_name || '',
                                                         phone_number: profile?.phone_number || '',
-                                                        institution_name: profile?.institution_name || ''
+                                                        institution_name: profile?.institution_name || '',
+                                                        address: profile?.address || ''
                                                     })
                                                     setIsEditingProfile(false)
                                                 }}
@@ -687,6 +753,7 @@ export default function Dashboard() {
                                                 Batal
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={handleUpdateProfile}
                                                 className="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition"
                                             >
@@ -728,16 +795,8 @@ export default function Dashboard() {
                             </button>
                         </div>
                         <div className="p-6">
-                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                                        <Moon size={20} />
-                                    </div>
-                                    <span className="font-bold text-slate-700">Dark Mode</span>
-                                </div>
-                                <div className="w-12 h-6 bg-slate-200 rounded-full relative cursor-not-allowed opacity-60">
-                                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
-                                </div>
+                            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
                             </div>
                         </div>
                     </div>
