@@ -10,6 +10,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true)
     const [totalSavings, setTotalSavings] = useState(0)
     const [growthPercentage, setGrowthPercentage] = useState(0)
+    const [profile, setProfile] = useState(null)
 
     // Filter & UI State
     const [filterStatus, setFilterStatus] = useState('Semua')
@@ -55,7 +56,18 @@ export default function Dashboard() {
                 .select('*, participants(id, transactions(amount))')
 
             if (groupsError) throw groupsError
+            if (groupsError) throw groupsError
 
+            // 2.b Fetch User Profile
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('institution_name')
+                .eq('id', session.user.id)
+                .single()
+
+            if (!profileError && profileData) {
+                setProfile(profileData)
+            }
             // 3. Process Groups Data (Calculate per-group totals)
             let calculatedTotalSavings = 0
             const processedGroups = (groupsData || []).map(group => {
@@ -223,9 +235,11 @@ export default function Dashboard() {
         <div className="relative min-h-[80vh] p-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-xl font-bold text-slate-800">Assalamu'alaikum,</h1>
-                    <p className="text-sm text-slate-500">Selamat datang kembali</p>
+                <div className="flex flex-col">
+                    <h1 className="text-sm font-medium text-slate-500 leading-none">Assalamu'alaikum,</h1>
+                    <p className="text-2xl font-bold text-emerald-900 leading-tight">
+                        {profile?.institution_name || 'Dombantara.id'}
+                    </p>
                 </div>
                 {/* ... Profile Button ... */}
                 <div className="relative">
