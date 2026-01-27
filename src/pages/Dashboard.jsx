@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User } from 'lucide-react'
+import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User, Settings, Info, Moon, Sun, Mail, Phone, Building } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 
@@ -17,8 +17,14 @@ export default function Dashboard() {
     const [showFilterMenu, setShowFilterMenu] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState(null)
 
-    // Profile Menu State
+    // Profile Menu & Modal State
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
+    const [isEditingProfile, setIsEditingProfile] = useState(false)
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
+    const [profileFormData, setProfileFormData] = useState({ full_name: '', phone_number: '', institution_name: '' })
     const [userEmail, setUserEmail] = useState('')
 
     // Edit Group State
@@ -56,17 +62,21 @@ export default function Dashboard() {
                 .select('*, participants(id, transactions(amount))')
 
             if (groupsError) throw groupsError
-            if (groupsError) throw groupsError
 
             // 2.b Fetch User Profile
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('institution_name')
+                .select('full_name, phone_number, institution_name')
                 .eq('id', session.user.id)
                 .single()
 
             if (!profileError && profileData) {
                 setProfile(profileData)
+                setProfileFormData({
+                    full_name: profileData.full_name || '',
+                    phone_number: profileData.phone_number || '',
+                    institution_name: profileData.institution_name || ''
+                })
             }
             // 3. Process Groups Data (Calculate per-group totals)
             let calculatedTotalSavings = 0
@@ -225,6 +235,44 @@ export default function Dashboard() {
         }
     }
 
+    const handleUpdateProfile = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: profileFormData.full_name,
+                    phone_number: profileFormData.phone_number,
+                    institution_name: profileFormData.institution_name
+                })
+                .eq('id', user.id)
+
+            if (error) throw error
+
+            setProfile({ ...profile, ...profileFormData })
+            setIsEditingProfile(false)
+            alert('Profil berhasil diperbarui!')
+        } catch (error) {
+            console.error('Error updating profile:', error)
+            alert('Gagal mengupdate profil')
+        }
+    }
+
+    const handleDeleteAccount = async () => {
+        try {
+            const { error } = await supabase.rpc('delete_user_permanently')
+            if (error) throw error
+
+            await supabase.auth.signOut()
+            navigate('/login')
+        } catch (error) {
+            console.error('Error deleting account:', error)
+            alert('Gagal menghapus akun. Pastikan Anda punya izin.')
+        }
+    }
+
     // Filter Logic...
     const filteredGroups = groups.filter(group => {
         if (filterStatus === 'Semua') return true
@@ -241,7 +289,7 @@ export default function Dashboard() {
                         {profile?.institution_name || 'Dombantara.id'}
                     </p>
                 </div>
-                {/* ... Profile Button ... */}
+
                 <div className="relative">
                     <button
                         onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -250,19 +298,49 @@ export default function Dashboard() {
                         <User className="text-gray-600 w-6 h-6" />
                     </button>
 
-                    {/* Profile Dropdown */}
+                    {/* Profile Dropdown Menu */}
                     {isProfileMenuOpen && (
-                        <div className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-scale-up">
+                        <div className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-scale-up">
                             <div className="px-4 py-2 border-b border-slate-50 mb-1">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akun</p>
-                                <p className="text-sm font-bold text-slate-800 truncate">{userEmail}</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menu</p>
                             </div>
                             <button
+                                onClick={() => {
+                                    setIsAccountModalOpen(true)
+                                    setIsProfileMenuOpen(false)
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                            >
+                                <User size={16} />
+                                <span>My Account</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsSettingsModalOpen(true)
+                                    setIsProfileMenuOpen(false)
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                            >
+                                <Settings size={16} />
+                                <span>Settings</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsAboutModalOpen(true)
+                                    setIsProfileMenuOpen(false)
+                                }}
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                            >
+                                <Info size={16} />
+                                <span>About</span>
+                            </button>
+                            <div className="h-px bg-slate-50 my-1"></div>
+                            <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
                             >
                                 <LogOut size={16} />
-                                <span>Keluar</span>
+                                <span>Logout</span>
                             </button>
                         </div>
                     )}
@@ -495,7 +573,234 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+            {/* My Account Modal (Profile Only & Delete) */}
+            {isAccountModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10">
+                            <h2 className="text-xl font-bold text-slate-800">My Account</h2>
+                            <button
+                                onClick={() => {
+                                    setIsAccountModalOpen(false)
+                                    setIsEditingProfile(false)
+                                }}
+                                className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-8">
+                            {/* Profile Section */}
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
+                                    {!isEditingProfile && (
+                                        <button
+                                            onClick={() => setIsEditingProfile(true)}
+                                            className="text-emerald-600 text-sm font-bold hover:underline flex items-center space-x-1"
+                                        >
+                                            <Pencil size={14} />
+                                            <span>Edit</span>
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="space-y-4">
+                                    {/* Nama */}
+                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <div className="flex items-center space-x-3 text-slate-400 mb-1">
+                                            <User size={16} />
+                                            <span className="text-xs font-bold uppercase">Nama Lengkap</span>
+                                        </div>
+                                        {isEditingProfile ? (
+                                            <input
+                                                type="text"
+                                                value={profileFormData.full_name}
+                                                onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
+                                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
+                                            />
+                                        ) : (
+                                            <p className="text-slate-800 font-bold ml-7">{profile?.full_name || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Email (Read Only) */}
+                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 opacity-70">
+                                        <div className="flex items-center space-x-3 text-slate-400 mb-1">
+                                            <Mail size={16} />
+                                            <span className="text-xs font-bold uppercase">Email</span>
+                                        </div>
+                                        <p className="text-slate-800 font-bold ml-7">{userEmail}</p>
+                                    </div>
+
+                                    {/* WhatsApp */}
+                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <div className="flex items-center space-x-3 text-slate-400 mb-1">
+                                            <Phone size={16} />
+                                            <span className="text-xs font-bold uppercase">WhatsApp</span>
+                                        </div>
+                                        {isEditingProfile ? (
+                                            <input
+                                                type="text"
+                                                value={profileFormData.phone_number}
+                                                onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
+                                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
+                                            />
+                                        ) : (
+                                            <p className="text-slate-800 font-bold ml-7">{profile?.phone_number || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Instansi */}
+                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <div className="flex items-center space-x-3 text-slate-400 mb-1">
+                                            <Building size={16} />
+                                            <span className="text-xs font-bold uppercase">Instansi / Masjid</span>
+                                        </div>
+                                        {isEditingProfile ? (
+                                            <input
+                                                type="text"
+                                                value={profileFormData.institution_name}
+                                                onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
+                                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
+                                            />
+                                        ) : (
+                                            <p className="text-slate-800 font-bold ml-7">{profile?.institution_name || '-'}</p>
+                                        )}
+                                    </div>
+
+                                    {isEditingProfile && (
+                                        <div className="flex space-x-3 pt-2">
+                                            <button
+                                                onClick={() => {
+                                                    setProfileFormData({
+                                                        full_name: profile?.full_name || '',
+                                                        phone_number: profile?.phone_number || '',
+                                                        institution_name: profile?.institution_name || ''
+                                                    })
+                                                    setIsEditingProfile(false)
+                                                }}
+                                                className="flex-1 py-3 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
+                                            >
+                                                Batal
+                                            </button>
+                                            <button
+                                                onClick={handleUpdateProfile}
+                                                className="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition"
+                                            >
+                                                Simpan
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <hr className="border-slate-100" />
+
+                            {/* Actions (Only Delete Account here now) */}
+                            <div className="pt-2">
+                                <button
+                                    onClick={() => {
+                                        setIsDeleteConfirmOpen(true)
+                                        // Keep modal open, confirm popup will overlay
+                                    }}
+                                    className="w-full flex items-center justify-center space-x-2 py-4 rounded-2xl font-bold text-red-600 hover:bg-red-50 transition border border-transparent hover:border-red-100"
+                                >
+                                    <Trash2 size={20} />
+                                    <span>Hapus Akun</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {isSettingsModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-slate-800">Settings</h2>
+                            <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                                        <Moon size={20} />
+                                    </div>
+                                    <span className="font-bold text-slate-700">Dark Mode</span>
+                                </div>
+                                <div className="w-12 h-6 bg-slate-200 rounded-full relative cursor-not-allowed opacity-60">
+                                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* About Modal */}
+            {isAboutModalOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-slate-800">About</h2>
+                            <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-8 text-center">
+                            <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
+                                <Building size={40} className="text-emerald-600" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
+                            <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
+                            <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
+                                <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteConfirmOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in">
+                        <div className="p-8 text-center">
+                            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 transform rotate-12">
+                                <Trash2 className="w-10 h-10 text-red-600" />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-4">Hapus Akun?</h2>
+                            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                                Apakah anda yakin ingin menghapus account ini? <br />
+                                <span className="text-red-500 font-bold bg-red-50 px-2 py-1 rounded-lg mt-2 inline-block">ini bersifat permanen dan datamu akan hilang semua</span>
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setIsDeleteConfirmOpen(false)}
+                                    className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    className="py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition"
+                                >
+                                    Ya, Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
-
