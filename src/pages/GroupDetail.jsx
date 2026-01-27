@@ -228,19 +228,27 @@ export default function GroupDetail() {
             // Upload Receipt if exists
             let receiptUrl = null
             if (trxReceiptFile) {
-                const fileExt = trxReceiptFile.name.split('.').pop()
-                const fileName = `${Date.now()}_${Math.random()}.${fileExt}`
-                const filePath = `${fileName}`
+                // Generate path: Date.now() + '-' + file.name
+                const fileName = `${Date.now()}-${trxReceiptFile.name}`
+                // Clean up filename just in case, or use as is per request.
+                // Keeping it exactly as requested but maybe removing special chars could be wise?
+                // Request said: "Date.now() + '-' + file.name" so let's stick to that.
 
                 const { error: uploadError } = await supabase.storage
                     .from('receipts')
-                    .upload(filePath, trxReceiptFile)
+                    .upload(fileName, trxReceiptFile, {
+                        cacheControl: '3600',
+                        upsert: false
+                    })
 
-                if (uploadError) throw uploadError
+                if (uploadError) {
+                    console.error('Error uploading receipt:', uploadError)
+                    throw new Error(`Upload failed: ${uploadError.message}`)
+                }
 
                 const { data: urlData } = supabase.storage
                     .from('receipts')
-                    .getPublicUrl(filePath)
+                    .getPublicUrl(fileName)
 
                 receiptUrl = urlData.publicUrl
             }
@@ -253,12 +261,15 @@ export default function GroupDetail() {
                     payment_method: trxMethod,
                     user_id: user.id, // Required for RLS
                     transaction_date: trxDate,
-                    receipt_url: receiptUrl
+                    receipt_url: receiptUrl // Updated to receipt_url as requested
                 })
                 .select()
                 .single()
 
-            if (error) throw error
+            if (error) {
+                console.error('Error inserting transaction:', error)
+                throw new Error(`Database save failed: ${error.message}`)
+            }
 
             // Update UI immediately as requested
             await fetchData()
@@ -273,8 +284,8 @@ export default function GroupDetail() {
 
             setTrxStep('invoice')
         } catch (error) {
-            console.error('Error saving transaction:', error)
-            alert('Gagal menyimpan transaksi')
+            console.error('Transaction flow error:', error)
+            alert(`Gagal menyimpan transaksi: ${error.message}`)
         } finally {
             setTrxLoading(false)
         }
@@ -566,7 +577,7 @@ export default function GroupDetail() {
                                     disabled={trxLoading}
                                     className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200 mt-4"
                                 >
-                                    {trxLoading ? 'Memproses...' : 'Kirim Setoran'}
+                                    {trxLoading ? 'Memproses...' : 'Simpan dan Kirim Invoice'}
                                 </button>
                             </form>
                         )}
