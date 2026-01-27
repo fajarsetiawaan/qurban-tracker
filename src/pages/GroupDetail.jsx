@@ -36,6 +36,10 @@ export default function GroupDetail() {
     const [newParticipant, setNewParticipant] = useState({ name: '', phone: '' })
     const [addParticipantLoading, setAddParticipantLoading] = useState(false)
 
+    // History Modal State
+    const [selectedParticipantForHistory, setSelectedParticipantForHistory] = useState(null)
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+
     // Pre-fill form when Edit Modal opens
     useEffect(() => {
         if (isEditModalOpen && data) {
@@ -160,7 +164,9 @@ export default function GroupDetail() {
             name,
             phone,
             transactions (
-              amount
+              id,
+              amount,
+              transaction_date
             )
           )
         `)
@@ -449,7 +455,14 @@ export default function GroupDetail() {
                             const avatarColor = colors[idx % colors.length]
 
                             return (
-                                <div key={participant.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4">
+                                <div
+                                    key={participant.id}
+                                    onClick={() => {
+                                        setSelectedParticipantForHistory(participant)
+                                        setIsHistoryModalOpen(true)
+                                    }}
+                                    className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4 hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
+                                >
                                     {/* Avatar */}
                                     <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor}`}>
                                         {participant.name.substring(0, 2).toUpperCase()}
@@ -735,6 +748,54 @@ export default function GroupDetail() {
                                 {addParticipantLoading ? 'Menyimpan...' : 'Simpan Peserta'}
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* History Modal */}
+            {isHistoryModalOpen && selectedParticipantForHistory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-slate-800">
+                                Riwayat Transfer - {selectedParticipantForHistory.name}
+                            </h2>
+                            <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {selectedParticipantForHistory.transactions && selectedParticipantForHistory.transactions.length > 0 ? (
+                                <div className="space-y-4">
+                                    {selectedParticipantForHistory.transactions.map((trx) => (
+                                        <div key={trx.id} className="flex justify-between items-center border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-700">Rp {trx.amount.toLocaleString()}</p>
+                                                <p className="text-xs text-slate-400">
+                                                    {trx.transaction_date
+                                                        ? new Date(trx.transaction_date).toLocaleDateString('id-ID')
+                                                        : 'Tanggal tidak tersedia'}
+                                                </p>
+                                            </div>
+                                            <div className="p-2 bg-emerald-50 rounded-full">
+                                                <CheckCircle size={16} className="text-emerald-500" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-slate-400 text-sm">
+                                    Belum ada riwayat transfer.
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => setIsHistoryModalOpen(false)}
+                                className="w-full bg-slate-100 text-slate-600 py-3 rounded-xl font-bold mt-8 hover:bg-slate-200 transition"
+                            >
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
