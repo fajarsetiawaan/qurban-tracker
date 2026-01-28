@@ -14,6 +14,7 @@ export default function Dashboard() {
 
     // Filter & UI State
     const [filterStatus, setFilterStatus] = useState('Semua')
+    const [filterYear, setFilterYear] = useState('Semua')
     const [showFilterMenu, setShowFilterMenu] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState(null)
 
@@ -29,7 +30,7 @@ export default function Dashboard() {
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [editFormData, setEditFormData] = useState({ id: null, name: '', target_animal: 'sapi', total_price: '' })
+    const [editFormData, setEditFormData] = useState({ id: null, name: '', target_animal: 'sapi', total_price: '', qurban_year: 2026 })
     const [editLoading, setEditLoading] = useState(false)
 
     // Helper for Currency Formatting
@@ -206,7 +207,8 @@ export default function Dashboard() {
             id: group.id,
             name: group.name,
             target_animal: group.target_animal,
-            total_price: group.total_price
+            total_price: group.total_price,
+            qurban_year: group.qurban_year || 2026
         })
         setIsEditModalOpen(true)
         setActiveDropdown(null)
@@ -224,7 +226,8 @@ export default function Dashboard() {
                 .update({
                     name: editFormData.name,
                     target_animal: editFormData.target_animal,
-                    total_price: parseInt(editFormData.total_price) || 0
+                    total_price: parseInt(editFormData.total_price) || 0,
+                    qurban_year: editFormData.qurban_year
                 })
                 .eq('id', editFormData.id)
 
@@ -320,10 +323,24 @@ export default function Dashboard() {
     }
 
     // Filter Logic...
+    // Filter Logic - Filter by both status (animal type) and year
     const filteredGroups = groups.filter(group => {
-        if (filterStatus === 'Semua') return true
-        return group.target_animal.toLowerCase() === filterStatus.toLowerCase()
+        const matchStatus = filterStatus === 'Semua' || group.target_animal.toLowerCase() === filterStatus.toLowerCase()
+        const matchYear = filterYear === 'Semua' || (group.qurban_year || 2026) === parseInt(filterYear)
+        return matchStatus && matchYear
     })
+
+    // Helper for year badge colors
+    const getYearBadgeStyle = (year) => {
+        switch (year) {
+            case 2026:
+                return 'bg-emerald-100 text-emerald-700'
+            case 2027:
+                return 'bg-blue-100 text-blue-700'
+            default:
+                return 'bg-slate-100 text-slate-700'
+        }
+    }
 
     return (
         <div className="relative min-h-[80vh] p-6">
@@ -430,9 +447,10 @@ export default function Dashboard() {
 
             {/* Groups List */}
             <div className="mb-24">
-                <div className="flex justify-between items-end mb-4 relative z-10">
+                <div className="flex justify-between items-end mb-4 relative z-50">
                     <h2 className="text-lg font-bold text-slate-800">
-                        {filterStatus === 'Semua' ? 'Grup Qurban Anda' : `Grup ${filterStatus}`}
+                        {filterStatus === 'Semua' && filterYear === 'Semua' ? 'Grup Qurban Anda' :
+                            filterYear !== 'Semua' ? `Grup Periode ${filterYear}` : `Grup ${filterStatus}`}
                     </h2>
                     {/* ... Filter and Add Buttons ... */}
                     <div className="flex space-x-2">
@@ -446,19 +464,48 @@ export default function Dashboard() {
 
                             {/* Filter Dropdown */}
                             {showFilterMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-fade-in">
-                                    {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
-                                        <button
-                                            key={status}
-                                            onClick={() => {
-                                                setFilterStatus(status)
-                                                setShowFilterMenu(false)
-                                            }}
-                                            className={`w-full text-left px-4 py-2 rounded-xl text-sm font-bold ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-500 hover:bg-slate-50'}`}
-                                        >
-                                            {status}
-                                        </button>
-                                    ))}
+                                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-20 animate-fade-in space-y-3">
+                                    {/* Section 1: Jenis Hewan */}
+                                    <div>
+                                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
+                                        <div className="space-y-1">
+                                            {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
+                                                <button
+                                                    key={status}
+                                                    onClick={() => {
+                                                        setFilterStatus(status)
+                                                        setShowFilterMenu(false)
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                >
+                                                    <span>{status}</span>
+                                                    {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <hr className="border-slate-50" />
+
+                                    {/* Section 2: Periode */}
+                                    <div>
+                                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Periode</h3>
+                                        <div className="space-y-1">
+                                            {['Semua', '2026', '2027'].map(year => (
+                                                <button
+                                                    key={year}
+                                                    onClick={() => {
+                                                        setFilterYear(year)
+                                                        setShowFilterMenu(false)
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                >
+                                                    <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
+                                                    {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -504,17 +551,25 @@ export default function Dashboard() {
                                             <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition mb-3">{group.name}</h3>
                                         </div>
 
-                                        {/* Quick Actions Trigger */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault()
-                                                e.stopPropagation()
-                                                setActiveDropdown(activeDropdown === group.id ? null : group.id)
-                                            }}
-                                            className="bg-slate-50 p-2 rounded-full text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition relative z-10"
-                                        >
-                                            <MoreVertical size={20} />
-                                        </button>
+                                        {/* Quick Actions & Badge */}
+                                        <div className="flex items-center space-x-2">
+                                            {/* Year Badge - In Flow */}
+                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getYearBadgeStyle(group.qurban_year || 2026)}`}>
+                                                Periode {group.qurban_year || 2026}
+                                            </div>
+
+                                            {/* Quick Actions Trigger */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    e.stopPropagation()
+                                                    setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                                }}
+                                                className="bg-slate-50 p-2 rounded-full text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition relative z-10"
+                                            >
+                                                <MoreVertical size={20} />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Progress Visual */}
@@ -595,6 +650,18 @@ export default function Dashboard() {
                                     <option value="sapi">Sapi</option>
                                     <option value="kambing">Kambing</option>
                                     <option value="domba">Domba</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                <select
+                                    value={editFormData.qurban_year}
+                                    onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                >
+                                    <option value={2026}>2026</option>
+                                    <option value={2027}>2027</option>
                                 </select>
                             </div>
 

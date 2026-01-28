@@ -12,6 +12,7 @@ export default function Onboarding() {
     const [groupName, setGroupName] = useState('')
     const [targetAnimal, setTargetAnimal] = useState('sapi')
     const [totalPrice, setTotalPrice] = useState('')
+    const [qurbanYear, setQurbanYear] = useState(2026)
 
     // Participants State
     const [participants, setParticipants] = useState([
@@ -55,6 +56,7 @@ export default function Onboarding() {
                     name: groupName,
                     target_animal: targetAnimal,
                     total_price: parseInt(totalPrice) || 0,
+                    qurban_year: qurbanYear,
                     user_id: userId
                 })
                 .select()
@@ -154,6 +156,18 @@ export default function Onboarding() {
                                     onChange={(e) => setTotalPrice(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
+                                <select
+                                    value={qurbanYear}
+                                    onChange={(e) => setQurbanYear(parseInt(e.target.value))}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                >
+                                    <option value={2026}>2026</option>
+                                    <option value={2027}>2027</option>
+                                </select>
                             </div>
                         </div>
                     </div>
