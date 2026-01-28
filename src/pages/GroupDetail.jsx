@@ -41,6 +41,14 @@ export default function GroupDetail() {
     const [newParticipant, setNewParticipant] = useState({ name: '', phone: '' })
     const [addParticipantLoading, setAddParticipantLoading] = useState(false)
 
+    // Participant Actions State
+    const [activeParticipantDropdown, setActiveParticipantDropdown] = useState(null)
+    const [selectedParticipant, setSelectedParticipant] = useState(null)
+    const [isEditParticipantModalOpen, setIsEditParticipantModalOpen] = useState(false)
+    const [isDeleteParticipantModalOpen, setIsDeleteParticipantModalOpen] = useState(false)
+    const [participantLoading, setParticipantLoading] = useState(false)
+    const [editParticipantData, setEditParticipantData] = useState({ name: '', phone: '' })
+
     // History Modal State
     const [selectedParticipantForHistory, setSelectedParticipantForHistory] = useState(null)
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
@@ -142,6 +150,62 @@ export default function GroupDetail() {
             alert('Gagal menambahkan peserta')
         } finally {
             setAddParticipantLoading(false)
+        }
+    }
+
+    const handleEditParticipantClick = (participant, e) => {
+        e.stopPropagation()
+        setSelectedParticipant(participant)
+        setEditParticipantData({ name: participant.name, phone: participant.phone || '' })
+        setIsEditParticipantModalOpen(true)
+        setActiveParticipantDropdown(null)
+    }
+
+    const handleDeleteParticipantClick = (participant, e) => {
+        e.stopPropagation()
+        setSelectedParticipant(participant)
+        setIsDeleteParticipantModalOpen(true)
+        setActiveParticipantDropdown(null)
+    }
+
+    const handleUpdateParticipant = async (e) => {
+        e.preventDefault()
+        setParticipantLoading(true)
+        try {
+            const { error } = await supabase
+                .from('participants')
+                .update({ name: editParticipantData.name, phone: editParticipantData.phone })
+                .eq('id', selectedParticipant.id)
+
+            if (error) throw error
+
+            fetchData()
+            setIsEditParticipantModalOpen(false)
+        } catch (error) {
+            console.error('Error updating participant:', error)
+            alert('Gagal mengupdate peserta')
+        } finally {
+            setParticipantLoading(false)
+        }
+    }
+
+    const confirmDeleteParticipant = async () => {
+        setParticipantLoading(true)
+        try {
+            const { error } = await supabase
+                .from('participants')
+                .delete()
+                .eq('id', selectedParticipant.id)
+
+            if (error) throw error
+
+            fetchData()
+            setIsDeleteParticipantModalOpen(false)
+        } catch (error) {
+            console.error('Error deleting participant:', error)
+            alert('Gagal menghapus peserta')
+        } finally {
+            setParticipantLoading(false)
         }
     }
 
@@ -384,7 +448,7 @@ export default function GroupDetail() {
                 </div>
             </div>
 
-            <div className="px-6 pb-6 -mt-4">
+            <div className="px-6 pb-40 -mt-4">
                 <h1 className="text-2xl font-bold text-slate-800 text-center mb-1">{data.name}</h1>
                 <p className="text-sm text-slate-500 text-center capitalize">{data.target_animal} • Target Rp {data.total_price.toLocaleString()}</p>
 
@@ -457,7 +521,7 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4 hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
+                                    className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4 hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer relative group"
                                 >
                                     {/* Avatar */}
                                     <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor}`}>
@@ -481,6 +545,40 @@ export default function GroupDetail() {
                                         <p className="text-[10px] text-slate-400 text-right">
                                             {percentage >= 100 ? 'LUNAS' : `Sisa Rp ${(perPersonTarget - participant.totalPaid).toLocaleString()}`}
                                         </p>
+                                    </div>
+
+                                    {/* Action Menu */}
+                                    <div className="relative">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setActiveParticipantDropdown(activeParticipantDropdown === participant.id ? null : participant.id)
+                                            }}
+                                            className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition z-10 relative"
+                                        >
+                                            <MoreVertical size={20} />
+                                        </button>
+
+                                        {/* Dropdown */}
+                                        {activeParticipantDropdown === participant.id && (
+                                            <div className="absolute right-0 top-10 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right">
+                                                <button
+                                                    onClick={(e) => handleEditParticipantClick(participant, e)}
+                                                    className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
+                                                >
+                                                    <Pencil size={18} className="text-slate-400" />
+                                                    <span>Edit</span>
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeleteParticipantClick(participant, e)}
+                                                    className="w-full text-left px-5 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center space-x-3"
+                                                >
+                                                    <Trash2 size={18} />
+                                                    <span>Hapus</span>
+                                                </button>
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             )
@@ -854,6 +952,85 @@ export default function GroupDetail() {
                     </div>
                 </div>
             )}
+
+
+            {/* Edit Participant Modal */}
+            {
+                isEditParticipantModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-bold text-slate-800">Edit Peserta</h2>
+                                <button onClick={() => setIsEditParticipantModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleUpdateParticipant} className="p-6 space-y-6">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
+                                    <input
+                                        type="text"
+                                        value={editParticipantData.name}
+                                        onChange={(e) => setEditParticipantData({ ...editParticipantData, name: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor HP (Opsional)</label>
+                                    <input
+                                        type="tel"
+                                        value={editParticipantData.phone}
+                                        onChange={(e) => setEditParticipantData({ ...editParticipantData, phone: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        placeholder="08..."
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={participantLoading}
+                                    className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                                >
+                                    {participantLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Delete Participant Modal */}
+            {
+                isDeleteParticipantModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Peserta?</h3>
+                            <p className="text-slate-500 mb-6 text-sm">
+                                Apakah kamu yakin ingin menghapus peserta <strong>"{selectedParticipant?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setIsDeleteParticipantModalOpen(false)}
+                                    disabled={participantLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmDeleteParticipant}
+                                    disabled={participantLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                                >
+                                    {participantLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }
