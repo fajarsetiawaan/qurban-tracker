@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, MoreHorizontal, Pencil, Trash2, MoreVertical, UserPlus } from 'lucide-react'
+import { PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus } from 'lucide-react'
 import Skeleton from '../components/Skeleton'
+import { formatNumber, unformatNumber } from '../lib/utils'
 
 export default function GroupDetail() {
     const { id } = useParams()
@@ -26,10 +27,14 @@ export default function GroupDetail() {
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '' })
+    const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '', qurban_year: 2026 })
 
     const [editLoading, setEditLoading] = useState(false)
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false)
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
 
     // Add Participant State
     const [isAddParticipantModalOpen, setIsAddParticipantModalOpen] = useState(false)
@@ -46,27 +51,33 @@ export default function GroupDetail() {
             setEditFormData({
                 name: data.name,
                 target_animal: data.target_animal,
-                total_price: data.total_price
+                total_price: formatNumber(data.total_price),
+                qurban_year: data.qurban_year || 2026
             })
         }
     }, [isEditModalOpen, data])
 
-    const handleDeleteGroup = async () => {
-        if (window.confirm('Yakin ingin menghapus grup ini beserta semua data pesertanya?')) {
-            try {
-                // RLS Policy normally handles checks, but we ensure we are logged in
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) throw new Error('User not authenticated')
+    const handleDeleteGroup = () => {
+        setIsDeleteModalOpen(true)
+        setIsHeaderMenuOpen(false)
+    }
 
-                const { error } = await supabase.from('groups').delete().eq('id', id)
-                if (error) throw error
+    const confirmDeleteGroup = async () => {
+        setDeleteLoading(true)
+        try {
+            // RLS Policy normally handles checks, but we ensure we are logged in
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
 
-                // Navigate back to Dashboard
-                navigate('/')
-            } catch (error) {
-                console.error('Error deleting group:', error)
-                alert('Gagal menghapus grup')
-            }
+            const { error } = await supabase.from('groups').delete().eq('id', id)
+            if (error) throw error
+
+            navigate('/')
+        } catch (error) {
+            console.error('Error deleting group:', error)
+            alert(`Gagal menghapus grup: ${error.message || 'Terjadi kesalahan'}`)
+        } finally {
+            setDeleteLoading(false)
         }
     }
 
@@ -88,7 +99,8 @@ export default function GroupDetail() {
                 .update({
                     name: editFormData.name,
                     target_animal: editFormData.target_animal,
-                    total_price: parseInt(editFormData.total_price) || 0
+                    total_price: unformatNumber(editFormData.total_price),
+                    qurban_year: editFormData.qurban_year
                 })
                 .eq('id', id)
 
@@ -201,22 +213,8 @@ export default function GroupDetail() {
         }
     }
 
-    const formatRupiahInput = (value) => {
-        const numberString = value.replace(/[^,\d]/g, '').toString()
-        const split = numberString.split(',')
-        const sisa = split[0].length % 3
-        let rupiah = split[0].substr(0, sisa)
-        const ribuan = split[0].substr(sisa).match(/\d{3}/gi)
-
-        if (ribuan) {
-            const separator = sisa ? '.' : ''
-            rupiah += separator + ribuan.join('.')
-        }
-        return split[1] !== undefined ? rupiah + ',' + split[1] : rupiah
-    }
-
     const handleAmountChange = (e) => {
-        const formatted = formatRupiahInput(e.target.value)
+        const formatted = formatNumber(e.target.value)
         setTrxAmount(formatted)
     }
 
@@ -225,7 +223,7 @@ export default function GroupDetail() {
         if (!trxParticipantId || !trxAmount) return
 
         setTrxLoading(true)
-        const rawAmount = parseInt(trxAmount.replace(/\./g, ''))
+        const rawAmount = unformatNumber(trxAmount)
 
         try {
             // Get user for RLS
@@ -372,8 +370,8 @@ export default function GroupDetail() {
                             </button>
                             <button
                                 onClick={(e) => {
+                                    e.preventDefault()
                                     e.stopPropagation()
-                                    setIsHeaderMenuOpen(false)
                                     handleDeleteGroup()
                                 }}
                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
@@ -393,24 +391,22 @@ export default function GroupDetail() {
                 {/* Chart Section */}
                 <div className="bg-white mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden">
                     <div className="w-56 h-56 relative z-10">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={chartData}
-                                    innerRadius={65}
-                                    outerRadius={90}
-                                    cornerRadius={10}
-                                    paddingAngle={4}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <PieChart width={224} height={224}>
+                            <Pie
+                                data={chartData}
+                                innerRadius={65}
+                                outerRadius={90}
+                                cornerRadius={10}
+                                paddingAngle={4}
+                                dataKey="value"
+                                stroke="none"
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
+                        </PieChart>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">Terkumpul</span>
                             <span className="text-3xl font-bold text-emerald-600">
@@ -684,11 +680,23 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                <select
+                                    value={editFormData.qurban_year}
+                                    onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                >
+                                    <option value={2026}>2026</option>
+                                    <option value={2027}>2027</option>
+                                </select>
+                            </div>
+
+                            <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     value={editFormData.total_price}
-                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: e.target.value })}
+                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                     required
                                 />
@@ -812,6 +820,36 @@ export default function GroupDetail() {
                                     Tutup
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="text-red-500" size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Grup?</h3>
+                        <p className="text-slate-500 mb-6 text-sm">
+                            Apakah kamu yakin ingin menghapus grup <strong>"{data?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmDeleteGroup}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                            >
+                                {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
                         </div>
                     </div>
                 </div>

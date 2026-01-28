@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Wallet, TrendingUp, ChevronRight, Filter, MoreVertical, Pencil, Trash2, X, LogOut, Search, BookOpen, Grid, User, Settings, Info, Moon, Sun, Mail, Phone, Building, MapPin } from 'lucide-react'
+import { Plus, Search, Filter, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
+import { formatNumber, unformatNumber } from '../lib/utils'
 
 export default function Dashboard() {
     const navigate = useNavigate()
     const [groups, setGroups] = useState([])
     const [loading, setLoading] = useState(true)
     const [totalSavings, setTotalSavings] = useState(0)
+    const [totalTarget, setTotalTarget] = useState(0)
     const [growthPercentage, setGrowthPercentage] = useState(0)
     const [profile, setProfile] = useState(null)
 
@@ -27,6 +29,11 @@ export default function Dashboard() {
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false)
     const [profileFormData, setProfileFormData] = useState({ full_name: '', phone_number: '', institution_name: '', address: '' })
     const [userEmail, setUserEmail] = useState('')
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [groupToDelete, setGroupToDelete] = useState(null)
+    const [deleteLoading, setDeleteLoading] = useState(false)
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -116,6 +123,11 @@ export default function Dashboard() {
             })
 
             setGroups(processedGroups)
+
+            // Calculate Global Target
+            const globalTargetSum = processedGroups.reduce((sum, g) => sum + (g.total_price || 0), 0)
+            setTotalTarget(globalTargetSum)
+
             // Note: We used to setTotalSavings here, but we will override it with the global transaction sum below for accuracy logic requested
             // Actually, summing group collections IS the global total if all transactions belong to groups. 
             // However, the user specifically asked to "Fetch amount from transactions table" for global total.
@@ -182,22 +194,35 @@ export default function Dashboard() {
         }
     }
 
-    const handleDeleteGroup = async (groupId, e) => {
-        e.stopPropagation()
-        if (window.confirm('Yakin ingin menghapus grup ini?')) {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) throw new Error('User not authenticated')
+    const handleDeleteGroup = (group, e) => {
+        if (e) {
+            e.preventDefault()
+            e.stopPropagation()
+        }
+        setGroupToDelete(group)
+        setIsDeleteModalOpen(true)
+        setActiveDropdown(null)
+    }
 
-                const { error } = await supabase.from('groups').delete().eq('id', groupId)
-                if (error) throw error
+    const confirmDeleteGroup = async () => {
+        if (!groupToDelete) return
 
-                fetchDashboardData()
-                setActiveDropdown(null)
-            } catch (error) {
-                console.error('Error deleting group:', error)
-                alert('Gagal menghapus grup')
-            }
+        setDeleteLoading(true)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
+            const { error } = await supabase.from('groups').delete().eq('id', groupToDelete.id)
+            if (error) throw error
+
+            fetchDashboardData()
+            setIsDeleteModalOpen(false)
+            setGroupToDelete(null)
+        } catch (error) {
+            console.error('Error deleting group:', error)
+            alert('Gagal menghapus grup')
+        } finally {
+            setDeleteLoading(false)
         }
     }
 
@@ -207,7 +232,7 @@ export default function Dashboard() {
             id: group.id,
             name: group.name,
             target_animal: group.target_animal,
-            total_price: group.total_price,
+            total_price: formatNumber(group.total_price),
             qurban_year: group.qurban_year || 2026
         })
         setIsEditModalOpen(true)
@@ -226,7 +251,7 @@ export default function Dashboard() {
                 .update({
                     name: editFormData.name,
                     target_animal: editFormData.target_animal,
-                    total_price: parseInt(editFormData.total_price) || 0,
+                    total_price: unformatNumber(editFormData.total_price),
                     qurban_year: editFormData.qurban_year
                 })
                 .eq('id', editFormData.id)
@@ -418,29 +443,57 @@ export default function Dashboard() {
                 <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-yellow-300 opacity-10 blur-2xl"></div>
 
                 <div className="relative z-10 text-white">
-                    <div className="flex items-center space-x-2 mb-2 opacity-90">
-                        <Wallet size={18} />
-                        <span className="text-sm font-medium tracking-wide">Total Tabungan Qurban</span>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="flex items-center space-x-2 mb-2 opacity-90">
+                                <Wallet size={18} />
+                                <span className="text-sm font-medium tracking-wide">Total Tabungan Qurban</span>
+                            </div>
+                            {loading ? (
+                                <Skeleton className="h-10 w-3/4 bg-white/30 rounded-lg" />
+                            ) : (
+                                <div>
+                                    <h2 className="text-4xl font-bold tracking-tight mb-1">
+                                        {formatRupiah(totalSavings)}
+                                    </h2>
+                                    {totalTarget > 0 && (
+                                        <p className="text-emerald-100 text-sm font-medium opacity-90">
+                                            Target: {formatRupiah(totalTarget)}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        {/* Decorative Icon */}
+                        <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
+                            <TrendingUp size={32} className="text-white" />
+                        </div>
                     </div>
-                    {loading ? (
-                        <Skeleton className="h-10 w-3/4 bg-white/30 rounded-lg" />
-                    ) : (
-                        <h2 className="text-4xl font-bold tracking-tight">
-                            {formatRupiah(totalSavings)}
-                        </h2>
+
+                    {/* Global Progress Bar */}
+                    {totalTarget > 0 && !loading && (
+                        <div className="mt-6">
+                            <div className="flex justify-between text-xs font-bold text-emerald-100 mb-1.5 uppercase tracking-wider">
+                                <span>Progress Global</span>
+                                <span>{Math.round((totalSavings / totalTarget) * 100)}%</span>
+                            </div>
+                            <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="h-full bg-white rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                    style={{ width: `${Math.min(100, (totalSavings / totalTarget) * 100)}%` }}
+                                ></div>
+                            </div>
+                        </div>
                     )}
 
-                    {/* Growth Badge */}
-                    {growthPercentage !== 0 && (
+                    {/* Growth Badge (if no target or extra info) */}
+                    {growthPercentage !== 0 && totalTarget === 0 && (
                         <div className="mt-6 flex items-center space-x-2 bg-white/20 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
                             <TrendingUp size={14} className={growthPercentage >= 0 ? "text-green-100" : "text-red-100"} />
                             <span className={`text-xs font-semibold ${growthPercentage >= 0 ? "text-green-50" : "text-red-50"}`}>
                                 {growthPercentage > 0 ? '+' : ''}{growthPercentage.toFixed(1)}% bulan ini
                             </span>
                         </div>
-                    )}
-                    {growthPercentage === 0 && (
-                        <div className="mt-6 h-6"></div> // Spacer to keep height consistent if needed, or just nothing
                     )}
                 </div>
             </div>
@@ -603,11 +656,15 @@ export default function Dashboard() {
                                             <span>Edit</span>
                                         </button>
                                         <button
-                                            onClick={(e) => handleDeleteGroup(group.id, e)}
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                e.stopPropagation()
+                                                handleDeleteGroup(group, e)
+                                            }}
                                             className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
                                         >
                                             <Trash2 size={16} />
-                                            <span>Hapus</span>
+                                            <span>Hapus Grup</span>
                                         </button>
                                     </div>
                                 )}
@@ -668,9 +725,9 @@ export default function Dashboard() {
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     value={editFormData.total_price}
-                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: e.target.value })}
+                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                     required
                                 />
@@ -890,6 +947,37 @@ export default function Dashboard() {
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
                                 <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Group Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="text-red-500" size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Grup?</h3>
+                        <p className="text-slate-500 mb-6 text-sm">
+                            Apakah kamu yakin ingin menghapus grup <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmDeleteGroup}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                            >
+                                {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
                         </div>
                     </div>
                 </div>

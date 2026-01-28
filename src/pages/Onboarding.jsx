@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Trash2, Plus, ArrowLeft } from 'lucide-react'
+import { formatNumber, unformatNumber } from '../lib/utils'
 
 export default function Onboarding() {
     const navigate = useNavigate()
@@ -55,7 +56,7 @@ export default function Onboarding() {
                 .insert({
                     name: groupName,
                     target_animal: targetAnimal,
-                    total_price: parseInt(totalPrice) || 0,
+                    total_price: unformatNumber(totalPrice),
                     qurban_year: qurbanYear,
                     user_id: userId
                 })
@@ -150,10 +151,10 @@ export default function Onboarding() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
                                 <input
-                                    type="number"
-                                    placeholder="Contoh: 21000000"
+                                    type="text"
+                                    placeholder="Contoh: 21.000.000"
                                     value={totalPrice}
-                                    onChange={(e) => setTotalPrice(e.target.value)}
+                                    onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
                                 />
                             </div>
