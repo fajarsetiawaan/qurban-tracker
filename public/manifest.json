@@ -2,19 +2,19 @@
     "name": "Dombantara - Tabungan Qurban",
     "short_name": "Dombantara",
     "description": "Aplikasi manajemen tabungan qurban mandiri oleh Dombantara",
-    "start_url": "/",
+    "start_url": "/tabungan-qurban/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#065f46",
     "icons": [
         {
-            "src": "/logo-domba.png",
+            "src": "/tabungan-qurban/logo-domba.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/logo-domba.png",
+            "src": "/tabungan-qurban/logo-domba.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"

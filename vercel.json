@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/tabungan-qurban/(.*)",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/tabungan-qurban",
+            "destination": "/index.html"
+        }
+    ]
+}
