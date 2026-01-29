@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet } from 'lucide-react'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 
@@ -401,26 +401,30 @@ export default function GroupDetail() {
     const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20 relative font-sans">
-            {/* Transparent Header */}
-            <div className="p-6 sticky top-0 z-10 flex items-center justify-between pointer-events-none">
-                <button onClick={() => navigate(-1)} className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-white transition pointer-events-auto">
-                    <ArrowLeft size={20} />
+        <div className="min-h-screen bg-slate-50 relative font-sans">
+            {/* Header (BCA Mobile Style) */}
+            <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-2 -ml-2 text-slate-600 hover:bg-slate-50 rounded-full transition"
+                >
+                    <ArrowLeft size={24} />
                 </button>
-                <div className="relative pointer-events-auto">
+                <h1 className="text-lg font-bold text-slate-800">Detail Grup</h1>
+                <div className="relative">
                     <button
                         onClick={(e) => {
                             e.stopPropagation()
                             setIsHeaderMenuOpen(!isHeaderMenuOpen)
                         }}
-                        className="text-slate-600 bg-white/80 backdrop-blur-md p-3 rounded-full shadow-sm hover:bg-slate-100 transition"
+                        className="p-2 -mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-full transition"
                     >
-                        <MoreVertical size={20} />
+                        <MoreVertical size={24} />
                     </button>
 
                     {/* Header Dropdown */}
                     {isHeaderMenuOpen && (
-                        <div className="absolute right-0 top-14 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-scale-up">
+                        <div className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-[100] animate-scale-up origin-top-right">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation()
@@ -448,9 +452,30 @@ export default function GroupDetail() {
                 </div>
             </div>
 
-            <div className="px-6 pb-40 -mt-4">
-                <h1 className="text-2xl font-bold text-slate-800 text-center mb-1">{data.name}</h1>
-                <p className="text-sm text-slate-500 text-center capitalize">{data.target_animal} • Target Rp {data.total_price.toLocaleString()}</p>
+            <main className="pt-6 pb-28 px-6">
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{data.name}</h1>
+
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                        <div className="flex items-center space-x-1.5 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
+                            <span className="text-xs font-bold uppercase tracking-wide">{data.target_animal}</span>
+                        </div>
+                        <div className="flex items-center space-x-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full">
+                            <Calendar size={12} />
+                            <span className="text-xs font-bold">Periode {data.qurban_year || 2026}</span>
+                        </div>
+                    </div>
+
+                    <div className="inline-flex items-center space-x-2 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+                        <div className="p-1 bg-white rounded-lg shadow-sm">
+                            <Wallet size={14} className="text-slate-400" />
+                        </div>
+                        <div className="text-left">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">Target Kekurangan</p>
+                            <p className="text-sm font-bold text-slate-700 leading-none">Rp {data.total_price.toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Chart Section */}
                 <div className="bg-white mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden">
@@ -585,23 +610,59 @@ export default function GroupDetail() {
                         })}
                     </div>
                 </div>
-            </div>
+            </main>
 
-            {/* Bottom Glass Navbar */}
-            <div className="fixed bottom-0 left-0 w-full h-24 bg-white/80 backdrop-blur-md z-50 flex justify-center items-center border-t border-slate-100/50 shadow-[0_-4px_30px_rgba(0,0,0,0.03)] pb-2">
+            {/* Bottom Navbar */}
+            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                <button
+                    onClick={() => navigate('/')}
+                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                >
+                    <Home size={24} className="group-hover:scale-110 transition" />
+                    <span className="text-[10px] font-medium">Home</span>
+                </button>
+
+                <button
+                    onClick={() => navigate('/?modal=history')}
+                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                >
+                    <ReceiptText size={24} className="group-hover:scale-110 transition" />
+                    <span className="text-[10px] font-medium">History</span>
+                </button>
+
+                {/* Center Button (Add Transaction) */}
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-16 h-16 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-black transition active:scale-95 shadow-xl shadow-slate-900/20"
+                    className="flex flex-col items-center justify-end -mt-8 space-y-1 group relative z-10"
                 >
-                    <Plus size={32} strokeWidth={2.5} />
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center shadow-2xl border-[4px] border-white group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
+                        <img src="/logo-domba.png" alt="Add" className="w-full h-full object-contain brightness-0 invert" />
+                    </div>
+                    <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 transform translate-y-1">Quick Add</span>
                 </button>
-            </div>
+
+                <button
+                    onClick={() => navigate('/?modal=notif')}
+                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                >
+                    <Bell size={24} className="group-hover:scale-110 transition" />
+                    <span className="text-[10px] font-medium">Notif</span>
+                </button>
+
+                <button
+                    onClick={() => navigate('/?modal=account')}
+                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                >
+                    <User size={24} className="group-hover:scale-110 transition" />
+                    <span className="text-[10px] font-medium">Account</span>
+                </button>
+            </nav>
 
             {/* Modal Overlay (Same implementation, cleaner style) */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up pb-6">
-                        <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100">
+                <div className="fixed inset-0 z-[155] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh]">
+                        <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100 flex-shrink-0">
                             <h2 className="text-lg font-bold text-slate-800">
                                 {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
                             </h2>
@@ -610,133 +671,135 @@ export default function GroupDetail() {
                             </button>
                         </div>
 
-                        {trxStep === 'form' && (
-                            <form onSubmit={handleSaveTransaction} className="p-6 space-y-6">
-                                <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sumber Dana</p>
-                                    <select
-                                        value={trxParticipantId}
-                                        onChange={(e) => setTrxParticipantId(e.target.value)}
-                                        className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                        required
-                                    >
-                                        <option value="">Pilih Peserta...</option>
-                                        {data.participants.map(p => (
-                                            <option key={p.id} value={p.id}>{p.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                        <div className="overflow-y-auto p-6 pt-0">
+                            {trxStep === 'form' && (
+                                <form onSubmit={handleSaveTransaction} className="space-y-6">
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sumber Dana</p>
+                                        <select
+                                            value={trxParticipantId}
+                                            onChange={(e) => setTrxParticipantId(e.target.value)}
+                                            className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                            required
+                                        >
+                                            <option value="">Pilih Peserta...</option>
+                                            {data.participants.map(p => (
+                                                <option key={p.id} value={p.id}>{p.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                                <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</p>
-                                    <div className="relative">
-                                        <span className="absolute left-6 top-4 text-emerald-600 font-bold text-xl">Rp</span>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</p>
+                                        <div className="relative">
+                                            <span className="absolute left-6 top-4 text-emerald-600 font-bold text-xl">Rp</span>
+                                            <input
+                                                type="text"
+                                                value={trxAmount}
+                                                onChange={handleAmountChange}
+                                                placeholder="0"
+                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</p>
                                         <input
-                                            type="text"
-                                            value={trxAmount}
-                                            onChange={handleAmountChange}
-                                            placeholder="0"
-                                            className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                            type="date"
+                                            value={trxDate}
+                                            onChange={(e) => setTrxDate(e.target.value)}
+                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                             required
                                         />
                                     </div>
-                                </div>
 
-                                <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</p>
-                                    <input
-                                        type="date"
-                                        value={trxDate}
-                                        onChange={(e) => setTrxDate(e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</p>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setTrxReceiptFile(e.target.files[0])}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-                                    />
-                                </div>
-
-                                <div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</p>
-                                    <div className="flex space-x-3">
-                                        {['Tunai', 'Transfer'].map(m => (
-                                            <button
-                                                key={m}
-                                                type="button"
-                                                onClick={() => setTrxMethod(m)}
-                                                className={`flex-1 py-3 rounded-xl font-bold transition ${trxMethod === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
-                                            >
-                                                {m}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={trxLoading}
-                                    className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200 mt-4"
-                                >
-                                    {trxLoading ? 'Memproses...' : 'Simpan dan Kirim Invoice'}
-                                </button>
-                            </form>
-                        )}
-
-                        {trxStep === 'invoice' && lastTransaction && (
-                            <div className="p-6 flex flex-col items-center">
-                                <div className="bg-white w-full p-0 relative">
-                                    <div className="text-center pb-8">
-                                        <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
-                                            <CheckCircle className="text-emerald-600" size={40} />
-                                        </div>
-                                        <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastTransaction.formattedAmount}</h3>
-                                        <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</p>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setTrxReceiptFile(e.target.files[0])}
+                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                        />
                                     </div>
 
-                                    <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500 text-sm">Tanggal</span>
-                                            <span className="font-medium text-slate-800 text-sm">{new Date(lastTransaction.transaction_date || lastTransaction.created_at).toLocaleDateString('id-ID')}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500 text-sm">Pengirim</span>
-                                            <span className="font-bold text-slate-800 text-sm">{lastTransaction.participantName}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500 text-sm">Metode</span>
-                                            <span className="font-medium text-slate-800 text-sm">{lastTransaction.payment_method}</span>
-                                        </div>
-
-                                        {lastTransaction.receipt_url && (
-                                            <div className="pt-2 text-center">
-                                                <a
-                                                    href={lastTransaction.receipt_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</p>
+                                        <div className="flex space-x-3">
+                                            {['Tunai', 'Transfer'].map(m => (
+                                                <button
+                                                    key={m}
+                                                    type="button"
+                                                    onClick={() => setTrxMethod(m)}
+                                                    className={`flex-1 py-3 rounded-xl font-bold transition ${trxMethod === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
                                                 >
-                                                    <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
-                                                </a>
-                                            </div>
-                                        )}
+                                                    {m}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <button
-                                    onClick={resetModal}
-                                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
-                                >
-                                    Selesai
-                                </button>
-                            </div>
-                        )}
+                                    <button
+                                        type="submit"
+                                        disabled={trxLoading}
+                                        className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200 mt-4"
+                                    >
+                                        {trxLoading ? 'Memproses...' : 'Simpan dan Kirim Invoice'}
+                                    </button>
+                                </form>
+                            )}
+
+                            {trxStep === 'invoice' && lastTransaction && (
+                                <div className="flex flex-col items-center">
+                                    <div className="bg-white w-full p-0 relative">
+                                        <div className="text-center pb-8">
+                                            <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
+                                                <CheckCircle className="text-emerald-600" size={40} />
+                                            </div>
+                                            <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastTransaction.formattedAmount}</h3>
+                                            <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                        </div>
+
+                                        <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500 text-sm">Tanggal</span>
+                                                <span className="font-medium text-slate-800 text-sm">{new Date(lastTransaction.transaction_date || lastTransaction.created_at).toLocaleDateString('id-ID')}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500 text-sm">Pengirim</span>
+                                                <span className="font-bold text-slate-800 text-sm">{lastTransaction.participantName}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-500 text-sm">Metode</span>
+                                                <span className="font-medium text-slate-800 text-sm">{lastTransaction.payment_method}</span>
+                                            </div>
+
+                                            {lastTransaction.receipt_url && (
+                                                <div className="pt-2 text-center">
+                                                    <a
+                                                        href={lastTransaction.receipt_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                                    >
+                                                        <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={resetModal}
+                                        className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
+                                    >
+                                        Selesai
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

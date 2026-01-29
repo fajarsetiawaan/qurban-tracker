@@ -68,14 +68,14 @@ export default function Login() {
 
             <div className="max-w-md w-full bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] p-10 border border-white/50 relative z-10 hover:shadow-[0_35px_70px_-15px_rgba(16,185,129,0.15)] transition-all duration-500">
                 <div className="text-center mb-10">
-                    <div className="w-24 h-24 bg-gradient-to-tr from-emerald-100 to-white rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-inner border border-white">
+                    <div className="w-24 h-24 bg-gradient-to-tr from-emerald-100 to-white rounded-3xl mx-auto mb-3 flex items-center justify-center shadow-inner border border-white">
                         <img src="/logo-domba.png" alt="Logo Dombantara" className="w-16 h-16 object-contain drop-shadow-md transform hover:scale-110 transition-transform duration-300" />
                     </div>
                     <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
                         {isSignUp ? 'Gabung Sekarang' : 'Dombantara.id'}
                     </h1>
                     <p className="text-slate-500 font-medium text-lg">
-                        {isSignUp ? 'Mulai perjalanan qurbanmu' : 'Tabungan Qurban Modern'}
+                        {isSignUp ? 'Mulai perjalanan qurbanmu' : 'Smart Qurban System'}
                     </p>
                 </div>
 
@@ -221,7 +221,7 @@ export default function Login() {
             </div>
 
             <p className="absolute bottom-6 text-xs font-bold text-emerald-800/20 tracking-widest uppercase">
-                © 2024 Dombantara ID
+                © 2026 Dombantara ID
             </p>
         </div>
     )

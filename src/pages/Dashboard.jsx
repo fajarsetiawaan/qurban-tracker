@@ -871,8 +871,8 @@ export default function Dashboard() {
                 )}
                 {/* My Account Modal (Profile Only & Delete) */}
                 {isAccountModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]">
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh]">
                             {/* Modal Header */}
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
                                 <h2 className="text-xl font-bold text-slate-800">My Account</h2>
@@ -1016,7 +1016,7 @@ export default function Dashboard() {
                                 <hr className="border-slate-100" />
 
                                 {/* Actions (Only Delete Account here now) */}
-                                <div className="pt-2">
+                                <div className="pt-8 pb-4">
                                     <button
                                         onClick={() => {
                                             setIsDeleteConfirmOpen(true)
@@ -1507,10 +1507,10 @@ export default function Dashboard() {
                     onClick={() => setIsQuickTransactionModalOpen(true)}
                     className="flex flex-col items-center justify-end -mt-8 space-y-1 group relative z-10"
                 >
-                    <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl border-[4px] border-white group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center shadow-2xl border-[4px] border-white group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
                         <img src="/logo-domba.png" alt="Add" className="w-full h-full object-contain brightness-0 invert" />
                     </div>
-                    <span className="text-[10px] font-medium text-emerald-500 transform translate-y-1">Add</span>
+                    <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 transform translate-y-1">Quick Add</span>
                 </button>
 
                 {/* 4. Notification */}
