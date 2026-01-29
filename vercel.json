@@ -1,6 +1,22 @@
 {
     "rewrites": [
         {
+            "source": "/tabungan-qurban/(.*\\.(js|css|png|jpg|jpeg|svg|json|ico|woff|woff2|ttf|eot))",
+            "destination": "/$1"
+        },
+        {
+            "source": "/tabungan-qurban/assets/(.*)",
+            "destination": "/assets/$1"
+        },
+        {
+            "source": "/tabungan-qurban/registerSW.js",
+            "destination": "/registerSW.js"
+        },
+        {
+            "source": "/tabungan-qurban/sw.js",
+            "destination": "/sw.js"
+        },
+        {
             "source": "/tabungan-qurban/(.*)",
             "destination": "/index.html"
         },
