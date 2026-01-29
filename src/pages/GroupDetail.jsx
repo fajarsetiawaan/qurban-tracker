@@ -392,7 +392,7 @@ export default function GroupDetail() {
         )
     }
 
-    if (!data) return <div className="p-4 text-center">Grup tidak ditemukan</div>
+    if (!data) return <div className="p-4 text-center">Group tidak ditemukan</div>
 
     const chartData = [
         { name: 'Terkumpul', value: data.totalCollected, color: '#10B981' },
@@ -406,20 +406,20 @@ export default function GroupDetail() {
             <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 -ml-2 text-slate-600 hover:bg-slate-50 rounded-full transition"
+                    className="w-9 h-9 flex items-center justify-center -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                 >
-                    <ArrowLeft size={24} />
+                    <ArrowLeft size={18} />
                 </button>
-                <h1 className="text-lg font-bold text-slate-800">Detail Grup</h1>
+                <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Group Info</h1>
                 <div className="relative">
                     <button
                         onClick={(e) => {
                             e.stopPropagation()
                             setIsHeaderMenuOpen(!isHeaderMenuOpen)
                         }}
-                        className="p-2 -mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-full transition"
+                        className="w-9 h-9 flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                     >
-                        <MoreVertical size={24} />
+                        <MoreVertical size={18} />
                     </button>
 
                     {/* Header Dropdown */}
@@ -434,7 +434,7 @@ export default function GroupDetail() {
                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
                             >
                                 <Pencil size={16} />
-                                <span>Edit Grup</span>
+                                <span>Edit Group</span>
                             </button>
                             <button
                                 onClick={(e) => {
@@ -445,7 +445,7 @@ export default function GroupDetail() {
                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
                             >
                                 <Trash2 size={16} />
-                                <span>Hapus Grup</span>
+                                <span>Hapus Group</span>
                             </button>
                         </div>
                     )}
@@ -466,15 +466,7 @@ export default function GroupDetail() {
                         </div>
                     </div>
 
-                    <div className="inline-flex items-center space-x-2 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
-                        <div className="p-1 bg-white rounded-lg shadow-sm">
-                            <Wallet size={14} className="text-slate-400" />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">Target Kekurangan</p>
-                            <p className="text-sm font-bold text-slate-700 leading-none">Rp {data.total_price.toLocaleString()}</p>
-                        </div>
-                    </div>
+
                 </div>
 
                 {/* Chart Section */}
@@ -809,7 +801,7 @@ export default function GroupDetail() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
                     <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-bold text-slate-800">Edit Grup</h2>
+                            <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
                             <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
                                 <X size={20} />
                             </button>
@@ -992,9 +984,9 @@ export default function GroupDetail() {
                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Trash2 className="text-red-500" size={32} />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Grup?</h3>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
                         <p className="text-slate-500 mb-6 text-sm">
-                            Apakah kamu yakin ingin menghapus grup <strong>"{data?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                            Apakah kamu yakin ingin menghapus group <strong>"{data?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
                         </p>
                         <div className="flex space-x-3">
                             <button

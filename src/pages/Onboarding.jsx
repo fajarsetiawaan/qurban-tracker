@@ -106,7 +106,7 @@ export default function Onboarding() {
                 <button onClick={() => navigate(-1)} className="mr-3 text-gray-600 hover:bg-gray-100 p-2 rounded-full transition">
                     <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-lg font-bold text-gray-800">Buat Grup Baru</h1>
+                <h1 className="text-lg font-bold text-gray-800">Buat Group Baru</h1>
             </div>
 
             <form onSubmit={handleSave} className="p-4 space-y-6">
@@ -119,7 +119,7 @@ export default function Onboarding() {
 
                 {/* Section 1: Data Grup */}
                 <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Grup</h2>
+                    <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Group</h2>
 
                     <div className="space-y-4">
                         <div>
@@ -232,7 +232,7 @@ export default function Onboarding() {
                         disabled={loading}
                         className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition disabled:opacity-70 transform active:scale-[0.98]"
                     >
-                        {loading ? 'Menyimpan...' : 'Simpan Grup & Peserta'}
+                        {loading ? 'Menyimpan...' : 'Simpan Group & Peserta'}
                     </button>
                 </div>
 

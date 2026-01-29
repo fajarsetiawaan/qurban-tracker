@@ -627,8 +627,8 @@ export default function Dashboard() {
                 <div className="mb-24">
                     <div className="flex justify-between items-end mb-4 relative z-50">
                         <h2 className="text-lg font-bold text-slate-800">
-                            {filterStatus === 'Semua' && filterYear === 'Semua' ? 'Grup Qurban Anda' :
-                                filterYear !== 'Semua' ? `Grup Periode ${filterYear}` : `Grup ${filterStatus}`}
+                            {filterStatus === 'Semua' && filterYear === 'Semua' ? 'Group Qurban Anda' :
+                                filterYear !== 'Semua' ? `Group Periode ${filterYear}` : `Group ${filterStatus}`}
                         </h2>
                         {/* ... Filter and Add Buttons ... */}
                         <div className="flex space-x-2">
@@ -705,7 +705,7 @@ export default function Dashboard() {
                         </div>
                     ) : groups.length === 0 ? (
                         <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200">
-                            <p className="text-slate-400 italic mb-4">Belum ada grup qurban</p>
+                            <p className="text-slate-400 italic mb-4">Belum ada group qurban</p>
                             <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
                         </div>
                     ) : (
@@ -789,7 +789,7 @@ export default function Dashboard() {
                                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
                                             >
                                                 <Trash2 size={16} />
-                                                <span>Hapus Grup</span>
+                                                <span>Hapus Group</span>
                                             </button>
                                         </div>
                                     )}
@@ -804,7 +804,7 @@ export default function Dashboard() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
                         <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
                             <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-lg font-bold text-slate-800">Edit Grup</h2>
+                                <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
                                 <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
                                     <X size={20} />
                                 </button>
@@ -1084,9 +1084,9 @@ export default function Dashboard() {
                             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="text-red-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Grup?</h3>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
                             <p className="text-slate-500 mb-6 text-sm">
-                                Apakah kamu yakin ingin menghapus grup <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                                Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
                             </p>
                             <div className="flex space-x-3">
                                 <button
@@ -1173,14 +1173,14 @@ export default function Dashboard() {
                             {quickTrxStep === 'form' && (
                                 <form onSubmit={handleQuickTransactionSubmit} className="space-y-4 pt-2 pb-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Grup</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Group</label>
                                         <select
                                             value={quickTrxFormData.group_id}
                                             onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
                                             className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                             required
                                         >
-                                            <option value="">-- Pilih Grup --</option>
+                                            <option value="">-- Pilih Group --</option>
                                             {groups.map(g => (
                                                 <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
                                             ))}
@@ -1351,7 +1351,7 @@ export default function Dashboard() {
                                 onChange={(e) => setHistoryFilterGroup(e.target.value)}
                                 className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
                             >
-                                <option value="Semua">Semua Grup</option>
+                                <option value="Semua">Semua Group</option>
                                 {groups.map(g => (
                                     <option key={g.id} value={g.id}>{g.name}</option>
                                 ))}
