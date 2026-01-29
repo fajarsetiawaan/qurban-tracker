@@ -17,13 +17,13 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/tabungan-qurban/logo-domba.png',
+            src: '/logo-domba.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: '/tabungan-qurban/logo-domba.png',
+            src: '/logo-domba.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
@@ -32,5 +32,5 @@ export default defineConfig({
       }
     })
   ],
-  base: './',
+  base: '/',
 })
