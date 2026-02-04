@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Search, Filter, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
@@ -137,6 +137,32 @@ export default function Dashboard() {
     useEffect(() => {
         if (isNotificationModalOpen) fetchNotificationData()
     }, [isNotificationModalOpen])
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeDropdown !== null) {
+                // Check if click is outside dropdown
+                const dropdowns = document.querySelectorAll('[data-dropdown]')
+                const triggers = document.querySelectorAll('[data-dropdown-trigger]')
+
+                let clickedInside = false
+                dropdowns.forEach(dropdown => {
+                    if (dropdown.contains(event.target)) clickedInside = true
+                })
+                triggers.forEach(trigger => {
+                    if (trigger.contains(event.target)) clickedInside = true
+                })
+
+                if (!clickedInside) {
+                    setActiveDropdown(null)
+                }
+            }
+        }
+
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
+    }, [activeDropdown])
     const handleQuickTransactionSubmit = async (e) => {
         e.preventDefault()
         setQuickTrxLoading(true)
@@ -539,7 +565,7 @@ export default function Dashboard() {
     return (
         <div className="relative min-h-screen bg-slate-50 pb-20">
             {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[90] bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4 flex justify-between items-center shadow-sm">
+            <header className="fixed top-0 left-0 right-0 z-[90] bg-slate-50 px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center space-x-0.5">
                     <img src="/logo-domba.png" alt="Logo" className="w-8 h-8 object-contain" />
                     <span className="text-sm font-bold text-emerald-950 tracking-tight font-heading">dombantara.id</span>
@@ -553,7 +579,13 @@ export default function Dashboard() {
             </header>
 
             {/* Main Content */}
-            <main className="pt-24 pb-40 px-6">
+            <main
+                className="pt-24 pb-40 px-6"
+                style={{
+                    maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)'
+                }}
+            >
                 <div className="flex flex-col mb-6">
                     <h1 className="text-sm font-medium text-slate-500 leading-none">Assalamu'alaikum,</h1>
                     <p className="text-2xl font-bold text-emerald-900 leading-tight">
@@ -637,7 +669,7 @@ export default function Dashboard() {
                                     onClick={() => setShowFilterMenu(!showFilterMenu)}
                                     className={`p-2 rounded-full transition ${showFilterMenu || filterStatus !== 'Semua' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
                                 >
-                                    <Filter size={20} />
+                                    <SlidersHorizontal size={20} />
                                 </button>
 
                                 {/* Filter Dropdown */}
@@ -738,6 +770,7 @@ export default function Dashboard() {
 
                                                 {/* Quick Actions Trigger */}
                                                 <button
+                                                    data-dropdown-trigger
                                                     onClick={(e) => {
                                                         e.preventDefault()
                                                         e.stopPropagation()
@@ -772,7 +805,7 @@ export default function Dashboard() {
 
                                     {/* Dropdown Menu */}
                                     {activeDropdown === group.id && (
-                                        <div className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
+                                        <div data-dropdown className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
                                             <button
                                                 onClick={(e) => openEditModal(group, e)}
                                                 className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
@@ -786,7 +819,7 @@ export default function Dashboard() {
                                                     e.stopPropagation()
                                                     handleDeleteGroup(group, e)
                                                 }}
-                                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
+                                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
                                             >
                                                 <Trash2 size={16} />
                                                 <span>Hapus Group</span>
@@ -1480,7 +1513,7 @@ export default function Dashboard() {
             )}
 
 
-            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-slate-50 flex justify-between items-center px-6 py-3 pb-6">
                 {/* 1. Home */}
                 <button
                     onClick={() => navigate('/')}
@@ -1507,7 +1540,7 @@ export default function Dashboard() {
                     onClick={() => setIsQuickTransactionModalOpen(true)}
                     className="flex flex-col items-center justify-end -mt-8 space-y-1 group relative z-10"
                 >
-                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center shadow-2xl border-[4px] border-white group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center border-[4px] border-slate-50 group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
                         <img src="/logo-domba.png" alt="Add" className="w-full h-full object-contain brightness-0 invert" />
                     </div>
                     <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 transform translate-y-1">Quick Add</span>

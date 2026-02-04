@@ -225,8 +225,8 @@ export default function Onboarding() {
                     </div>
                 </section>
 
-                {/* Action Button */}
-                <div className="pt-4">
+                {/* Action Button - Sticky Bottom */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-30">
                     <button
                         type="submit"
                         disabled={loading}

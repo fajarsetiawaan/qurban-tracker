@@ -30,7 +30,7 @@ export default function GroupDetail() {
     const [editFormData, setEditFormData] = useState({ name: '', target_animal: 'sapi', total_price: '', qurban_year: 2026 })
 
     const [editLoading, setEditLoading] = useState(false)
-    const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false)
+
 
     // Delete Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -65,10 +65,32 @@ export default function GroupDetail() {
         }
     }, [isEditModalOpen, data])
 
-    const handleDeleteGroup = () => {
-        setIsDeleteModalOpen(true)
-        setIsHeaderMenuOpen(false)
-    }
+    // Click Outside to Close Dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeParticipantDropdown !== null) {
+                const dropdowns = document.querySelectorAll('[data-dropdown]')
+                const triggers = document.querySelectorAll('[data-dropdown-trigger]')
+
+                let clickedInside = false
+                dropdowns.forEach(dropdown => {
+                    if (dropdown.contains(event.target)) clickedInside = true
+                })
+                triggers.forEach(trigger => {
+                    if (trigger.contains(event.target)) clickedInside = true
+                })
+
+                if (!clickedInside) {
+                    setActiveParticipantDropdown(null)
+                }
+            }
+        }
+
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
+    }, [activeParticipantDropdown])
+
+
 
     const confirmDeleteGroup = async () => {
         setDeleteLoading(true)
@@ -413,42 +435,11 @@ export default function GroupDetail() {
                 <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Group Info</h1>
                 <div className="relative">
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            setIsHeaderMenuOpen(!isHeaderMenuOpen)
-                        }}
+                        onClick={() => setIsEditModalOpen(true)}
                         className="w-9 h-9 flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                     >
                         <MoreVertical size={18} />
                     </button>
-
-                    {/* Header Dropdown */}
-                    {isHeaderMenuOpen && (
-                        <div className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-[100] animate-scale-up origin-top-right">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setIsHeaderMenuOpen(false)
-                                    setIsEditModalOpen(true)
-                                }}
-                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
-                            >
-                                <Pencil size={16} />
-                                <span>Edit Group</span>
-                            </button>
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    handleDeleteGroup()
-                                }}
-                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition"
-                            >
-                                <Trash2 size={16} />
-                                <span>Hapus Group</span>
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -567,9 +558,12 @@ export default function GroupDetail() {
                                     {/* Action Menu */}
                                     <div className="relative">
                                         <button
+                                            data-dropdown-trigger
                                             onClick={(e) => {
                                                 e.stopPropagation()
-                                                setActiveParticipantDropdown(activeParticipantDropdown === participant.id ? null : participant.id)
+                                                const newId = activeParticipantDropdown === participant.id ? null : participant.id
+                                                setActiveParticipantDropdown(newId)
+                                                if (newId) setIsHeaderMenuOpen(false)
                                             }}
                                             className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition z-10 relative"
                                         >
@@ -578,7 +572,11 @@ export default function GroupDetail() {
 
                                         {/* Dropdown */}
                                         {activeParticipantDropdown === participant.id && (
-                                            <div className="absolute right-0 top-10 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right">
+                                            <div
+                                                data-dropdown
+                                                className={`absolute right-0 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up ${idx >= data.participants.length - 2 ? 'bottom-full mb-2 origin-bottom-right' : 'top-10 origin-top-right'
+                                                    }`}
+                                            >
                                                 <button
                                                     onClick={(e) => handleEditParticipantClick(participant, e)}
                                                     className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
@@ -861,6 +859,18 @@ export default function GroupDetail() {
                                 className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
                             >
                                 {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+
+                            {/* Delete Group Button inside Edit Modal */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsEditModalOpen(false)
+                                    setIsDeleteModalOpen(true)
+                                }}
+                                className="w-full border border-red-500 text-red-500 py-3.5 rounded-xl font-bold mt-2 hover:bg-red-50 transition"
+                            >
+                                Hapus Group
                             </button>
                         </form>
                     </div>

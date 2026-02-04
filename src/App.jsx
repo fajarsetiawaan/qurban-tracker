@@ -37,12 +37,12 @@ function App() {
 
         <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
           <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
         </Route>
 
         {/* Standalone Protected Routes (No Bottom Nav) */}
+        <Route path="/onboarding" element={session ? <Onboarding /> : <Navigate to="/login" />} />
         <Route path="/groups/:id" element={session ? <GroupDetail /> : <Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
