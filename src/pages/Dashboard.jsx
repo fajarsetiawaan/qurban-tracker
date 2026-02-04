@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
@@ -832,83 +832,107 @@ export default function Dashboard() {
                     )}
                 </div>
 
-                {/* Edit Group Modal (Reused) */}
-                {isEditModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
-                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
-                                    <X size={20} />
-                                </button>
+            </main>
+
+            {/* Edit Group Modal (Reused) */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
+                            <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
                             </div>
 
-                            <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
-                                    <input
-                                        type="text"
-                                        value={editFormData.name}
-                                        onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
-                                    <select
-                                        value={editFormData.target_animal}
-                                        onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                    >
-                                        <option value="sapi">Sapi</option>
-                                        <option value="kambing">Kambing</option>
-                                        <option value="domba">Domba</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
-                                    <select
-                                        value={editFormData.qurban_year}
-                                        onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                    >
-                                        <option value={2026}>2026</option>
-                                        <option value={2027}>2027</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
-                                    <input
-                                        type="text"
-                                        value={editFormData.total_price}
-                                        onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                        required
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={editLoading}
-                                    className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
+                                <select
+                                    value={editFormData.target_animal}
+                                    onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                 >
-                                    {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
-                                </button>
-                            </form>
-                        </div>
+                                    <option value="sapi">Sapi</option>
+                                    <option value="kambing">Kambing</option>
+                                    <option value="domba">Domba</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                <select
+                                    value={editFormData.qurban_year}
+                                    onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                >
+                                    <option value={2026}>2026</option>
+                                    <option value={2027}>2027</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.total_price}
+                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={editLoading}
+                                className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                            >
+                                {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            </button>
+                        </form>
                     </div>
-                )}
-                {/* My Account Modal (Profile Only & Delete) */}
-                {isAccountModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh]">
-                            {/* Modal Header */}
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
+                </div>
+            )}
+
+            {/* My Account Modal (Profile Only & Delete) */}
+            {isAccountModalOpen && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh] m-4 relative">
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
+                            {isEditingProfile ? (
+                                <button
+                                    onClick={() => {
+                                        setProfileFormData({
+                                            full_name: profile?.full_name || '',
+                                            phone_number: profile?.phone_number || '',
+                                            institution_name: profile?.institution_name || '',
+                                            address: profile?.address || ''
+                                        })
+                                        setIsEditingProfile(false)
+                                    }}
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                            ) : (
                                 <h2 className="text-xl font-bold text-slate-800">My Account</h2>
+                            )}
+
+                            {isEditingProfile ? (
+                                <h2 className="text-lg font-bold text-slate-800">Edit Profil</h2>
+                            ) : (
                                 <button
                                     onClick={() => {
                                         setIsAccountModalOpen(false)
@@ -918,262 +942,318 @@ export default function Dashboard() {
                                 >
                                     <X size={20} />
                                 </button>
-                            </div>
+                            )}
+                            {isEditingProfile && <div className="w-8"></div>} {/* Spacer for centering */}
+                        </div>
 
-                            <div className="overflow-y-auto flex-1 p-6 space-y-8">
-                                {/* Profile Section */}
-                                <div className="space-y-4">
+                        <div className="overflow-y-auto flex-1 p-6 space-y-8 pb-24">
+                            {/* Profile Section */}
+                            <div className="space-y-4">
+                                {!isEditingProfile && (
                                     <div className="flex justify-between items-center">
                                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
+                                        <button
+                                            onClick={() => setIsEditingProfile(true)}
+                                            className="text-emerald-600 text-sm font-bold hover:underline flex items-center space-x-1"
+                                        >
+                                            <Pencil size={14} />
+                                            <span>Edit</span>
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Profile Hero Section */}
+                                <div className="flex flex-col items-center mb-6">
+                                    <div className={`w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4 relative transition-all duration-300 ${isEditingProfile ? 'scale-90' : ''}`}>
+                                        <span className="text-3xl font-bold text-emerald-600">
+                                            {profile?.full_name ? profile.full_name.charAt(0).toUpperCase() : 'A'}
+                                        </span>
                                         {!isEditingProfile && (
-                                            <button
-                                                onClick={() => setIsEditingProfile(true)}
-                                                className="text-emerald-600 text-sm font-bold hover:underline flex items-center space-x-1"
-                                            >
-                                                <Pencil size={14} />
-                                                <span>Edit</span>
-                                            </button>
+                                            <div className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center animate-scale-up">
+                                                <CheckCircle size={14} className="text-white" />
+                                            </div>
                                         )}
                                     </div>
 
-                                    <div className="space-y-4">
-                                        {/* Nama */}
-                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <div className="flex items-center space-x-3 text-slate-400 mb-1">
-                                                <User size={16} />
-                                                <span className="text-xs font-bold uppercase">Nama Lengkap</span>
-                                            </div>
-                                            {isEditingProfile ? (
+                                    {!isEditingProfile && (
+                                        <>
+                                            <h2 className="text-2xl font-bold text-slate-800 text-center leading-tight">
+                                                {profile?.full_name || 'Admin'}
+                                            </h2>
+                                            <p className="text-emerald-600 font-bold text-sm mt-1">{profile?.institution_name || 'Sahabat Qurban'}</p>
+                                        </>
+                                    )}
+                                </div>
+
+
+
+                                {/* Info List / Edit Form */}
+                                <div className="space-y-6">
+                                    {isEditingProfile ? (
+                                        <div className="space-y-4 animate-fade-in">
+                                            {/* Nama Lengkap Input Card */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <User size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</span>
+                                                </div>
                                                 <input
                                                     type="text"
                                                     value={profileFormData.full_name}
                                                     onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
+                                                    placeholder="Nama Lengkap"
                                                 />
-                                            ) : (
-                                                <p className="text-slate-800 font-bold ml-7">{profile?.full_name || '-'}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Email (Read Only) */}
-                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 opacity-70">
-                                            <div className="flex items-center space-x-3 text-slate-400 mb-1">
-                                                <Mail size={16} />
-                                                <span className="text-xs font-bold uppercase">Email</span>
                                             </div>
-                                            <p className="text-slate-800 font-bold ml-7">{userEmail}</p>
-                                        </div>
 
-                                        {/* WhatsApp */}
-                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <div className="flex items-center space-x-3 text-slate-400 mb-1">
-                                                <Phone size={16} />
-                                                <span className="text-xs font-bold uppercase">WhatsApp</span>
-                                            </div>
-                                            {isEditingProfile ? (
-                                                <input
-                                                    type="text"
-                                                    value={profileFormData.phone_number}
-                                                    onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
-                                                />
-                                            ) : (
-                                                <p className="text-slate-800 font-bold ml-7">{profile?.phone_number || '-'}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Instansi */}
-                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <div className="flex items-center space-x-3 text-slate-400 mb-1">
-                                                <Building size={16} />
-                                                <span className="text-xs font-bold uppercase">Instansi / Masjid</span>
-                                            </div>
-                                            {isEditingProfile ? (
+                                            {/* Instansi Input Card */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <Building size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Instansi / Masjid</span>
+                                                </div>
                                                 <input
                                                     type="text"
                                                     value={profileFormData.institution_name}
                                                     onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1"
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
+                                                    placeholder="Nama Instansi / Masjid"
                                                 />
-                                            ) : (
-                                                <p className="text-slate-800 font-bold ml-7">{profile?.institution_name || '-'}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Alamat */}
-                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <div className="flex items-center space-x-3 text-slate-400 mb-1">
-                                                <MapPin size={16} />
-                                                <span className="text-xs font-bold uppercase">Alamat</span>
                                             </div>
-                                            {isEditingProfile ? (
+
+                                            {/* Email Readonly Card */}
+                                            <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <Mail size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold">
+                                                    {userEmail}
+                                                </div>
+                                            </div>
+
+                                            {/* WhatsApp Input Card */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <Phone size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={profileFormData.phone_number}
+                                                    onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
+                                                    placeholder="08..."
+                                                />
+                                            </div>
+
+                                            {/* Address Input Card */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <MapPin size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
+                                                </div>
                                                 <textarea
                                                     value={profileFormData.address}
                                                     onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1 resize-none"
-                                                    rows="2"
+                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300 resize-none h-24"
+                                                    placeholder="Alamat lengkap..."
                                                 />
-                                            ) : (
-                                                <p className="text-slate-800 font-bold ml-7">{profile?.address || '-'}</p>
-                                            )}
-                                        </div>
-
-                                        {isEditingProfile && (
-                                            <div className="flex space-x-3 pt-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setProfileFormData({
-                                                            full_name: profile?.full_name || '',
-                                                            phone_number: profile?.phone_number || '',
-                                                            institution_name: profile?.institution_name || '',
-                                                            address: profile?.address || ''
-                                                        })
-                                                        setIsEditingProfile(false)
-                                                    }}
-                                                    className="flex-1 py-3 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
-                                                >
-                                                    Batal
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={handleUpdateProfile}
-                                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition"
-                                                >
-                                                    Simpan
-                                                </button>
                                             </div>
-                                        )}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4 animate-fade-in">
+                                            {/* Email Card (View Mode) */}
+                                            <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <Mail size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold">
+                                                    {userEmail}
+                                                </div>
+                                            </div>
+
+                                            {/* WhatsApp Card (View Mode) */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <Phone size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
+                                                </div>
+                                                <div className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold shadow-sm">
+                                                    {profile?.phone_number || '-'}
+                                                </div>
+                                            </div>
+
+                                            {/* Address Card (View Mode) */}
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <MapPin size={14} className="text-slate-400" />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
+                                                </div>
+                                                <div className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold shadow-sm min-h-[5rem]">
+                                                    {profile?.address || '-'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {!isEditingProfile && (
+                                <>
+                                    <hr className="border-slate-100" />
+                                    {/* Actions (Delete Account) */}
+                                    <div className="pt-6 pb-2 text-center">
+                                        <button
+                                            onClick={() => {
+                                                setIsDeleteConfirmOpen(true)
+                                            }}
+                                            className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline transition py-2 px-4 rounded-full hover:bg-red-50"
+                                        >
+                                            Hapus Akun Permanen
+                                        </button>
                                     </div>
-                                </div>
-
-                                <hr className="border-slate-100" />
-
-                                {/* Actions (Only Delete Account here now) */}
-                                <div className="pt-8 pb-4">
-                                    <button
-                                        onClick={() => {
-                                            setIsDeleteConfirmOpen(true)
-                                            // Keep modal open, confirm popup will overlay
-                                        }}
-                                        className="w-full flex items-center justify-center space-x-2 py-4 rounded-2xl font-bold text-red-600 hover:bg-red-50 transition border border-transparent hover:border-red-100"
-                                    >
-                                        <Trash2 size={20} />
-                                        <span>Hapus Akun</span>
-                                    </button>
-                                </div>
-                            </div>
+                                </>
+                            )}
                         </div>
-                    </div>
-                )}
 
-                {/* Settings Modal */}
-                {isSettingsModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-slate-800">Settings</h2>
-                                <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="p-6">
-                                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                                    <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* About Modal */}
-                {isAboutModalOpen && (
-                    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-slate-800">About</h2>
-                                <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <div className="p-8 text-center">
-                                <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
-                                    <Building size={40} className="text-emerald-600" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
-                                <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
-                                <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
-                                    <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Delete Group Confirmation Modal */}
-                {isDeleteModalOpen && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Trash2 className="text-red-500" size={32} />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
-                            <p className="text-slate-500 mb-6 text-sm">
-                                Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
-                            </p>
-                            <div className="flex space-x-3">
+                        {/* Sticky Footer for Edit Actions */}
+                        {isEditingProfile && (
+                            <div className="p-4 border-t border-slate-100 bg-white absolute bottom-0 left-0 right-0 z-20 animate-slide-up flex space-x-3">
                                 <button
-                                    onClick={() => setIsDeleteModalOpen(false)}
-                                    disabled={deleteLoading}
-                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                    onClick={() => {
+                                        setProfileFormData({
+                                            full_name: profile?.full_name || '',
+                                            phone_number: profile?.phone_number || '',
+                                            institution_name: profile?.institution_name || '',
+                                            address: profile?.address || ''
+                                        })
+                                        setIsEditingProfile(false)
+                                    }}
+                                    className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
                                 >
                                     Batal
                                 </button>
                                 <button
-                                    onClick={confirmDeleteGroup}
-                                    disabled={deleteLoading}
-                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                                    onClick={handleUpdateProfile}
+                                    className="flex-1 py-3.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition active:scale-[0.98]"
                                 >
-                                    {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                                    Simpan
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {isSettingsModalOpen && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-slate-800">Settings</h2>
+                            <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* About Modal */}
+            {isAboutModalOpen && (
+                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-bold text-slate-800">About</h2>
+                            <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="p-8 text-center">
+                            <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
+                                <Building size={40} className="text-emerald-600" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
+                            <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
+                            <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
+                                <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Group Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trash2 className="text-red-500" size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
+                        <p className="text-slate-500 mb-6 text-sm">
+                            Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={confirmDeleteGroup}
+                                disabled={deleteLoading}
+                                className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                            >
+                                {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteConfirmOpen && (
+                <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in">
+                        <div className="p-8 text-center">
+                            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 transform rotate-12">
+                                <Trash2 className="w-10 h-10 text-red-600" />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-4">Hapus Akun?</h2>
+                            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+                                apakah anda yakin ingin menghapus account ini ? <br />
+                                <span className="text-red-500 font-bold bg-red-50 px-2 py-1 rounded-lg mt-2 inline-block">ini bersifat permanen dan datamu akan hilang semua</span>
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => setIsDeleteConfirmOpen(false)}
+                                    className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    className="py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition"
+                                >
+                                    Ya, Hapus
                                 </button>
                             </div>
                         </div>
                     </div>
-                )}
-
-                {/* Delete Confirmation Modal */}
-                {isDeleteConfirmOpen && (
-                    <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-sm animate-fade-in">
-                        <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in">
-                            <div className="p-8 text-center">
-                                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 transform rotate-12">
-                                    <Trash2 className="w-10 h-10 text-red-600" />
-                                </div>
-                                <h2 className="text-2xl font-black text-slate-800 mb-4">Hapus Akun?</h2>
-                                <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-                                    apakah anda yakin ingin menghapus account ini ? <br />
-                                    <span className="text-red-500 font-bold bg-red-50 px-2 py-1 rounded-lg mt-2 inline-block">ini bersifat permanen dan datamu akan hilang semua</span>
-                                </p>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <button
-                                        onClick={() => setIsDeleteConfirmOpen(false)}
-                                        className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        onClick={handleDeleteAccount}
-                                        className="py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition"
-                                    >
-                                        Ya, Hapus
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </main>
+                </div>
+            )}
 
             {/* Quick Transaction Modal */}
             {isQuickTransactionModalOpen && (
@@ -1467,50 +1547,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Settings Modal */}
-            {isSettingsModalOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-xs rounded-3xl shadow-xl p-6 animate-scale-up">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-slate-800">Pengaturan</h3>
-                            <button onClick={() => setIsSettingsModalOpen(false)} className="bg-slate-50 p-2 rounded-full text-slate-400 hover:text-slate-600">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
-                                <span className="font-bold text-slate-700">Dark Mode</span>
-                                <div className="w-12 h-6 bg-slate-200 rounded-full relative cursor-not-allowed opacity-50">
-                                    <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1 shadow-sm"></div>
-                                </div>
-                            </div>
-                            <p className="text-xs text-slate-400 text-center">Fitur Dark Mode akan segera hadir.</p>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* About Modal */}
-            {isAboutModalOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-xs rounded-3xl shadow-xl p-6 text-center animate-scale-up">
-                        <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-emerald-100">
-                            <span className="font-bold text-2xl">D</span>
-                        </div>
-                        <h3 className="text-lg font-bold text-slate-800 mb-1">Dombantara.id</h3>
-                        <p className="text-sm text-emerald-600 font-bold mb-4">Version 1.0.0</p>
-                        <hr className="border-slate-100 my-4" />
-                        <p className="text-xs text-slate-400">Developed by</p>
-                        <p className="font-bold text-slate-700">Fajar Setiawan</p>
-                        <button
-                            onClick={() => setIsAboutModalOpen(false)}
-                            className="mt-6 w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition"
-                        >
-                            Tutup
-                        </button>
-                    </div>
-                </div>
-            )}
 
 
             <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-slate-50 flex justify-between items-center px-6 py-3 pb-6">
