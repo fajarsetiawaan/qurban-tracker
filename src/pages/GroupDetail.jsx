@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard } from 'lucide-react'
+import DatePicker from '../components/DatePicker'
+import CalculatorModal from '../components/CalculatorModal'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 
@@ -24,6 +26,8 @@ export default function GroupDetail() {
     // New Transaction State
     const [trxDate, setTrxDate] = useState(new Date().toISOString().split('T')[0])
     const [trxReceiptFile, setTrxReceiptFile] = useState(null)
+    const [showDatePicker, setShowDatePicker] = useState(false)
+    const [showCalculator, setShowCalculator] = useState(false)
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -649,8 +653,14 @@ export default function GroupDetail() {
 
             {/* Modal Overlay (Same implementation, cleaner style) */}
             {showModal && (
-                <div className="fixed inset-0 z-[155] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh]">
+                <div
+                    onClick={resetModal}
+                    className="fixed inset-0 z-[155] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh]"
+                    >
                         <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100 flex-shrink-0">
                             <h2 className="text-lg font-bold text-slate-800">
                                 {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
@@ -664,48 +674,71 @@ export default function GroupDetail() {
                             {trxStep === 'form' && (
                                 <form onSubmit={handleSaveTransaction} className="space-y-6">
                                     <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sumber Dana</p>
-                                        <select
-                                            value={trxParticipantId}
-                                            onChange={(e) => setTrxParticipantId(e.target.value)}
-                                            className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            required
-                                        >
-                                            <option value="">Pilih Peserta...</option>
-                                            {data.participants.map(p => (
-                                                <option key={p.id} value={p.id}>{p.name}</option>
-                                            ))}
-                                        </select>
+                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                            <Users size={14} />
+                                            <span>Sumber Dana</span>
+                                        </p>
+                                        <div className="relative">
+                                            <select
+                                                value={trxParticipantId}
+                                                onChange={(e) => setTrxParticipantId(e.target.value)}
+                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
+                                                required
+                                            >
+                                                <option value="">-- Pilih Peserta --</option>
+                                                {data.participants.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
+                                                <ChevronLeft size={16} className="rotate-[-90deg]" />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</p>
+                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                            <span>Jumlah Setoran</span>
+                                        </p>
                                         <div className="relative">
                                             <span className="absolute left-6 top-4 text-emerald-600 font-bold text-xl">Rp</span>
                                             <input
                                                 type="text"
                                                 value={trxAmount}
-                                                onChange={handleAmountChange}
+                                                onClick={() => setShowCalculator(true)}
+                                                readOnly={true}
                                                 placeholder="0"
-                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50 cursor-pointer caret-transparent"
                                                 required
                                             />
                                         </div>
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</p>
-                                        <input
-                                            type="date"
-                                            value={trxDate}
-                                            onChange={(e) => setTrxDate(e.target.value)}
-                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            required
-                                        />
+                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                            <Calendar size={14} />
+                                            <span>Tanggal Transaksi</span>
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowDatePicker(true)}
+                                            className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
+                                        >
+                                            <span>
+                                                {new Date(trxDate).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                })}
+                                            </span>
+                                            <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400" />
+                                        </button>
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</p>
+                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                            <span>Bukti Transfer (Opsional)</span>
+                                        </p>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -715,27 +748,35 @@ export default function GroupDetail() {
                                     </div>
 
                                     <div>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</p>
+                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                            <span>Metode</span>
+                                        </p>
                                         <div className="flex space-x-3">
-                                            {['Tunai', 'Transfer'].map(m => (
-                                                <button
-                                                    key={m}
-                                                    type="button"
-                                                    onClick={() => setTrxMethod(m)}
-                                                    className={`flex-1 py-3 rounded-xl font-bold transition ${trxMethod === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
-                                                >
-                                                    {m}
-                                                </button>
-                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={() => setTrxMethod('Tunai')}
+                                                className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Tunai' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                            >
+                                                <Banknote size={18} />
+                                                <span>Tunai</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTrxMethod('Transfer')}
+                                                className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Transfer' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                            >
+                                                <CreditCard size={18} />
+                                                <span>Transfer</span>
+                                            </button>
                                         </div>
                                     </div>
 
                                     <button
                                         type="submit"
                                         disabled={trxLoading}
-                                        className="w-full bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-600 disabled:opacity-70 shadow-lg shadow-emerald-200 mt-4"
+                                        className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition active:scale-[0.98]"
                                     >
-                                        {trxLoading ? 'Memproses...' : 'Simpan dan Kirim Invoice'}
+                                        {trxLoading ? 'Memproses...' : 'Simpan'}
                                     </button>
                                 </form>
                             )}
@@ -793,6 +834,13 @@ export default function GroupDetail() {
                 </div>
             )}
 
+            {/* Custom Date Picker Modal */}
+            <DatePicker
+                isOpen={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                selectedDate={trxDate}
+                onDateChange={setTrxDate}
+            />
             {/* Edit Group Modal */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
@@ -929,61 +977,82 @@ export default function GroupDetail() {
             )}
             {/* History Modal */}
             {isHistoryModalOpen && selectedParticipantForHistory && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all">
+                <div
+                    onClick={() => setIsHistoryModalOpen(false)}
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all"
+                    >
                         {/* Header */}
-                        <div className="flex justify-between items-start p-6 border-b border-gray-100">
+                        <div className="flex justify-between items-center p-8 pb-4">
                             <div>
-                                <p className="text-sm font-medium text-gray-500 mb-1">Riwayat Transfer</p>
-                                <h3 className="text-xl font-bold text-gray-900 leading-tight">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Riwayat Transfer</p>
+                                <h3 className="text-2xl font-black text-slate-800 leading-tight">
                                     {selectedParticipantForHistory.name}
                                 </h3>
                             </div>
                             <button
                                 onClick={() => setIsHistoryModalOpen(false)}
-                                className="p-2 -mr-2 -mt-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+                                className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition active:scale-90"
                             >
-                                <X size={20} />
+                                <X size={20} strokeWidth={2.5} />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-6">
+                        <div className="p-8 pt-2">
                             {selectedParticipantForHistory.transactions && selectedParticipantForHistory.transactions.length > 0 ? (
-                                <div className="space-y-1">
+                                <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                                     {selectedParticipantForHistory.transactions.map((trx) => (
-                                        <div key={trx.id} className="flex justify-between items-center py-4 border-b border-gray-50 last:border-0 last:pb-0 group hover:bg-gray-50/50 transition px-2 rounded-xl -mx-2">
+                                        <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
                                             <div className="flex items-center space-x-4">
-                                                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
-                                                    <CheckCircle size={18} className="text-emerald-500" />
+                                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
+                                                    {trx.payment_method === 'Transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
                                                 </div>
                                                 <div>
-                                                    <p className="text-lg font-bold text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
-                                                    <p className="text-xs font-medium text-gray-400">
-                                                        {trx.transaction_date
-                                                            ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-                                                            : 'Tanggal tidak tersedia'}
+                                                    <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                                                        <span>
+                                                            {trx.transaction_date
+                                                                ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                                : 'Tanggal tidak tersedia'}
+                                                        </span>
                                                     </p>
                                                 </div>
                                             </div>
+                                            {trx.receipt_url && (
+                                                <a
+                                                    href={trx.receipt_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95"
+                                                    title="Lihat Bukti"
+                                                >
+                                                    <ReceiptText size={18} />
+                                                </a>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-12 text-center">
-                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                                        <User size={32} className="text-gray-300" />
+                                <div className="flex flex-col items-center justify-center py-16 text-center">
+                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
+                                        <ReceiptText size={40} className="text-slate-300" />
                                     </div>
-                                    <h4 className="text-gray-900 font-medium mb-1">Belum ada transaksi</h4>
-                                    <p className="text-gray-400 text-sm">Peserta ini belum melakukan pembayaran apapun.</p>
+                                    <h4 className="text-slate-800 font-bold text-lg mb-2">Belum ada transaksi</h4>
+                                    <p className="text-slate-400 text-sm max-w-[200px] leading-relaxed">
+                                        Peserta ini belum melakukan pembayaran apapun untuk saat ini.
+                                    </p>
                                 </div>
                             )}
 
                             {/* Footer Button */}
-                            <div className="mt-8 pt-2">
+                            <div className="mt-8">
                                 <button
                                     onClick={() => setIsHistoryModalOpen(false)}
-                                    className="w-full bg-gray-100 text-gray-700 py-3.5 rounded-xl font-bold hover:bg-gray-200 transition active:scale-[0.98]"
+                                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition active:scale-[0.98] shadow-xl shadow-slate-200"
                                 >
                                     Tutup
                                 </button>
@@ -1101,6 +1170,14 @@ export default function GroupDetail() {
                     </div>
                 )
             }
+            {/* Calculator Modal */}
+            <CalculatorModal
+                isOpen={showCalculator}
+                onClose={() => setShowCalculator(false)}
+                onConfirm={(val) => setTrxAmount(val)}
+                initialValue={trxAmount}
+                title="Masukkan Jumlah Setoran"
+            />
         </div>
     )
 }

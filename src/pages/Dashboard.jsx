@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
+import DatePicker from '../components/DatePicker'
+import CalculatorModal from '../components/CalculatorModal'
 
 export default function Dashboard() {
     const navigate = useNavigate()
@@ -55,6 +57,8 @@ export default function Dashboard() {
     const [quickTrxLoading, setQuickTrxLoading] = useState(false)
     const [quickTrxStep, setQuickTrxStep] = useState('form') // 'form' | 'invoice'
     const [lastQuickTrx, setLastQuickTrx] = useState(null)
+    const [showDatePicker, setShowDatePicker] = useState(false)
+    const [showCalculator, setShowCalculator] = useState(false)
 
     // History & Notification State
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
@@ -1270,8 +1274,8 @@ export default function Dashboard() {
                             className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
                         >
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-lg font-bold text-slate-800">
-                                    {quickTrxStep === 'form' ? 'Tambah Setoran Cepat' : 'Detail Transaksi'}
+                                <h2 className="text-2xl font-black text-slate-800">
+                                    {quickTrxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
                                 </h2>
                                 <button
                                     onClick={() => {
@@ -1286,7 +1290,7 @@ export default function Dashboard() {
                                             receipt: null
                                         })
                                     }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition"
                                 >
                                     <X size={20} />
                                 </button>
@@ -1294,49 +1298,67 @@ export default function Dashboard() {
 
                             <div className="overflow-y-auto flex-1 p-6 pt-2">
                                 {quickTrxStep === 'form' && (
-                                    <form onSubmit={handleQuickTransactionSubmit} className="space-y-4 pt-2 pb-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Group</label>
-                                            <select
-                                                value={quickTrxFormData.group_id}
-                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
-                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                                required
-                                            >
-                                                <option value="">-- Pilih Group --</option>
-                                                {groups.map(g => (
-                                                    <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
-                                                ))}
-                                            </select>
+                                    <form onSubmit={handleQuickTransactionSubmit} className="space-y-5 pt-2 pb-4">
+                                        {/* Group Selection */}
+                                        <div className="space-y-2">
+                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                                <Users size={14} />
+                                                <span>Pilih Group</span>
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    value={quickTrxFormData.group_id}
+                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
+                                                    required
+                                                >
+                                                    <option value="">-- Pilih Group --</option>
+                                                    {groups.map(g => (
+                                                        <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
+                                                    <ChevronDown size={16} />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* Participant Selection */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Peserta</label>
-                                            <select
-                                                value={quickTrxFormData.participant_id}
-                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                                required
-                                                disabled={!quickTrxFormData.group_id}
-                                            >
-                                                <option value="">-- Pilih Peserta --</option>
-                                                {quickTrxFormData.group_id && groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
-                                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                                ))}
-                                            </select>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                                <User size={14} />
+                                                <span>Pilih Peserta</span>
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    value={quickTrxFormData.participant_id}
+                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none disabled:opacity-50"
+                                                    required
+                                                    disabled={!quickTrxFormData.group_id}
+                                                >
+                                                    <option value="">-- Pilih Peserta --</option>
+                                                    {quickTrxFormData.group_id && groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
+                                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
+                                                    <ChevronDown size={16} />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {/* Amount */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</label>
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Jumlah Setoran</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-3 text-emerald-600 font-bold text-lg">Rp</span>
+                                                <span className="absolute left-4 top-3.5 text-emerald-600 font-bold text-lg">Rp</span>
                                                 <input
                                                     type="text"
                                                     value={quickTrxFormData.amount}
-                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, amount: formatNumber(e.target.value) })}
-                                                    className="w-full pl-12 pr-4 py-3 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                                    onClick={() => setShowCalculator(true)}
+                                                    readOnly={true}
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50 transition-all cursor-pointer caret-transparent"
                                                     placeholder="0"
                                                     required
                                                 />
@@ -1344,49 +1366,65 @@ export default function Dashboard() {
                                         </div>
 
                                         {/* Date */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</label>
-                                            <input
-                                                type="date"
-                                                value={quickTrxFormData.date}
-                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, date: e.target.value })}
-                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                                required
-                                            />
+                                        <div className="space-y-2">
+                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                                <Calendar size={14} />
+                                                <span>Tanggal Transaksi</span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowDatePicker(true)}
+                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
+                                            >
+                                                <span>
+                                                    {new Date(quickTrxFormData.date).toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric'
+                                                    })}
+                                                </span>
+                                                <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400" />
+                                            </button>
                                         </div>
 
                                         {/* Receipt */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</label>
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
                                             <input
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
-                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 transition"
                                             />
                                         </div>
 
                                         {/* Method */}
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</label>
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Metode Pembayaran</label>
                                             <div className="flex space-x-3">
-                                                {['Tunai', 'Transfer'].map(m => (
-                                                    <button
-                                                        key={m}
-                                                        type="button"
-                                                        onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: m })}
-                                                        className={`flex-1 py-3 rounded-xl font-bold transition ${quickTrxFormData.method === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
-                                                    >
-                                                        {m}
-                                                    </button>
-                                                ))}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Tunai' })}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Tunai' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                >
+                                                    <Banknote size={18} />
+                                                    <span>Tunai</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Transfer' })}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Transfer' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                >
+                                                    <CreditCard size={18} />
+                                                    <span>Transfer</span>
+                                                </button>
                                             </div>
                                         </div>
 
                                         <button
                                             type="submit"
                                             disabled={quickTrxLoading}
-                                            className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                                            className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-6 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200 transition active:scale-[0.98]"
                                         >
                                             {quickTrxLoading ? 'Menyimpan...' : 'Simpan Setoran'}
                                         </button>
@@ -1446,7 +1484,7 @@ export default function Dashboard() {
                                                     receipt: null
                                                 })
                                             }}
-                                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
+                                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl hover:bg-slate-800 transition active:scale-[0.98]"
                                         >
                                             Selesai
                                         </button>
@@ -1457,6 +1495,23 @@ export default function Dashboard() {
                     </div>
                 )
             }
+
+            {/* Custom Date Picker Modal */}
+            <DatePicker
+                isOpen={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                selectedDate={quickTrxFormData.date}
+                onDateChange={(date) => setQuickTrxFormData({ ...quickTrxFormData, date })}
+            />
+
+            {/* Calculator Modal */}
+            <CalculatorModal
+                isOpen={showCalculator}
+                onClose={() => setShowCalculator(false)}
+                onConfirm={(val) => setQuickTrxFormData({ ...quickTrxFormData, amount: val })}
+                initialValue={quickTrxFormData.amount}
+                title="Masukkan Jumlah Setoran"
+            />
 
             {/* History Modal */}
             {
