@@ -565,16 +565,16 @@ export default function Dashboard() {
     return (
         <div className="relative min-h-screen bg-slate-50 pb-20">
             {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[90] bg-slate-50 px-6 py-4 flex justify-between items-center">
-                <div className="flex items-center space-x-0.5">
-                    <img src="/logo-domba.png" alt="Logo" className="w-8 h-8 object-contain" />
-                    <span className="text-sm font-bold text-emerald-950 tracking-tight font-heading">dombantara.id</span>
+            <header className="fixed top-0 left-0 right-0 z-[90] px-6 py-4 flex justify-between items-center bg-slate-50/80 backdrop-blur-md border-b border-slate-100/50 transition-all duration-300">
+                <div className="flex items-center space-x-3">
+                    <img src="/logo-domba.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
+                    <span className="text-xl font-black text-slate-800 tracking-tight font-heading">dombantara.id</span>
                 </div>
                 <button
                     onClick={handleLogout}
-                    className="p-2 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
+                    className="p-2.5 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition active:scale-[0.95]"
                 >
-                    <LogOut size={20} />
+                    <LogOut size={20} strokeWidth={2.5} />
                 </button>
             </header>
 
@@ -586,9 +586,9 @@ export default function Dashboard() {
                     WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)'
                 }}
             >
-                <div className="flex flex-col mb-6">
-                    <h1 className="text-sm font-medium text-slate-500 leading-none">Assalamu'alaikum,</h1>
-                    <p className="text-2xl font-bold text-emerald-900 leading-tight">
+                <div className="flex flex-col mb-8">
+                    <h1 className="text-base font-bold text-slate-400 mb-1">Assalamu'alaikum,</h1>
+                    <p className="text-3xl font-black text-slate-900 leading-tight tracking-tight">
                         {profile?.institution_name || 'Sahabat Qurban'}
                     </p>
                 </div>
@@ -1470,8 +1470,8 @@ export default function Dashboard() {
                             className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
                         >
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-xl font-bold text-slate-800">Riwayat Transaksi</h2>
-                                <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <h2 className="text-2xl font-black text-slate-800">Riwayat Transaksi</h2>
+                                <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -1480,7 +1480,7 @@ export default function Dashboard() {
                                 <select
                                     value={historyFilterGroup}
                                     onChange={(e) => setHistoryFilterGroup(e.target.value)}
-                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
+                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
                                 >
                                     <option value="Semua">Semua Group</option>
                                     {groups.map(g => (
@@ -1494,25 +1494,28 @@ export default function Dashboard() {
                                     <div className="text-center py-10 text-slate-400">Loading...</div>
                                 ) : historyTransactions.length > 0 ? (
                                     historyTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                                        <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-3xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow duration-300">
                                             <div>
-                                                <p className="text-xs font-bold text-slate-400 mb-1">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                                                     {new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </p>
-                                                <h4 className="font-bold text-slate-800 text-sm">{trx.participantName}</h4>
-                                                <p className="text-xs text-slate-500">{trx.groupName} • {trx.payment_method}</p>
+                                                <h4 className="font-bold text-slate-800 text-sm mb-0.5">{trx.participantName}</h4>
+                                                <p className="text-xs font-medium text-slate-500">{trx.groupName} • {trx.payment_method}</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="block font-bold text-emerald-600 text-sm">{trx.formattedAmount}</span>
+                                                <span className="block font-black text-emerald-600 text-base">{trx.formattedAmount}</span>
                                                 {trx.receipt_url && (
-                                                    <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline">Lihat Bukti</a>
+                                                    <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 hover:underline mt-1 inline-block">Lihat Bukti</a>
                                                 )}
                                             </div>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-10">
-                                        <p className="text-slate-400 font-medium">Belum ada riwayat transaksi</p>
+                                    <div className="text-center py-12 flex flex-col items-center">
+                                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                            <ReceiptText size={24} className="text-slate-300" />
+                                        </div>
+                                        <p className="text-slate-400 font-bold text-sm">Belum ada riwayat transaksi</p>
                                     </div>
                                 )}
                             </div>
@@ -1533,8 +1536,8 @@ export default function Dashboard() {
                             className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
                         >
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-xl font-bold text-slate-800">Notifikasi Hari Ini</h2>
-                                <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                <h2 className="text-2xl font-black text-slate-800">Notifikasi Hari Ini</h2>
+                                <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -1544,17 +1547,19 @@ export default function Dashboard() {
                                     <div className="text-center py-10 text-slate-400">Loading...</div>
                                 ) : notificationTransactions.length > 0 ? (
                                     notificationTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-start space-x-3">
-                                            <div className="bg-emerald-200 p-2 rounded-full text-emerald-700 flex-none">
-                                                <Bell size={16} />
+                                        <div key={trx.id} className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-3xl flex items-start space-x-4">
+                                            <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600 flex-none shadow-sm shadow-emerald-100">
+                                                <Bell size={20} className="fill-current" />
                                             </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-bold text-slate-800 text-sm">Setoran Baru!</h4>
-                                                <p className="text-xs text-slate-600 mt-1">
-                                                    <span className="font-bold">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method}.
-                                                </p>
-                                                <p className="text-[10px] text-slate-400 mt-2 text-right">
-                                                    {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                                            <div className="flex-1 pt-1">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <h4 className="font-black text-slate-800 text-sm">Setoran Baru!</h4>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                                                        {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                                                    <span className="font-bold text-slate-800">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method}.
                                                 </p>
                                             </div>
                                         </div>
