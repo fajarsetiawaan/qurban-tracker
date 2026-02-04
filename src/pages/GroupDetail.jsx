@@ -877,8 +877,14 @@ export default function GroupDetail() {
             )}
             {/* Add Participant Modal */}
             {isAddParticipantModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
+                <div
+                    onClick={() => setIsAddParticipantModalOpen(false)}
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up"
+                    >
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-slate-800">Tambah Peserta</h2>
                             <button onClick={() => setIsAddParticipantModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">

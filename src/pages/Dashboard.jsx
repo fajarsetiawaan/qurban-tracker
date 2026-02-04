@@ -674,49 +674,55 @@ export default function Dashboard() {
 
                                 {/* Filter Dropdown */}
                                 {showFilterMenu && (
-                                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-20 animate-fade-in space-y-3">
-                                        {/* Section 1: Jenis Hewan */}
-                                        <div>
-                                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
-                                            <div className="space-y-1">
-                                                {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
-                                                    <button
-                                                        key={status}
-                                                        onClick={() => {
-                                                            setFilterStatus(status)
-                                                            setShowFilterMenu(false)
-                                                        }}
-                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                                                    >
-                                                        <span>{status}</span>
-                                                        {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
-                                                    </button>
-                                                ))}
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-[140] bg-transparent"
+                                            onClick={() => setShowFilterMenu(false)}
+                                        />
+                                        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-[150] animate-fade-in space-y-3">
+                                            {/* Section 1: Jenis Hewan */}
+                                            <div>
+                                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
+                                                <div className="space-y-1">
+                                                    {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
+                                                        <button
+                                                            key={status}
+                                                            onClick={() => {
+                                                                setFilterStatus(status)
+                                                                setShowFilterMenu(false)
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                        >
+                                                            <span>{status}</span>
+                                                            {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <hr className="border-slate-50" />
+
+                                            {/* Section 2: Periode */}
+                                            <div>
+                                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Periode</h3>
+                                                <div className="space-y-1">
+                                                    {['Semua', '2026', '2027'].map(year => (
+                                                        <button
+                                                            key={year}
+                                                            onClick={() => {
+                                                                setFilterYear(year)
+                                                                setShowFilterMenu(false)
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                        >
+                                                            <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
+                                                            {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <hr className="border-slate-50" />
-
-                                        {/* Section 2: Periode */}
-                                        <div>
-                                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Periode</h3>
-                                            <div className="space-y-1">
-                                                {['Semua', '2026', '2027'].map(year => (
-                                                    <button
-                                                        key={year}
-                                                        onClick={() => {
-                                                            setFilterYear(year)
-                                                            setShowFilterMenu(false)
-                                                        }}
-                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                                                    >
-                                                        <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
-                                                        {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </>
                                 )}
                             </div>
 
@@ -836,8 +842,14 @@ export default function Dashboard() {
 
             {/* Edit Group Modal (Reused) */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                <div
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                    >
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
                             <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
@@ -907,51 +919,35 @@ export default function Dashboard() {
 
             {/* My Account Modal (Profile Only & Delete) */}
             {isAccountModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh] m-4 relative">
+                <div
+                    onClick={() => setIsAccountModalOpen(false)}
+                    className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh] m-4 relative"
+                    >
                         {/* Modal Header */}
                         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
-                            {isEditingProfile ? (
-                                <button
-                                    onClick={() => {
-                                        setProfileFormData({
-                                            full_name: profile?.full_name || '',
-                                            phone_number: profile?.phone_number || '',
-                                            institution_name: profile?.institution_name || '',
-                                            address: profile?.address || ''
-                                        })
-                                        setIsEditingProfile(false)
-                                    }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-                            ) : (
-                                <h2 className="text-xl font-bold text-slate-800">My Account</h2>
-                            )}
+                            <h2 className="text-xl font-bold text-slate-800">My Account</h2>
 
-                            {isEditingProfile ? (
-                                <h2 className="text-lg font-bold text-slate-800">Edit Profil</h2>
-                            ) : (
-                                <button
-                                    onClick={() => {
-                                        setIsAccountModalOpen(false)
-                                        setIsEditingProfile(false)
-                                    }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
-                                >
-                                    <X size={20} />
-                                </button>
-                            )}
-                            {isEditingProfile && <div className="w-8"></div>} {/* Spacer for centering */}
+                            <button
+                                onClick={() => {
+                                    setIsAccountModalOpen(false)
+                                    setIsEditingProfile(false)
+                                }}
+                                className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
 
                         <div className="overflow-y-auto flex-1 p-6 space-y-8 pb-24">
                             {/* Profile Section */}
                             <div className="space-y-4">
-                                {!isEditingProfile && (
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
+                                    {!isEditingProfile && (
                                         <button
                                             onClick={() => setIsEditingProfile(true)}
                                             className="text-emerald-600 text-sm font-bold hover:underline flex items-center space-x-1"
@@ -959,9 +955,8 @@ export default function Dashboard() {
                                             <Pencil size={14} />
                                             <span>Edit</span>
                                         </button>
-                                    </div>
-                                )}
-
+                                    )}
+                                </div>
                                 {/* Profile Hero Section */}
                                 <div className="flex flex-col items-center mb-6">
                                     <div className={`w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-4 relative transition-all duration-300 ${isEditingProfile ? 'scale-90' : ''}`}>
@@ -974,578 +969,597 @@ export default function Dashboard() {
                                             </div>
                                         )}
                                     </div>
-
-                                    {!isEditingProfile && (
-                                        <>
-                                            <h2 className="text-2xl font-bold text-slate-800 text-center leading-tight">
-                                                {profile?.full_name || 'Admin'}
-                                            </h2>
-                                            <p className="text-emerald-600 font-bold text-sm mt-1">{profile?.institution_name || 'Sahabat Qurban'}</p>
-                                        </>
-                                    )}
-                                </div>
-
-
-
-                                {/* Info List / Edit Form */}
-                                <div className="space-y-6">
-                                    {isEditingProfile ? (
-                                        <div className="space-y-4 animate-fade-in">
-                                            {/* Nama Lengkap Input Card */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <User size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</span>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={profileFormData.full_name}
-                                                    onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
-                                                    placeholder="Nama Lengkap"
-                                                />
-                                            </div>
-
-                                            {/* Instansi Input Card */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Building size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Instansi / Masjid</span>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={profileFormData.institution_name}
-                                                    onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
-                                                    placeholder="Nama Instansi / Masjid"
-                                                />
-                                            </div>
-
-                                            {/* Email Readonly Card */}
-                                            <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Mail size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
-                                                </div>
-                                                <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold">
-                                                    {userEmail}
-                                                </div>
-                                            </div>
-
-                                            {/* WhatsApp Input Card */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Phone size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    value={profileFormData.phone_number}
-                                                    onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300"
-                                                    placeholder="08..."
-                                                />
-                                            </div>
-
-                                            {/* Address Input Card */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <MapPin size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
-                                                </div>
-                                                <textarea
-                                                    value={profileFormData.address}
-                                                    onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
-                                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm transition-all placeholder:text-slate-300 resize-none h-24"
-                                                    placeholder="Alamat lengkap..."
-                                                />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4 animate-fade-in">
-                                            {/* Email Card (View Mode) */}
-                                            <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Mail size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
-                                                </div>
-                                                <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold">
-                                                    {userEmail}
-                                                </div>
-                                            </div>
-
-                                            {/* WhatsApp Card (View Mode) */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <Phone size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
-                                                </div>
-                                                <div className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold shadow-sm">
-                                                    {profile?.phone_number || '-'}
-                                                </div>
-                                            </div>
-
-                                            {/* Address Card (View Mode) */}
-                                            <div className="bg-slate-50 rounded-2xl p-4">
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <MapPin size={14} className="text-slate-400" />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
-                                                </div>
-                                                <div className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-bold shadow-sm min-h-[5rem]">
-                                                    {profile?.address || '-'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {/* View Mode: Text removed to support inline inputs */}
                                 </div>
                             </div>
 
-                            {!isEditingProfile && (
-                                <>
-                                    <hr className="border-slate-100" />
-                                    {/* Actions (Delete Account) */}
-                                    <div className="pt-6 pb-2 text-center">
-                                        <button
-                                            onClick={() => {
-                                                setIsDeleteConfirmOpen(true)
-                                            }}
-                                            className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline transition py-2 px-4 rounded-full hover:bg-red-50"
-                                        >
-                                            Hapus Akun Permanen
-                                        </button>
+                            {/* Info List / Edit Form (Inline Editing) */}
+                            <div className="space-y-4">
+                                {/* Nama Lengkap Input Card */}
+                                <div className="bg-slate-50 rounded-2xl p-4">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <User size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</span>
                                     </div>
-                                </>
-                            )}
+                                    <input
+                                        type="text"
+                                        disabled={!isEditingProfile}
+                                        value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
+                                        onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
+                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
+                                        placeholder="Nama Lengkap"
+                                    />
+                                </div>
+
+                                {/* Instansi Input Card */}
+                                <div className="bg-slate-50 rounded-2xl p-4">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <Building size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Instansi / Masjid</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        disabled={!isEditingProfile}
+                                        value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
+                                        onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
+                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
+                                        placeholder="Nama Instansi"
+                                    />
+                                </div>
+
+                                {/* Email Readonly Card */}
+                                <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <Mail size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold cursor-default">
+                                        {userEmail}
+                                    </div>
+                                </div>
+
+                                {/* WhatsApp Input Card */}
+                                <div className="bg-slate-50 rounded-2xl p-4">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <Phone size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        disabled={!isEditingProfile}
+                                        value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
+                                        onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
+                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
+                                        placeholder="08..."
+                                    />
+                                </div>
+
+                                {/* Address Input Card */}
+                                <div className="bg-slate-50 rounded-2xl p-4">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <MapPin size={14} className="text-slate-400" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
+                                    </div>
+                                    <textarea
+                                        disabled={!isEditingProfile}
+                                        value={isEditingProfile ? profileFormData.address : (profile?.address || '-')}
+                                        onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
+                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all resize-none h-24 ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
+                                        placeholder="Alamat lengkap..."
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Sticky Footer for Edit Actions */}
                         {isEditingProfile && (
-                            <div className="p-4 border-t border-slate-100 bg-white absolute bottom-0 left-0 right-0 z-20 animate-slide-up flex space-x-3">
-                                <button
-                                    onClick={() => {
-                                        setProfileFormData({
-                                            full_name: profile?.full_name || '',
-                                            phone_number: profile?.phone_number || '',
-                                            institution_name: profile?.institution_name || '',
-                                            address: profile?.address || ''
-                                        })
-                                        setIsEditingProfile(false)
-                                    }}
-                                    className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
-                                >
-                                    Batal
-                                </button>
-                                <button
-                                    onClick={handleUpdateProfile}
-                                    className="flex-1 py-3.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition active:scale-[0.98]"
-                                >
-                                    Simpan
-                                </button>
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 z-20 animate-slide-up">
+                                <div className="flex space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            setProfileFormData({
+                                                full_name: profile?.full_name || '',
+                                                phone_number: profile?.phone_number || '',
+                                                institution_name: profile?.institution_name || '',
+                                                address: profile?.address || ''
+                                            })
+                                            setIsEditingProfile(false)
+                                        }}
+                                        className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={handleUpdateProfile}
+                                        className="flex-1 py-3.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition active:scale-[0.98]"
+                                    >
+                                        Simpan
+                                    </button>
+                                </div>
                             </div>
                         )}
+
+                        {!isEditingProfile && (
+                            <>
+                                <hr className="border-slate-100 mt-6" />
+                                {/* Actions (Delete Account) */}
+                                <div className="pt-6 pb-8 text-center">
+                                    <button
+                                        onClick={() => {
+                                            setIsDeleteConfirmOpen(true)
+                                        }}
+                                        className="text-sm font-bold text-red-500 hover:text-red-600 hover:underline transition py-2 px-4 rounded-full hover:bg-red-50"
+                                    >
+                                        Hapus Akun
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
+
+                    {/* Sticky Footer Removed */}
                 </div>
             )}
 
             {/* Settings Modal */}
-            {isSettingsModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                            <h2 className="text-xl font-bold text-slate-800">Settings</h2>
-                            <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                                <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
+            {
+                isSettingsModalOpen && (
+                    <div
+                        onClick={() => setIsSettingsModalOpen(false)}
+                        className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-bold text-slate-800">Settings</h2>
+                                <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                                    <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* About Modal */}
-            {isAboutModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                            <h2 className="text-xl font-bold text-slate-800">About</h2>
-                            <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-8 text-center">
-                            <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
-                                <Building size={40} className="text-emerald-600" />
+            {
+                isAboutModalOpen && (
+                    <div
+                        onClick={() => setIsAboutModalOpen(false)}
+                        className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-bold text-slate-800">About</h2>
+                                <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
-                            <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
-                            <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
-                                <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
+                            <div className="p-8 text-center">
+                                <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
+                                    <Building size={40} className="text-emerald-600" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
+                                <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
+                                <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
+                                    <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Delete Group Confirmation Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
-                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Trash2 className="text-red-500" size={32} />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
-                        <p className="text-slate-500 mb-6 text-sm">
-                            Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
-                        </p>
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                disabled={deleteLoading}
-                                className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={confirmDeleteGroup}
-                                disabled={deleteLoading}
-                                className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
-                            >
-                                {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Confirmation Modal */}
-            {isDeleteConfirmOpen && (
-                <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in">
-                        <div className="p-8 text-center">
-                            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 transform rotate-12">
-                                <Trash2 className="w-10 h-10 text-red-600" />
+            {
+                isDeleteModalOpen && (
+                    <div
+                        onClick={() => setIsDeleteModalOpen(false)}
+                        className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center"
+                        >
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-500" size={32} />
                             </div>
-                            <h2 className="text-2xl font-black text-slate-800 mb-4">Hapus Akun?</h2>
-                            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-                                apakah anda yakin ingin menghapus account ini ? <br />
-                                <span className="text-red-500 font-bold bg-red-50 px-2 py-1 rounded-lg mt-2 inline-block">ini bersifat permanen dan datamu akan hilang semua</span>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
+                            <p className="text-slate-500 mb-6 text-sm">
+                                Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
                             </p>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="flex space-x-3">
                                 <button
-                                    onClick={() => setIsDeleteConfirmOpen(false)}
-                                    className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
                                 >
                                     Batal
                                 </button>
                                 <button
-                                    onClick={handleDeleteAccount}
-                                    className="py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition"
+                                    onClick={confirmDeleteGroup}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
                                 >
-                                    Ya, Hapus
+                                    {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Delete Confirmation Modal */}
+            {
+                isDeleteConfirmOpen && (
+                    <div
+                        onClick={() => setIsDeleteConfirmOpen(false)}
+                        className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-sm animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in"
+                        >
+                            <div className="p-8 text-center flex flex-col items-center">
+                                <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
+                                    <Trash2 className="w-10 h-10 text-red-600" />
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900 mb-2">Hapus Akun?</h2>
+                                <p className="text-slate-500 font-medium mb-6 leading-relaxed max-w-[80%] mx-auto">
+                                    apakah anda yakin ingin menghapus account ini ?
+                                </p>
+
+                                <div className="w-full bg-red-50 border border-red-100 rounded-2xl p-4 mb-8">
+                                    <p className="text-red-500 font-bold text-sm">
+                                        ini bersifat permanen dan datamu akan hilang semua
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 w-full">
+                                    <button
+                                        onClick={() => setIsDeleteConfirmOpen(false)}
+                                        className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteAccount}
+                                        className="py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-700 shadow-xl shadow-red-200 transition active:scale-[0.98]"
+                                    >
+                                        Ya, Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Quick Transaction Modal */}
-            {isQuickTransactionModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                            <h2 className="text-lg font-bold text-slate-800">
-                                {quickTrxStep === 'form' ? 'Tambah Setoran Cepat' : 'Detail Transaksi'}
-                            </h2>
-                            <button
-                                onClick={() => {
-                                    setIsQuickTransactionModalOpen(false)
-                                    setQuickTrxStep('form')
-                                    setQuickTrxFormData({
-                                        group_id: '',
-                                        participant_id: '',
-                                        amount: '',
-                                        date: new Date().toISOString().split('T')[0],
-                                        method: 'Tunai',
-                                        receipt: null
-                                    })
-                                }}
-                                className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+            {
+                isQuickTransactionModalOpen && (
+                    <div
+                        onClick={() => setIsQuickTransactionModalOpen(false)}
+                        className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
+                                <h2 className="text-lg font-bold text-slate-800">
+                                    {quickTrxStep === 'form' ? 'Tambah Setoran Cepat' : 'Detail Transaksi'}
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setIsQuickTransactionModalOpen(false)
+                                        setQuickTrxStep('form')
+                                        setQuickTrxFormData({
+                                            group_id: '',
+                                            participant_id: '',
+                                            amount: '',
+                                            date: new Date().toISOString().split('T')[0],
+                                            method: 'Tunai',
+                                            receipt: null
+                                        })
+                                    }}
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="overflow-y-auto flex-1 p-6 pt-2">
-                            {quickTrxStep === 'form' && (
-                                <form onSubmit={handleQuickTransactionSubmit} className="space-y-4 pt-2 pb-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Group</label>
-                                        <select
-                                            value={quickTrxFormData.group_id}
-                                            onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
-                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            required
-                                        >
-                                            <option value="">-- Pilih Group --</option>
-                                            {groups.map(g => (
-                                                <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                            <div className="overflow-y-auto flex-1 p-6 pt-2">
+                                {quickTrxStep === 'form' && (
+                                    <form onSubmit={handleQuickTransactionSubmit} className="space-y-4 pt-2 pb-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Group</label>
+                                            <select
+                                                value={quickTrxFormData.group_id}
+                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                required
+                                            >
+                                                <option value="">-- Pilih Group --</option>
+                                                {groups.map(g => (
+                                                    <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    {/* Participant Selection */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Peserta</label>
-                                        <select
-                                            value={quickTrxFormData.participant_id}
-                                            onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            required
-                                            disabled={!quickTrxFormData.group_id}
-                                        >
-                                            <option value="">-- Pilih Peserta --</option>
-                                            {quickTrxFormData.group_id && groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
-                                                <option key={p.id} value={p.id}>{p.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                        {/* Participant Selection */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Peserta</label>
+                                            <select
+                                                value={quickTrxFormData.participant_id}
+                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                                required
+                                                disabled={!quickTrxFormData.group_id}
+                                            >
+                                                <option value="">-- Pilih Peserta --</option>
+                                                {quickTrxFormData.group_id && groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                    {/* Amount */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-3 text-emerald-600 font-bold text-lg">Rp</span>
+                                        {/* Amount */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Jumlah Setoran</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-3 text-emerald-600 font-bold text-lg">Rp</span>
+                                                <input
+                                                    type="text"
+                                                    value={quickTrxFormData.amount}
+                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, amount: formatNumber(e.target.value) })}
+                                                    className="w-full pl-12 pr-4 py-3 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50"
+                                                    placeholder="0"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Date */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</label>
                                             <input
-                                                type="text"
-                                                value={quickTrxFormData.amount}
-                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, amount: formatNumber(e.target.value) })}
-                                                className="w-full pl-12 pr-4 py-3 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50"
-                                                placeholder="0"
+                                                type="date"
+                                                value={quickTrxFormData.date}
+                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, date: e.target.value })}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                                 required
                                             />
                                         </div>
-                                    </div>
 
-                                    {/* Date */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Transaksi</label>
-                                        <input
-                                            type="date"
-                                            value={quickTrxFormData.date}
-                                            onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, date: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
-                                            required
-                                        />
-                                    </div>
-
-                                    {/* Receipt */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
-                                            className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-                                        />
-                                    </div>
-
-                                    {/* Method */}
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</label>
-                                        <div className="flex space-x-3">
-                                            {['Tunai', 'Transfer'].map(m => (
-                                                <button
-                                                    key={m}
-                                                    type="button"
-                                                    onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: m })}
-                                                    className={`flex-1 py-3 rounded-xl font-bold transition ${quickTrxFormData.method === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
-                                                >
-                                                    {m}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={quickTrxLoading}
-                                        className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
-                                    >
-                                        {quickTrxLoading ? 'Menyimpan...' : 'Simpan Setoran'}
-                                    </button>
-                                </form>
-                            )}
-
-                            {quickTrxStep === 'invoice' && lastQuickTrx && (
-                                <div className="flex flex-col items-center pt-2 pb-4">
-                                    <div className="bg-white w-full p-0 relative">
-                                        <div className="text-center pb-8">
-                                            <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
-                                                <CheckCircle className="text-emerald-600" size={40} />
-                                            </div>
-                                            <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastQuickTrx.formattedAmount}</h3>
-                                            <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                        {/* Receipt */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bukti Transfer (Opsional)</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
+                                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                            />
                                         </div>
 
-                                        <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 text-sm">Tanggal</span>
-                                                <span className="font-medium text-slate-800 text-sm">{new Date(lastQuickTrx.transaction_date || lastQuickTrx.created_at).toLocaleDateString('id-ID')}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 text-sm">Pengirim</span>
-                                                <span className="font-bold text-slate-800 text-sm">{lastQuickTrx.participantName}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 text-sm">Metode</span>
-                                                <span className="font-medium text-slate-800 text-sm">{lastQuickTrx.payment_method}</span>
-                                            </div>
-
-                                            {lastQuickTrx.receipt_url && (
-                                                <div className="pt-2 text-center">
-                                                    <a
-                                                        href={lastQuickTrx.receipt_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                        {/* Method */}
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Metode</label>
+                                            <div className="flex space-x-3">
+                                                {['Tunai', 'Transfer'].map(m => (
+                                                    <button
+                                                        key={m}
+                                                        type="button"
+                                                        onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: m })}
+                                                        className={`flex-1 py-3 rounded-xl font-bold transition ${quickTrxFormData.method === m ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
                                                     >
-                                                        <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
-                                                    </a>
-                                                </div>
-                                            )}
+                                                        {m}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <button
-                                        onClick={() => {
-                                            setIsQuickTransactionModalOpen(false)
-                                            setQuickTrxStep('form')
-                                            setQuickTrxFormData({
-                                                group_id: '',
-                                                participant_id: '',
-                                                amount: '',
-                                                date: new Date().toISOString().split('T')[0],
-                                                method: 'Tunai',
-                                                receipt: null
-                                            })
-                                        }}
-                                        className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
-                                    >
-                                        Selesai
-                                    </button>
-                                </div>
-                            )}
+                                        <button
+                                            type="submit"
+                                            disabled={quickTrxLoading}
+                                            className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 disabled:opacity-70 shadow-lg shadow-emerald-200"
+                                        >
+                                            {quickTrxLoading ? 'Menyimpan...' : 'Simpan Setoran'}
+                                        </button>
+                                    </form>
+                                )}
+
+                                {quickTrxStep === 'invoice' && lastQuickTrx && (
+                                    <div className="flex flex-col items-center pt-2 pb-4">
+                                        <div className="bg-white w-full p-0 relative">
+                                            <div className="text-center pb-8">
+                                                <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
+                                                    <CheckCircle className="text-emerald-600" size={40} />
+                                                </div>
+                                                <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastQuickTrx.formattedAmount}</h3>
+                                                <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                            </div>
+
+                                            <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 text-sm">Tanggal</span>
+                                                    <span className="font-medium text-slate-800 text-sm">{new Date(lastQuickTrx.transaction_date || lastQuickTrx.created_at).toLocaleDateString('id-ID')}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 text-sm">Pengirim</span>
+                                                    <span className="font-bold text-slate-800 text-sm">{lastQuickTrx.participantName}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 text-sm">Metode</span>
+                                                    <span className="font-medium text-slate-800 text-sm">{lastQuickTrx.payment_method}</span>
+                                                </div>
+
+                                                {lastQuickTrx.receipt_url && (
+                                                    <div className="pt-2 text-center">
+                                                        <a
+                                                            href={lastQuickTrx.receipt_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                                        >
+                                                            <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                setIsQuickTransactionModalOpen(false)
+                                                setQuickTrxStep('form')
+                                                setQuickTrxFormData({
+                                                    group_id: '',
+                                                    participant_id: '',
+                                                    amount: '',
+                                                    date: new Date().toISOString().split('T')[0],
+                                                    method: 'Tunai',
+                                                    receipt: null
+                                                })
+                                            }}
+                                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl"
+                                        >
+                                            Selesai
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* History Modal */}
-            {isHistoryModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                            <h2 className="text-xl font-bold text-slate-800">Riwayat Transaksi</h2>
-                            <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                <X size={20} />
-                            </button>
-                        </div>
+            {
+                isHistoryModalOpen && (
+                    <div
+                        onClick={() => setIsHistoryModalOpen(false)}
+                        className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
+                                <h2 className="text-xl font-bold text-slate-800">Riwayat Transaksi</h2>
+                                <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="px-6 py-4 border-b border-gray-50 flex-none bg-white">
-                            <select
-                                value={historyFilterGroup}
-                                onChange={(e) => setHistoryFilterGroup(e.target.value)}
-                                className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
-                            >
-                                <option value="Semua">Semua Group</option>
-                                {groups.map(g => (
-                                    <option key={g.id} value={g.id}>{g.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="px-6 py-4 border-b border-gray-50 flex-none bg-white">
+                                <select
+                                    value={historyFilterGroup}
+                                    onChange={(e) => setHistoryFilterGroup(e.target.value)}
+                                    className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
+                                >
+                                    <option value="Semua">Semua Group</option>
+                                    {groups.map(g => (
+                                        <option key={g.id} value={g.id}>{g.name}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        <div className="overflow-y-auto flex-1 p-6 pt-2 space-y-3">
-                            {historyLoading ? (
-                                <div className="text-center py-10 text-slate-400">Loading...</div>
-                            ) : historyTransactions.length > 0 ? (
-                                historyTransactions.map((trx) => (
-                                    <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center">
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-400 mb-1">
-                                                {new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                            </p>
-                                            <h4 className="font-bold text-slate-800 text-sm">{trx.participantName}</h4>
-                                            <p className="text-xs text-slate-500">{trx.groupName} • {trx.payment_method}</p>
+                            <div className="overflow-y-auto flex-1 p-6 pt-2 space-y-3">
+                                {historyLoading ? (
+                                    <div className="text-center py-10 text-slate-400">Loading...</div>
+                                ) : historyTransactions.length > 0 ? (
+                                    historyTransactions.map((trx) => (
+                                        <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center">
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 mb-1">
+                                                    {new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                </p>
+                                                <h4 className="font-bold text-slate-800 text-sm">{trx.participantName}</h4>
+                                                <p className="text-xs text-slate-500">{trx.groupName} • {trx.payment_method}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="block font-bold text-emerald-600 text-sm">{trx.formattedAmount}</span>
+                                                {trx.receipt_url && (
+                                                    <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline">Lihat Bukti</a>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className="block font-bold text-emerald-600 text-sm">{trx.formattedAmount}</span>
-                                            {trx.receipt_url && (
-                                                <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline">Lihat Bukti</a>
-                                            )}
-                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-10">
+                                        <p className="text-slate-400 font-medium">Belum ada riwayat transaksi</p>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="text-center py-10">
-                                    <p className="text-slate-400 font-medium">Belum ada riwayat transaksi</p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Notification Modal (Today's Transactions) */}
-            {isNotificationModalOpen && (
-                <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                            <h2 className="text-xl font-bold text-slate-800">Notifikasi Hari Ini</h2>
-                            <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
-                                <X size={20} />
-                            </button>
-                        </div>
+            {
+                isNotificationModalOpen && (
+                    <div
+                        onClick={() => setIsNotificationModalOpen(false)}
+                        className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
+                                <h2 className="text-xl font-bold text-slate-800">Notifikasi Hari Ini</h2>
+                                <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="overflow-y-auto flex-1 p-6 space-y-3">
-                            {notifLoading ? (
-                                <div className="text-center py-10 text-slate-400">Loading...</div>
-                            ) : notificationTransactions.length > 0 ? (
-                                notificationTransactions.map((trx) => (
-                                    <div key={trx.id} className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-start space-x-3">
-                                        <div className="bg-emerald-200 p-2 rounded-full text-emerald-700 flex-none">
-                                            <Bell size={16} />
+                            <div className="overflow-y-auto flex-1 p-6 space-y-3">
+                                {notifLoading ? (
+                                    <div className="text-center py-10 text-slate-400">Loading...</div>
+                                ) : notificationTransactions.length > 0 ? (
+                                    notificationTransactions.map((trx) => (
+                                        <div key={trx.id} className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-start space-x-3">
+                                            <div className="bg-emerald-200 p-2 rounded-full text-emerald-700 flex-none">
+                                                <Bell size={16} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-slate-800 text-sm">Setoran Baru!</h4>
+                                                <p className="text-xs text-slate-600 mt-1">
+                                                    <span className="font-bold">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method}.
+                                                </p>
+                                                <p className="text-[10px] text-slate-400 mt-2 text-right">
+                                                    {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-slate-800 text-sm">Setoran Baru!</h4>
-                                            <p className="text-xs text-slate-600 mt-1">
-                                                <span className="font-bold">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method}.
-                                            </p>
-                                            <p className="text-[10px] text-slate-400 mt-2 text-right">
-                                                {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-                                            </p>
+                                    ))
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                                        <div className="bg-slate-50 p-4 rounded-full mb-4">
+                                            <Bell size={32} className="text-slate-300" />
                                         </div>
+                                        <p className="text-slate-800 font-bold">Tidak ada notifikasi hari ini</p>
+                                        <p className="text-xs text-slate-500 mt-1">Belum ada transaksi yang masuk hari ini.</p>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-12 text-center">
-                                    <div className="bg-slate-50 p-4 rounded-full mb-4">
-                                        <Bell size={32} className="text-slate-300" />
-                                    </div>
-                                    <p className="text-slate-800 font-bold">Tidak ada notifikasi hari ini</p>
-                                    <p className="text-xs text-slate-500 mt-1">Belum ada transaksi yang masuk hari ini.</p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
 
@@ -1597,49 +1611,55 @@ export default function Dashboard() {
                 <div className="relative">
                     {/* Dropdown Menu */}
                     {isAccountDropdownOpen && (
-                        <div className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
-                            <div className="p-2 space-y-1">
-                                <button
-                                    onClick={() => {
-                                        fetchUserProfile()
-                                        setIsAccountModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 transition group"
-                                >
-                                    <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200">
-                                        <User size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">My Account</span>
-                                </button>
+                        <>
+                            <div
+                                className="fixed inset-0 z-[110] bg-transparent"
+                                onClick={() => setIsAccountDropdownOpen(false)}
+                            />
+                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
+                                <div className="p-2 space-y-1">
+                                    <button
+                                        onClick={() => {
+                                            fetchUserProfile()
+                                            setIsAccountModalOpen(true)
+                                            setIsAccountDropdownOpen(false)
+                                        }}
+                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 transition group"
+                                    >
+                                        <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200">
+                                            <User size={16} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">My Account</span>
+                                    </button>
 
-                                <button
-                                    onClick={() => {
-                                        setIsSettingsModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
-                                >
-                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
-                                        <Settings size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-600">Setting</span>
-                                </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsSettingsModalOpen(true)
+                                            setIsAccountDropdownOpen(false)
+                                        }}
+                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                    >
+                                        <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                            <Settings size={16} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-600">Setting</span>
+                                    </button>
 
-                                <button
-                                    onClick={() => {
-                                        setIsAboutModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
-                                >
-                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
-                                        <Info size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-600">About</span>
-                                </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsAboutModalOpen(true)
+                                            setIsAccountDropdownOpen(false)
+                                        }}
+                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                    >
+                                        <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                            <Info size={16} />
+                                        </div>
+                                        <span className="text-sm font-bold text-slate-600">About</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
 
                     <button
@@ -1651,6 +1671,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
-        </div>
+        </div >
     )
 }
