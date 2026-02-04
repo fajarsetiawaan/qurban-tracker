@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 import DatePicker from '../components/DatePicker'
@@ -9,6 +9,7 @@ import CalculatorModal from '../components/CalculatorModal'
 
 export default function Dashboard() {
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
     const [groups, setGroups] = useState([])
     const [loading, setLoading] = useState(true)
     const [totalSavings, setTotalSavings] = useState(0)
@@ -250,6 +251,25 @@ export default function Dashboard() {
     useEffect(() => {
         fetchDashboardData()
     }, [])
+
+    // Handle ?modal=account|history|notif query param from GroupDetail navigation
+    useEffect(() => {
+        const modalParam = searchParams.get('modal')
+        if (modalParam) {
+            if (modalParam === 'account') {
+                setIsAccountModalOpen(true)
+            } else if (modalParam === 'history') {
+                setIsHistoryModalOpen(true)
+                fetchHistoryData()
+            } else if (modalParam === 'notif') {
+                setIsNotificationModalOpen(true)
+                fetchNotificationData()
+            }
+            // Clear the query param after opening modal
+            searchParams.delete('modal')
+            setSearchParams(searchParams, { replace: true })
+        }
+    }, [searchParams, setSearchParams])
 
     const fetchDashboardData = async () => {
         try {
@@ -863,8 +883,10 @@ export default function Dashboard() {
 
                         <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                <label htmlFor="edit-group-name" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
                                 <input
+                                    id="edit-group-name"
+                                    name="name"
                                     type="text"
                                     value={editFormData.name}
                                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
@@ -874,8 +896,10 @@ export default function Dashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
+                                <label htmlFor="edit-group-animal" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
                                 <select
+                                    id="edit-group-animal"
+                                    name="target_animal"
                                     value={editFormData.target_animal}
                                     onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
@@ -887,8 +911,10 @@ export default function Dashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                <label htmlFor="edit-group-year" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
                                 <select
+                                    id="edit-group-year"
+                                    name="qurban_year"
                                     value={editFormData.qurban_year}
                                     onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
@@ -899,8 +925,10 @@ export default function Dashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                <label htmlFor="edit-group-price" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
                                 <input
+                                    id="edit-group-price"
+                                    name="total_price"
                                     type="text"
                                     value={editFormData.total_price}
                                     onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
@@ -989,6 +1017,8 @@ export default function Dashboard() {
                                             <User size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                         </div>
                                         <input
+                                            id="profile-full-name"
+                                            name="full_name"
                                             type="text"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
@@ -1005,6 +1035,8 @@ export default function Dashboard() {
                                             <Building size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                         </div>
                                         <input
+                                            id="profile-institution"
+                                            name="institution_name"
                                             type="text"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
@@ -1021,6 +1053,8 @@ export default function Dashboard() {
                                             <Mail size={18} />
                                         </div>
                                         <input
+                                            id="profile-email"
+                                            name="email"
                                             type="text"
                                             disabled
                                             value={userEmail || ''}
@@ -1040,6 +1074,8 @@ export default function Dashboard() {
                                             <Phone size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                         </div>
                                         <input
+                                            id="profile-phone"
+                                            name="phone_number"
                                             type="text"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
@@ -1056,6 +1092,8 @@ export default function Dashboard() {
                                             <MapPin size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                         </div>
                                         <textarea
+                                            id="profile-address"
+                                            name="address"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.address : (profile?.address || '-')}
                                             onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
@@ -1301,12 +1339,14 @@ export default function Dashboard() {
                                     <form onSubmit={handleQuickTransactionSubmit} className="space-y-5 pt-2 pb-4">
                                         {/* Group Selection */}
                                         <div className="space-y-2">
-                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-group" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
                                                 <Users size={14} />
                                                 <span>Pilih Group</span>
                                             </label>
                                             <div className="relative">
                                                 <select
+                                                    id="quick-trx-group"
+                                                    name="group_id"
                                                     value={quickTrxFormData.group_id}
                                                     onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
                                                     className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
@@ -1325,12 +1365,14 @@ export default function Dashboard() {
 
                                         {/* Participant Selection */}
                                         <div className="space-y-2">
-                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
                                                 <User size={14} />
                                                 <span>Pilih Peserta</span>
                                             </label>
                                             <div className="relative">
                                                 <select
+                                                    id="quick-trx-participant"
+                                                    name="participant_id"
                                                     value={quickTrxFormData.participant_id}
                                                     onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
                                                     className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none disabled:opacity-50"
@@ -1350,10 +1392,12 @@ export default function Dashboard() {
 
                                         {/* Amount */}
                                         <div className="space-y-2">
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Jumlah Setoran</label>
+                                            <label htmlFor="quick-trx-amount" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Jumlah Setoran</label>
                                             <div className="relative">
                                                 <span className="absolute left-4 top-3.5 text-emerald-600 font-bold text-lg">Rp</span>
                                                 <input
+                                                    id="quick-trx-amount"
+                                                    name="amount"
                                                     type="text"
                                                     value={quickTrxFormData.amount}
                                                     onClick={() => setShowCalculator(true)}
@@ -1367,10 +1411,10 @@ export default function Dashboard() {
 
                                         {/* Date */}
                                         <div className="space-y-2">
-                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
                                                 <Calendar size={14} />
                                                 <span>Tanggal Transaksi</span>
-                                            </label>
+                                            </span>
                                             <button
                                                 type="button"
                                                 onClick={() => setShowDatePicker(true)}
@@ -1389,8 +1433,10 @@ export default function Dashboard() {
 
                                         {/* Receipt */}
                                         <div className="space-y-2">
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
+                                            <label htmlFor="quick-trx-receipt" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
                                             <input
+                                                id="quick-trx-receipt"
+                                                name="receipt"
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
@@ -1400,7 +1446,7 @@ export default function Dashboard() {
 
                                         {/* Method */}
                                         <div className="space-y-2">
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Metode Pembayaran</label>
+                                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Metode Pembayaran</span>
                                             <div className="flex space-x-3">
                                                 <button
                                                     type="button"

@@ -674,12 +674,14 @@ export default function GroupDetail() {
                             {trxStep === 'form' && (
                                 <form onSubmit={handleSaveTransaction} className="space-y-6">
                                     <div>
-                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                        <label htmlFor="group-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
                                             <Users size={14} />
                                             <span>Sumber Dana</span>
-                                        </p>
+                                        </label>
                                         <div className="relative">
                                             <select
+                                                id="group-trx-participant"
+                                                name="participant_id"
                                                 value={trxParticipantId}
                                                 onChange={(e) => setTrxParticipantId(e.target.value)}
                                                 className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
@@ -697,12 +699,14 @@ export default function GroupDetail() {
                                     </div>
 
                                     <div>
-                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                        <label htmlFor="group-trx-amount" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
                                             <span>Jumlah Setoran</span>
-                                        </p>
+                                        </label>
                                         <div className="relative">
                                             <span className="absolute left-6 top-4 text-emerald-600 font-bold text-xl">Rp</span>
                                             <input
+                                                id="group-trx-amount"
+                                                name="amount"
                                                 type="text"
                                                 value={trxAmount}
                                                 onClick={() => setShowCalculator(true)}
@@ -854,8 +858,10 @@ export default function GroupDetail() {
 
                         <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                <label htmlFor="gd-edit-group-name" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Kelompok</label>
                                 <input
+                                    id="gd-edit-group-name"
+                                    name="name"
                                     type="text"
                                     value={editFormData.name}
                                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
@@ -865,8 +871,10 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
+                                <label htmlFor="gd-edit-group-animal" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hewan</label>
                                 <select
+                                    id="gd-edit-group-animal"
+                                    name="target_animal"
                                     value={editFormData.target_animal}
                                     onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
@@ -878,8 +886,10 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                <label htmlFor="gd-edit-group-year" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun Qurban</label>
                                 <select
+                                    id="gd-edit-group-year"
+                                    name="qurban_year"
                                     value={editFormData.qurban_year}
                                     onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
@@ -890,8 +900,10 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                <label htmlFor="gd-edit-group-price" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
                                 <input
+                                    id="gd-edit-group-price"
+                                    name="total_price"
                                     type="text"
                                     value={editFormData.total_price}
                                     onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
