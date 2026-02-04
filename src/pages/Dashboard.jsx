@@ -929,7 +929,7 @@ export default function Dashboard() {
                     >
                         {/* Modal Header */}
                         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
-                            <h2 className="text-xl font-bold text-slate-800">My Account</h2>
+                            <h2 className="text-2xl font-bold text-slate-800">My Account</h2>
 
                             <button
                                 onClick={() => {
@@ -974,79 +974,92 @@ export default function Dashboard() {
                             </div>
 
                             {/* Info List / Edit Form (Inline Editing) */}
-                            <div className="space-y-4">
-                                {/* Nama Lengkap Input Card */}
-                                <div className="bg-slate-50 rounded-2xl p-4">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <User size={14} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</span>
+                            <div className="space-y-6">
+                                {/* Section: Informasi Pribadi */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Informasi Pribadi</h4>
+
+                                    {/* Nama Lengkap */}
+                                    <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className="absolute left-4 top-3.5 text-slate-400">
+                                            <User size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            disabled={!isEditingProfile}
+                                            value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
+                                            onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                            placeholder="Nama Lengkap"
+                                        />
+                                        {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Nama</span>}
                                     </div>
-                                    <input
-                                        type="text"
-                                        disabled={!isEditingProfile}
-                                        value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
-                                        onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
-                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
-                                        placeholder="Nama Lengkap"
-                                    />
+
+                                    {/* Instansi */}
+                                    <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className="absolute left-4 top-3.5 text-slate-400">
+                                            <Building size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            disabled={!isEditingProfile}
+                                            value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
+                                            onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                            placeholder="Nama Instansi"
+                                        />
+                                        {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Instansi</span>}
+                                    </div>
+
+                                    {/* Email (Read Only) */}
+                                    <div className="relative bg-slate-50 border border-transparent rounded-2xl p-1 opacity-75">
+                                        <div className="absolute left-4 top-3.5 text-slate-400">
+                                            <Mail size={18} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            disabled
+                                            value={userEmail || ''}
+                                            className="w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-500 focus:ring-0 cursor-default"
+                                        />
+                                        <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Email</span>
+                                    </div>
                                 </div>
 
-                                {/* Instansi Input Card */}
-                                <div className="bg-slate-50 rounded-2xl p-4">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <Building size={14} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Instansi / Masjid</span>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        disabled={!isEditingProfile}
-                                        value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
-                                        onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
-                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
-                                        placeholder="Nama Instansi"
-                                    />
-                                </div>
+                                {/* Section: Kontak */}
+                                <div className="space-y-3">
+                                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kontak</h4>
 
-                                {/* Email Readonly Card */}
-                                <div className="bg-slate-50 rounded-2xl p-4 opacity-70">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <Mail size={14} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</span>
+                                    {/* WhatsApp */}
+                                    <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className="absolute left-4 top-3.5 text-slate-400">
+                                            <Phone size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            disabled={!isEditingProfile}
+                                            value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
+                                            onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                            placeholder="08..."
+                                        />
+                                        {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">WhatsApp</span>}
                                     </div>
-                                    <div className="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 text-slate-500 font-bold cursor-default">
-                                        {userEmail}
-                                    </div>
-                                </div>
 
-                                {/* WhatsApp Input Card */}
-                                <div className="bg-slate-50 rounded-2xl p-4">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <Phone size={14} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">WhatsApp</span>
+                                    {/* Alamat */}
+                                    <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className="absolute left-4 top-3.5 text-slate-400">
+                                            <MapPin size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
+                                        </div>
+                                        <textarea
+                                            disabled={!isEditingProfile}
+                                            value={isEditingProfile ? profileFormData.address : (profile?.address || '-')}
+                                            onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
+                                            className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:resize-none resize-none h-24 disabled:opacity-100 leading-relaxed`}
+                                            placeholder="Alamat lengkap..."
+                                        />
+                                        {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Alamat</span>}
                                     </div>
-                                    <input
-                                        type="text"
-                                        disabled={!isEditingProfile}
-                                        value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
-                                        onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
-                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
-                                        placeholder="08..."
-                                    />
-                                </div>
-
-                                {/* Address Input Card */}
-                                <div className="bg-slate-50 rounded-2xl p-4">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <MapPin size={14} className="text-slate-400" />
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat</span>
-                                    </div>
-                                    <textarea
-                                        disabled={!isEditingProfile}
-                                        value={isEditingProfile ? profileFormData.address : (profile?.address || '-')}
-                                        onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
-                                        className={`w-full rounded-xl px-4 py-3 font-bold text-slate-800 transition-all resize-none h-24 ${isEditingProfile ? 'bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-emerald-500' : 'bg-transparent border-transparent cursor-default'}`}
-                                        placeholder="Alamat lengkap..."
-                                    />
                                 </div>
                             </div>
                         </div>
@@ -1228,7 +1241,7 @@ export default function Dashboard() {
                                 <div className="grid grid-cols-2 gap-4 w-full">
                                     <button
                                         onClick={() => setIsDeleteConfirmOpen(false)}
-                                        className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                        className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition active:scale-[0.98]"
                                     >
                                         Batal
                                     </button>
