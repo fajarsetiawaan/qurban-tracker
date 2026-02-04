@@ -563,7 +563,6 @@ export default function GroupDetail() {
                                                 e.stopPropagation()
                                                 const newId = activeParticipantDropdown === participant.id ? null : participant.id
                                                 setActiveParticipantDropdown(newId)
-                                                if (newId) setIsHeaderMenuOpen(false)
                                             }}
                                             className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition z-10 relative"
                                         >
@@ -796,7 +795,7 @@ export default function GroupDetail() {
 
             {/* Edit Group Modal */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
                     <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
@@ -878,7 +877,7 @@ export default function GroupDetail() {
             )}
             {/* Add Participant Modal */}
             {isAddParticipantModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
                     <div className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up">
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                             <h2 className="text-lg font-bold text-slate-800">Tambah Peserta</h2>
@@ -924,7 +923,7 @@ export default function GroupDetail() {
             )}
             {/* History Modal */}
             {isHistoryModalOpen && selectedParticipantForHistory && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all">
                         {/* Header */}
                         <div className="flex justify-between items-start p-6 border-b border-gray-100">
@@ -989,7 +988,7 @@ export default function GroupDetail() {
             )}
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
                     <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
                         <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Trash2 className="text-red-500" size={32} />
