@@ -1608,7 +1608,7 @@ export default function Dashboard() {
                                                     {new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </p>
                                                 <h4 className="font-bold text-slate-800 text-sm mb-0.5">{trx.participantName}</h4>
-                                                <p className="text-xs font-medium text-slate-500">{trx.groupName} • {trx.payment_method}</p>
+                                                <p className="text-xs font-medium text-slate-500">{trx.groupName} • {trx.payment_method || 'Tunai'}</p>
                                             </div>
                                             <div className="text-right">
                                                 <span className="block font-black text-emerald-600 text-base">{trx.formattedAmount}</span>
@@ -1666,8 +1666,8 @@ export default function Dashboard() {
                                                         {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                                                    <span className="font-bold text-slate-800">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method}.
+                                                <p className="text-sm text-slate-600 leading-relaxed">
+                                                    <span className="font-bold text-slate-800">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.
                                                 </p>
                                             </div>
                                         </div>

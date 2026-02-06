@@ -268,7 +268,9 @@ export default function GroupDetail() {
             transactions (
               id,
               amount,
-              transaction_date
+              transaction_date,
+              payment_method,
+              receipt_url
             )
           )
         `)
@@ -1029,7 +1031,7 @@ export default function GroupDetail() {
                                         <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
                                             <div className="flex items-center space-x-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
-                                                    {trx.payment_method === 'Transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
+                                                    {trx.payment_method?.toLowerCase() === 'transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
                                                 </div>
                                                 <div>
                                                     <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
@@ -1042,17 +1044,22 @@ export default function GroupDetail() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            {trx.receipt_url && (
-                                                <a
-                                                    href={trx.receipt_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95"
-                                                    title="Lihat Bukti"
-                                                >
-                                                    <ReceiptText size={18} />
-                                                </a>
-                                            )}
+                                            <div className="flex items-center space-x-2">
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                    {trx.payment_method || 'Tunai'}
+                                                </span>
+                                                {trx.receipt_url && (
+                                                    <a
+                                                        href={trx.receipt_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95"
+                                                        title="Lihat Bukti"
+                                                    >
+                                                        <ReceiptText size={18} />
+                                                    </a>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -1080,37 +1087,40 @@ export default function GroupDetail() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
             {/* Delete Confirmation Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
-                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Trash2 className="text-red-500" size={32} />
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
-                        <p className="text-slate-500 mb-6 text-sm">
-                            Apakah kamu yakin ingin menghapus group <strong>"{data?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
-                        </p>
-                        <div className="flex space-x-3">
-                            <button
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                disabled={deleteLoading}
-                                className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
-                            >
-                                Batal
-                            </button>
-                            <button
-                                onClick={confirmDeleteGroup}
-                                disabled={deleteLoading}
-                                className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
-                            >
-                                {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
-                            </button>
+            {
+                isDeleteModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
+                            <p className="text-slate-500 mb-6 text-sm">
+                                Apakah kamu yakin ingin menghapus group <strong>"{data?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={confirmDeleteGroup}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                                >
+                                    {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
             {/* Edit Participant Modal */}
@@ -1204,6 +1214,6 @@ export default function GroupDetail() {
                 initialValue={trxAmount}
                 title="Masukkan Jumlah Setoran"
             />
-        </div>
+        </div >
     )
 }
