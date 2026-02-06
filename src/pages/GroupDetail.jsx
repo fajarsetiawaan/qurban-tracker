@@ -429,9 +429,9 @@ export default function GroupDetail() {
     const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
 
     return (
-        <div className="min-h-screen bg-slate-50 relative font-sans">
-            {/* Header (BCA Mobile Style) */}
-            <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="min-h-screen bg-slate-50 relative font-sans pb-32">
+            {/* Header (App Style) */}
+            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-3 flex items-center justify-between shadow-sm transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
                     className="w-9 h-9 flex items-center justify-center -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
@@ -607,8 +607,8 @@ export default function GroupDetail() {
                 </div>
             </main>
 
-            {/* Bottom Navbar */}
-            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            {/* Bottom Navbar (Glassmorphism) */}
+            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
                 <button
                     onClick={() => navigate('/')}
                     className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"

@@ -102,11 +102,15 @@ export default function Onboarding() {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
-            <div className="bg-white p-4 sticky top-0 z-10 shadow-sm flex items-center border-b border-gray-100">
-                <button onClick={() => navigate(-1)} className="mr-3 text-gray-600 hover:bg-gray-100 p-2 rounded-full transition">
-                    <ArrowLeft size={24} />
+            {/* Header (App Style) */}
+            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-3 flex items-center shadow-sm transition-all duration-300">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="w-9 h-9 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
+                >
+                    <ArrowLeft size={18} />
                 </button>
-                <h1 className="text-lg font-bold text-gray-800">Buat Group Baru</h1>
+                <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Buat Group Baru</h1>
             </div>
 
             <form onSubmit={handleSave} className="p-4 space-y-6">
