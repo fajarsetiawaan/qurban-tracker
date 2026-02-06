@@ -101,162 +101,167 @@ export default function Onboarding() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            {/* Header (App Style) */}
-            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-3 flex items-center shadow-sm transition-all duration-300">
+        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans">
+            {/* Header (App Style) - Fixed */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-4 flex items-center shadow-sm transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-9 h-9 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
+                    className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                 >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={20} />
                 </button>
                 <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Buat Group Baru</h1>
-            </div>
+            </header>
 
-            <form onSubmit={handleSave} className="p-4 space-y-6">
 
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
-                        {error}
-                    </div>
-                )}
+            {/* Main Scrollable Content */}
+            <main className="flex-1 overflow-y-auto pt-20 pb-28 no-scrollbar scroll-smooth px-4 py-6">
+                <form id="onboarding-form" onSubmit={handleSave} className="space-y-6">
 
-                {/* Section 1: Data Grup */}
-                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Group</h2>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="onboard-group-name" className="block text-sm font-medium text-gray-700 mb-1">Nama Kelompok</label>
-                            <input
-                                id="onboard-group-name"
-                                name="name"
-                                type="text"
-                                autoComplete="off"
-                                placeholder="Contoh: Kelompok Masjid Al-Hidayah"
-                                value={groupName}
-                                onChange={(e) => setGroupName(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
-                                required
-                            />
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm border border-red-200">
+                            {error}
                         </div>
+                    )}
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="onboard-target-animal" className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
-                                <select
-                                    id="onboard-target-animal"
-                                    name="target_animal"
-                                    value={targetAnimal}
-                                    onChange={(e) => setTargetAnimal(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-                                >
-                                    <option value="sapi">Sapi</option>
-                                    <option value="kambing">Kambing</option>
-                                    <option value="domba">Domba</option>
-                                </select>
-                            </div>
+                    {/* Section 1: Data Grup */}
+                    <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Group</h2>
 
+                        <div className="space-y-4">
                             <div>
-                                <label htmlFor="onboard-total-price" className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                                <label htmlFor="onboard-group-name" className="block text-sm font-medium text-gray-700 mb-1">Nama Kelompok</label>
                                 <input
-                                    id="onboard-total-price"
-                                    name="total_price"
+                                    id="onboard-group-name"
+                                    name="name"
                                     type="text"
                                     autoComplete="off"
-                                    placeholder="Contoh: 21.000.000"
-                                    value={totalPrice}
-                                    onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
+                                    placeholder="Contoh: Kelompok Masjid Al-Hidayah"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
+                                    required
                                 />
                             </div>
 
-                            <div>
-                                <label htmlFor="onboard-qurban-year" className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
-                                <select
-                                    id="onboard-qurban-year"
-                                    name="qurban_year"
-                                    value={qurbanYear}
-                                    onChange={(e) => setQurbanYear(parseInt(e.target.value))}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-                                >
-                                    <option value={2026}>2026</option>
-                                    <option value={2027}>2027</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Section 2: Data Peserta */}
-                <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
-                        <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wide">Daftar Peserta</h2>
-                        <button
-                            type="button"
-                            onClick={addParticipant}
-                            className="text-emerald-600 text-sm font-bold flex items-center hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition"
-                        >
-                            <Plus size={16} className="mr-1" /> Tambah
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        {participants.map((participant, index) => (
-                            <div key={index} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fade-in">
-                                <div className="pt-2 text-xs font-bold text-gray-400 w-6 text-center">
-                                    {index + 1}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="onboard-target-animal" className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
+                                    <select
+                                        id="onboard-target-animal"
+                                        name="target_animal"
+                                        value={targetAnimal}
+                                        onChange={(e) => setTargetAnimal(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                    >
+                                        <option value="sapi">Sapi</option>
+                                        <option value="kambing">Kambing</option>
+                                        <option value="domba">Domba</option>
+                                    </select>
                                 </div>
-                                <div className="flex-1 space-y-3">
+
+                                <div>
+                                    <label htmlFor="onboard-total-price" className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
                                     <input
-                                        id={`participant-name-${index}`}
-                                        name={`participant_name_${index}`}
+                                        id="onboard-total-price"
+                                        name="total_price"
                                         type="text"
                                         autoComplete="off"
-                                        placeholder="Nama Peserta"
-                                        value={participant.name}
-                                        onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
-                                        required
-                                    />
-                                    <input
-                                        id={`participant-phone-${index}`}
-                                        name={`participant_phone_${index}`}
-                                        type="tel"
-                                        autoComplete="off"
-                                        placeholder="No HP (Opsional)"
-                                        value={participant.phone}
-                                        onChange={(e) => handleParticipantChange(index, 'phone', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                        placeholder="Contoh: 21.000.000"
+                                        value={totalPrice}
+                                        onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
                                     />
                                 </div>
-                                {participants.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeParticipant(index)}
-                                        className="text-gray-400 hover:text-red-500 p-2 mt-1"
-                                        title="Hapus Peserta"
+
+                                <div>
+                                    <label htmlFor="onboard-qurban-year" className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
+                                    <select
+                                        id="onboard-qurban-year"
+                                        name="qurban_year"
+                                        value={qurbanYear}
+                                        onChange={(e) => setQurbanYear(parseInt(e.target.value))}
+                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                                     >
-                                        <Trash2 size={18} />
-                                    </button>
-                                )}
+                                        <option value={2026}>2026</option>
+                                        <option value={2027}>2027</option>
+                                    </select>
+                                </div>
                             </div>
-                        ))}
-                    </div>
-                </section>
+                        </div>
+                    </section>
 
-                {/* Action Button - Sticky Bottom */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-30">
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition disabled:opacity-70 transform active:scale-[0.98]"
-                    >
-                        {loading ? 'Menyimpan...' : 'Simpan Group & Peserta'}
-                    </button>
-                </div>
+                    {/* Section 2: Data Peserta */}
+                    <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                            <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wide">Daftar Peserta</h2>
+                            <button
+                                type="button"
+                                onClick={addParticipant}
+                                className="text-emerald-600 text-sm font-bold flex items-center hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition"
+                            >
+                                <Plus size={16} className="mr-1" /> Tambah
+                            </button>
+                        </div>
 
-            </form>
+                        <div className="space-y-4">
+                            {participants.map((participant, index) => (
+                                <div key={index} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fade-in">
+                                    <div className="pt-2 text-xs font-bold text-gray-400 w-6 text-center">
+                                        {index + 1}
+                                    </div>
+                                    <div className="flex-1 space-y-3">
+                                        <input
+                                            id={`participant-name-${index}`}
+                                            name={`participant_name_${index}`}
+                                            type="text"
+                                            autoComplete="off"
+                                            placeholder="Nama Peserta"
+                                            value={participant.name}
+                                            onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                            required
+                                        />
+                                        <input
+                                            id={`participant-phone-${index}`}
+                                            name={`participant_phone_${index}`}
+                                            type="tel"
+                                            autoComplete="off"
+                                            placeholder="No HP (Opsional)"
+                                            value={participant.phone}
+                                            onChange={(e) => handleParticipantChange(index, 'phone', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                        />
+                                    </div>
+                                    {participants.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeParticipant(index)}
+                                            className="text-gray-400 hover:text-red-500 p-2 mt-1"
+                                            title="Hapus Peserta"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                </form>
+            </main>
+
+            {/* Action Button - Fixed Bottom */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-50">
+                <button
+                    type="submit"
+                    form="onboarding-form"
+                    disabled={loading}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700 transition disabled:opacity-70 transform active:scale-[0.98]"
+                >
+                    {loading ? 'Menyimpan...' : 'Simpan Group & Peserta'}
+                </button>
+            </div>
         </div>
     )
 }

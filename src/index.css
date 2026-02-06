@@ -5,10 +5,29 @@ body {
     background-color: #f8fafc;
     /* slate-50 */
     overscroll-behavior: none;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
 }
 
 #root {
     background-color: #f8fafc;
     /* slate-50 */
-    min-height: 100vh;
+    height: 100%;
+    width: 100%;
+}
+
+/* Custom Utility for hiding scrollbars but keeping scroll */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }

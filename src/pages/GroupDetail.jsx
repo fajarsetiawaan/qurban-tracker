@@ -429,27 +429,29 @@ export default function GroupDetail() {
     const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
 
     return (
-        <div className="min-h-screen bg-slate-50 relative font-sans pb-32">
-            {/* Header (App Style) */}
-            <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-3 flex items-center justify-between shadow-sm transition-all duration-300">
+        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans">
+            {/* Header (App Style) - Fixed */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-4 flex items-center justify-between shadow-sm transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-9 h-9 flex items-center justify-center -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
+                    className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                 >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={20} />
                 </button>
                 <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Group Info</h1>
                 <div className="relative">
                     <button
                         onClick={() => setIsEditModalOpen(true)}
-                        className="w-9 h-9 flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
+                        className="w-10 h-10 flex items-center justify-center -mr-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                     >
-                        <MoreVertical size={18} />
+                        <MoreVertical size={20} />
                     </button>
                 </div>
-            </div>
+            </header>
 
-            <main className="pt-6 pb-28 px-6">
+
+            {/* Main Scrollable Content */}
+            <main className="flex-1 overflow-y-auto pt-20 pb-32 px-6 no-scrollbar scroll-smooth">
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{data.name}</h1>
 
@@ -607,7 +609,7 @@ export default function GroupDetail() {
                 </div>
             </main>
 
-            {/* Bottom Navbar (Glassmorphism) */}
+            {/* Bottom Navbar (Glassmorphism) - Fixed */}
             <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
                 <button
                     onClick={() => navigate('/')}

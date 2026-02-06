@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -22,6 +22,10 @@ export default function Dashboard() {
     const [filterYear, setFilterYear] = useState('Semua')
     const [showFilterMenu, setShowFilterMenu] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState(null)
+    const filterMenuRef = useRef(null)
+    const filterButtonRef = useRef(null)
+    const accountDropdownRef = useRef(null)
+    const accountButtonRef = useRef(null)
 
     // Profile Menu & Modal State
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -69,7 +73,26 @@ export default function Dashboard() {
     const [notifLoading, setNotifLoading] = useState(false)
     const [historyFilterGroup, setHistoryFilterGroup] = useState('Semua')
 
-    // ... (fetchDashboardData and others remain same)
+    // Outside click listener for dropdowns
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Close filter menu if clicked outside
+            if (filterMenuRef.current && !filterMenuRef.current.contains(event.target) &&
+                filterButtonRef.current && !filterButtonRef.current.contains(event.target)) {
+                setShowFilterMenu(false)
+            }
+            // Close account dropdown if clicked outside
+            if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target) &&
+                accountButtonRef.current && !accountButtonRef.current.contains(event.target)) {
+                setIsAccountDropdownOpen(false)
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
 
     const fetchHistoryData = async () => {
         setHistoryLoading(true)
@@ -587,13 +610,13 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="relative min-h-screen bg-slate-50 pb-20">
+        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative">
             {/* Fixed Top Header */}
-            {/* Fixed Top Header */}
-            {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[90] px-6 py-3 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-100/50 transition-all duration-300 shadow-sm">
+            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all duration-300 shadow-sm">
                 <div className="flex items-center space-x-3">
-                    <img src="/logo-domba.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
+                    <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                        <img src="/logo-domba.png" alt="Logo" className="w-6 h-6 object-contain brightness-0 invert" />
+                    </div>
                     <span className="text-xl font-black text-slate-800 tracking-tight font-heading">dombantara.id</span>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -608,9 +631,9 @@ export default function Dashboard() {
             </header>
 
 
-            {/* Main Content */}
+            {/* Main Scrollable Content */}
             <main
-                className="pt-24 pb-40 px-6"
+                className="flex-1 overflow-y-auto pt-24 pb-32 px-6 no-scrollbar"
                 style={{
                     maskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)'
@@ -696,6 +719,7 @@ export default function Dashboard() {
                         <div className="flex space-x-2">
                             <div className="relative">
                                 <button
+                                    ref={filterButtonRef}
                                     onClick={() => setShowFilterMenu(!showFilterMenu)}
                                     className={`p-2 rounded-full transition ${showFilterMenu || filterStatus !== 'Semua' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
                                 >
@@ -704,55 +728,49 @@ export default function Dashboard() {
 
                                 {/* Filter Dropdown */}
                                 {showFilterMenu && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-[140] bg-transparent"
-                                            onClick={() => setShowFilterMenu(false)}
-                                        />
-                                        <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-[150] animate-fade-in space-y-3">
-                                            {/* Section 1: Jenis Hewan */}
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
-                                                <div className="space-y-1">
-                                                    {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
-                                                        <button
-                                                            key={status}
-                                                            onClick={() => {
-                                                                setFilterStatus(status)
-                                                                setShowFilterMenu(false)
-                                                            }}
-                                                            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                                                        >
-                                                            <span>{status}</span>
-                                                            {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <hr className="border-slate-50" />
-
-                                            {/* Section 2: Periode */}
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Periode</h3>
-                                                <div className="space-y-1">
-                                                    {['Semua', '2026', '2027'].map(year => (
-                                                        <button
-                                                            key={year}
-                                                            onClick={() => {
-                                                                setFilterYear(year)
-                                                                setShowFilterMenu(false)
-                                                            }}
-                                                            className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                                                        >
-                                                            <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
-                                                            {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                    <div ref={filterMenuRef} className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-[150] animate-fade-in space-y-3">
+                                        {/* Section 1: Jenis Hewan */}
+                                        <div>
+                                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
+                                            <div className="space-y-1">
+                                                {['Semua', 'Sapi', 'Kambing', 'Domba'].map(status => (
+                                                    <button
+                                                        key={status}
+                                                        onClick={() => {
+                                                            setFilterStatus(status)
+                                                            setShowFilterMenu(false)
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                    >
+                                                        <span>{status}</span>
+                                                        {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
-                                    </>
+
+                                        <hr className="border-slate-50" />
+
+                                        {/* Section 2: Periode */}
+                                        <div>
+                                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Periode</h3>
+                                            <div className="space-y-1">
+                                                {['Semua', '2026', '2027'].map(year => (
+                                                    <button
+                                                        key={year}
+                                                        onClick={() => {
+                                                            setFilterYear(year)
+                                                            setShowFilterMenu(false)
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                    >
+                                                        <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
+                                                        {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
 
@@ -1701,7 +1719,7 @@ export default function Dashboard() {
 
 
 
-            {/* Refined Mobile Bottom Navigation */}
+            {/* Refined Mobile Bottom Navigation - Fixed and over content */}
             <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
                 {/* 1. Home */}
                 <button
@@ -1749,70 +1767,65 @@ export default function Dashboard() {
                 <div className="relative">
                     {/* Dropdown Menu */}
                     {isAccountDropdownOpen && (
-                        <>
-                            <div
-                                className="fixed inset-0 z-[110] bg-transparent"
-                                onClick={() => setIsAccountDropdownOpen(false)}
-                            />
-                            <div className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
-                                <div className="p-2 space-y-1">
-                                    <button
-                                        onClick={() => {
-                                            fetchUserProfile()
-                                            setIsAccountModalOpen(true)
-                                            setIsAccountDropdownOpen(false)
-                                        }}
-                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 transition group"
-                                    >
-                                        <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200">
-                                            <User size={16} />
-                                        </div>
-                                        <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">My Account</span>
-                                    </button>
+                        <div ref={accountDropdownRef} className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
+                            <div className="p-2 space-y-1">
+                                <button
+                                    onClick={() => {
+                                        fetchUserProfile()
+                                        setIsAccountModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 transition group"
+                                >
+                                    <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200">
+                                        <User size={16} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">My Account</span>
+                                </button>
 
-                                    <button
-                                        onClick={() => {
-                                            setIsSettingsModalOpen(true)
-                                            setIsAccountDropdownOpen(false)
-                                        }}
-                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
-                                    >
-                                        <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
-                                            <Settings size={16} />
-                                        </div>
-                                        <span className="text-sm font-bold text-slate-600">Setting</span>
-                                    </button>
+                                <button
+                                    onClick={() => {
+                                        setIsSettingsModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                >
+                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                        <Settings size={16} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-600">Setting</span>
+                                </button>
 
-                                    <button
-                                        onClick={() => {
-                                            setIsAboutModalOpen(true)
-                                            setIsAccountDropdownOpen(false)
-                                        }}
-                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
-                                    >
-                                        <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
-                                            <Info size={16} />
-                                        </div>
-                                        <span className="text-sm font-bold text-slate-600">About</span>
-                                    </button>
+                                <button
+                                    onClick={() => {
+                                        setIsAboutModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                >
+                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                        <Info size={16} />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-600">About</span>
+                                </button>
 
-                                    <hr className="border-slate-50 mx-2" />
+                                <hr className="border-slate-50 mx-2" />
 
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-red-50 transition group"
-                                    >
-                                        <div className="bg-red-100 p-1.5 rounded-lg text-red-600 group-hover:bg-red-200">
-                                            <LogOut size={16} />
-                                        </div>
-                                        <span className="text-sm font-bold text-red-600">Keluar</span>
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-red-50 transition group"
+                                >
+                                    <div className="bg-red-100 p-1.5 rounded-lg text-red-600 group-hover:bg-red-200">
+                                        <LogOut size={16} />
+                                    </div>
+                                    <span className="text-sm font-bold text-red-600">Keluar</span>
+                                </button>
                             </div>
-                        </>
+                        </div>
                     )}
 
                     <button
+                        ref={accountButtonRef}
                         onClick={() => setIsAccountDropdownOpen(!isAccountDropdownOpen)}
                         className={`flex flex-col items-center space-y-1 transition group ${isAccountDropdownOpen ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'}`}
                     >
@@ -1821,6 +1834,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
-        </div >
+        </div>
     )
 }
