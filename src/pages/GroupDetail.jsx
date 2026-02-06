@@ -719,10 +719,10 @@ export default function GroupDetail() {
                                     </div>
 
                                     <div>
-                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                        <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
                                             <Calendar size={14} />
                                             <span>Tanggal Transaksi</span>
-                                        </p>
+                                        </span>
                                         <button
                                             type="button"
                                             onClick={() => setShowDatePicker(true)}
@@ -740,10 +740,12 @@ export default function GroupDetail() {
                                     </div>
 
                                     <div>
-                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                        <label htmlFor="group-trx-receipt" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
                                             <span>Bukti Transfer (Opsional)</span>
-                                        </p>
+                                        </label>
                                         <input
+                                            id="group-trx-receipt"
+                                            name="receipt"
                                             type="file"
                                             accept="image/*"
                                             onChange={(e) => setTrxReceiptFile(e.target.files[0])}
@@ -752,9 +754,9 @@ export default function GroupDetail() {
                                     </div>
 
                                     <div>
-                                        <p className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
+                                        <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1 mb-2">
                                             <span>Metode</span>
-                                        </p>
+                                        </span>
                                         <div className="flex space-x-3">
                                             <button
                                                 type="button"
@@ -954,9 +956,12 @@ export default function GroupDetail() {
 
                         <form onSubmit={handleAddParticipant} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
+                                <label htmlFor="add-participant-name" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
                                 <input
+                                    id="add-participant-name"
+                                    name="name"
                                     type="text"
+                                    autoComplete="off"
                                     value={newParticipant.name}
                                     onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 hover:bg-slate-100 transition"
@@ -966,9 +971,12 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor Telepon (Opsional)</label>
+                                <label htmlFor="add-participant-phone" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor Telepon (Opsional)</label>
                                 <input
+                                    id="add-participant-phone"
+                                    name="phone"
                                     type="tel"
+                                    autoComplete="off"
                                     value={newParticipant.phone}
                                     onChange={(e) => setNewParticipant({ ...newParticipant, phone: e.target.value })}
                                     className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 hover:bg-slate-100 transition"
@@ -1118,9 +1126,12 @@ export default function GroupDetail() {
                             </div>
                             <form onSubmit={handleUpdateParticipant} className="p-6 space-y-6">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
+                                    <label htmlFor="edit-participant-name" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Peserta</label>
                                     <input
+                                        id="edit-participant-name"
+                                        name="name"
                                         type="text"
+                                        autoComplete="off"
                                         value={editParticipantData.name}
                                         onChange={(e) => setEditParticipantData({ ...editParticipantData, name: e.target.value })}
                                         className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
@@ -1128,9 +1139,12 @@ export default function GroupDetail() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor HP (Opsional)</label>
+                                    <label htmlFor="edit-participant-phone" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor HP (Opsional)</label>
                                     <input
+                                        id="edit-participant-phone"
+                                        name="phone"
                                         type="tel"
+                                        autoComplete="off"
                                         value={editParticipantData.phone}
                                         onChange={(e) => setEditParticipantData({ ...editParticipantData, phone: e.target.value })}
                                         className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"

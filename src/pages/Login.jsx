@@ -117,9 +117,12 @@ export default function Login() {
                         {isSignUp && (
                             <>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                                    <label htmlFor="signup-fullname" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
                                     <input
+                                        id="signup-fullname"
+                                        name="full_name"
                                         type="text"
+                                        autoComplete="name"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
                                         className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
@@ -129,9 +132,12 @@ export default function Login() {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+                                    <label htmlFor="signup-phone" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
                                     <input
+                                        id="signup-phone"
+                                        name="phone_number"
                                         type="tel"
+                                        autoComplete="tel"
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
                                         className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
@@ -141,9 +147,12 @@ export default function Login() {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Masjid/Instansi</label>
+                                    <label htmlFor="signup-institution" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Masjid/Instansi</label>
                                     <input
+                                        id="signup-institution"
+                                        name="institution_name"
                                         type="text"
+                                        autoComplete="organization"
                                         value={institutionName}
                                         onChange={(e) => setInstitutionName(e.target.value)}
                                         className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
@@ -153,8 +162,11 @@ export default function Login() {
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Alamat</label>
+                                    <label htmlFor="signup-address" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Alamat</label>
                                     <textarea
+                                        id="signup-address"
+                                        name="address"
+                                        autoComplete="street-address"
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
                                         className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300 resize-none"
@@ -167,9 +179,12 @@ export default function Login() {
                         )}
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                            <label htmlFor="login-email" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
                             <input
+                                id="login-email"
+                                name="email"
                                 type="email"
+                                autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
@@ -179,9 +194,12 @@ export default function Login() {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                            <label htmlFor="login-password" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
                             <input
+                                id="login-password"
+                                name="password"
                                 type="password"
+                                autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"

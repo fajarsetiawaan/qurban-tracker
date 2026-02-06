@@ -123,9 +123,12 @@ export default function Onboarding() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nama Kelompok</label>
+                            <label htmlFor="onboard-group-name" className="block text-sm font-medium text-gray-700 mb-1">Nama Kelompok</label>
                             <input
+                                id="onboard-group-name"
+                                name="name"
                                 type="text"
+                                autoComplete="off"
                                 placeholder="Contoh: Kelompok Masjid Al-Hidayah"
                                 value={groupName}
                                 onChange={(e) => setGroupName(e.target.value)}
@@ -136,8 +139,10 @@ export default function Onboarding() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
+                                <label htmlFor="onboard-target-animal" className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
                                 <select
+                                    id="onboard-target-animal"
+                                    name="target_animal"
                                     value={targetAnimal}
                                     onChange={(e) => setTargetAnimal(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
@@ -149,9 +154,12 @@ export default function Onboarding() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                                <label htmlFor="onboard-total-price" className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
                                 <input
+                                    id="onboard-total-price"
+                                    name="total_price"
                                     type="text"
+                                    autoComplete="off"
                                     placeholder="Contoh: 21.000.000"
                                     value={totalPrice}
                                     onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
@@ -160,8 +168,10 @@ export default function Onboarding() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
+                                <label htmlFor="onboard-qurban-year" className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
                                 <select
+                                    id="onboard-qurban-year"
+                                    name="qurban_year"
                                     value={qurbanYear}
                                     onChange={(e) => setQurbanYear(parseInt(e.target.value))}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
@@ -195,7 +205,10 @@ export default function Onboarding() {
                                 </div>
                                 <div className="flex-1 space-y-3">
                                     <input
+                                        id={`participant-name-${index}`}
+                                        name={`participant_name_${index}`}
                                         type="text"
+                                        autoComplete="off"
                                         placeholder="Nama Peserta"
                                         value={participant.name}
                                         onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
@@ -203,7 +216,10 @@ export default function Onboarding() {
                                         required
                                     />
                                     <input
+                                        id={`participant-phone-${index}`}
+                                        name={`participant_phone_${index}`}
                                         type="tel"
+                                        autoComplete="off"
                                         placeholder="No HP (Opsional)"
                                         value={participant.phone}
                                         onChange={(e) => handleParticipantChange(index, 'phone', e.target.value)}

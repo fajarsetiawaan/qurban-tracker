@@ -1020,6 +1020,7 @@ export default function Dashboard() {
                                             id="profile-full-name"
                                             name="full_name"
                                             type="text"
+                                            autoComplete="name"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
                                             onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
@@ -1038,6 +1039,7 @@ export default function Dashboard() {
                                             id="profile-institution"
                                             name="institution_name"
                                             type="text"
+                                            autoComplete="organization"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
                                             onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
@@ -1056,6 +1058,7 @@ export default function Dashboard() {
                                             id="profile-email"
                                             name="email"
                                             type="text"
+                                            autoComplete="email"
                                             disabled
                                             value={userEmail || ''}
                                             className="w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-500 focus:ring-0 cursor-default"
@@ -1077,6 +1080,7 @@ export default function Dashboard() {
                                             id="profile-phone"
                                             name="phone_number"
                                             type="text"
+                                            autoComplete="tel"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
                                             onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
@@ -1094,6 +1098,7 @@ export default function Dashboard() {
                                         <textarea
                                             id="profile-address"
                                             name="address"
+                                            autoComplete="street-address"
                                             disabled={!isEditingProfile}
                                             value={isEditingProfile ? profileFormData.address : (profile?.address || '-')}
                                             onChange={(e) => setProfileFormData({ ...profileFormData, address: e.target.value })}
@@ -1200,11 +1205,11 @@ export default function Dashboard() {
                                 </button>
                             </div>
                             <div className="p-8 text-center">
-                                <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
-                                    <Building size={40} className="text-emerald-600" />
+                                <div className="w-24 h-24 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                    <img src="/logo-domba.png" alt="Logo Dombantara" className="w-16 h-16 object-contain" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
-                                <p className="text-slate-500 font-medium mb-6">Version 1.0.0</p>
+                                <p className="text-slate-500 font-medium mb-6">Version 1.0.1</p>
                                 <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
                                     <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
@@ -1579,6 +1584,8 @@ export default function Dashboard() {
 
                             <div className="px-6 py-4 border-b border-gray-50 flex-none bg-white">
                                 <select
+                                    id="history-filter-group"
+                                    name="history_filter"
                                     value={historyFilterGroup}
                                     onChange={(e) => setHistoryFilterGroup(e.target.value)}
                                     className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
