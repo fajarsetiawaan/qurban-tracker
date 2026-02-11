@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal, Share2 } from 'lucide-react'
 import DatePicker from '../components/DatePicker'
 import CalculatorModal from '../components/CalculatorModal'
+import ShareModal from '../components/ShareModal'
 
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
@@ -72,6 +73,7 @@ export default function GroupDetail() {
     const [showCalculator, setShowCalculator] = useState(false)
     const [calculatorMode, setCalculatorMode] = useState('new') // 'new' | 'edit'
     const [editingTransaction, setEditingTransaction] = useState(null)
+    const [isSelectParticipantOpen, setIsSelectParticipantOpen] = useState(false)
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -96,6 +98,10 @@ export default function GroupDetail() {
     const [isDeleteParticipantModalOpen, setIsDeleteParticipantModalOpen] = useState(false)
     const [participantLoading, setParticipantLoading] = useState(false)
     const [editParticipantData, setEditParticipantData] = useState({ name: '', phone: '' })
+
+    // Share Modal State
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+    const [shareParticipant, setShareParticipant] = useState(null)
 
     // History Modal State
     const [selectedParticipantForHistory, setSelectedParticipantForHistory] = useState(null)
@@ -309,20 +315,28 @@ export default function GroupDetail() {
     useEffect(() => {
         fetchData()
 
-        const channel = supabase
-            .channel(`public:transactions`)
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'transactions' },
-                () => {
-                    console.log('Realtime update detected!')
-                    fetchData()
-                }
-            )
-            .subscribe()
+        let channel = null
+        // Delay subscription to avoid strict-mode double-mount issues
+        const timeout = setTimeout(() => {
+            channel = supabase
+                .channel(`public:transactions`)
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'transactions' },
+                    () => {
+                        console.log('Realtime update detected!')
+                        fetchData()
+                    }
+                )
+                .subscribe()
+        }, 1000)
 
         return () => {
-            supabase.removeChannel(channel)
+            clearTimeout(timeout)
+            // Fire and forget cleanup with error suppression
+            if (channel) {
+                supabase.removeChannel(channel).catch(() => { })
+            }
         }
     }, [id])
 
@@ -600,7 +614,58 @@ export default function GroupDetail() {
         setTrxAmount('')
         setTrxParticipantId('')
         setTrxMethod('Tunai')
-        setLastTransaction(null)
+        setTrxReceiptFile(null)
+        setTrxDate(new Date().toISOString().split('T')[0])
+    }
+
+    // Helper: Generate Random Slug
+    const generateSlug = (length = 8) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        let result = ''
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length))
+        }
+        return result
+    }
+
+    // Share Link Logic
+    const handleShareLink = async (participant) => {
+        // Close dropdown
+        setActiveParticipantDropdown(null)
+
+        let slug = participant.slug
+
+        // If no slug, generate and save one
+        if (!slug) {
+            try {
+                const newSlug = generateSlug()
+                const { error } = await supabase
+                    .from('participants')
+                    .update({ slug: newSlug })
+                    .eq('id', participant.id)
+
+                if (error) throw error
+
+                // Update local state immediately
+                slug = newSlug
+                setData(prev => ({
+                    ...prev,
+                    participants: prev.participants.map(p =>
+                        p.id === participant.id ? { ...p, slug: newSlug } : p
+                    )
+                }))
+
+            } catch (error) {
+                console.error('Error generating slug:', error)
+                alert('Gagal membuat link sharing')
+                return
+            }
+        }
+
+        // Open Share Modal instead of direct copy
+        // Format: { ...participant, slug } to ensure we have the latest slug
+        setShareParticipant({ ...participant, slug })
+        setIsShareModalOpen(true)
     }
 
     if (loading) {
@@ -633,7 +698,13 @@ export default function GroupDetail() {
         { name: 'Terkumpul', value: data.totalCollected, color: '#10B981' },
         { name: 'Kekurangan', value: data.shortage, color: '#F1F5F9' }
     ]
-    const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
+
+    // Use target_participants if available and > 0, otherwise fallback to current participants length (or 1 to avoid division by zero)
+    const divisor = (data.target_participants && data.target_participants > 0)
+        ? data.target_participants
+        : (data.participants.length > 0 ? data.participants.length : 1)
+
+    const perPersonTarget = data.total_price / divisor
 
     return (
         <motion.div
@@ -668,13 +739,19 @@ export default function GroupDetail() {
                 <div className="text-center mb-8">
                     <h1 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{data.name}</h1>
 
-                    <div className="flex flex-wrap justify-center gap-2 mb-4">
-                        <div className="flex items-center space-x-1.5 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
-                            <span className="text-xs font-bold uppercase tracking-wide">{data.target_animal}</span>
+                    <div className="flex flex-col items-center gap-2 mb-4">
+                        <div className="flex flex-wrap justify-center gap-2">
+                            <div className="flex items-center space-x-1.5 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
+                                <span className="text-xs font-bold uppercase tracking-wide">{data.target_animal}</span>
+                            </div>
+                            <div className="flex items-center space-x-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full">
+                                <Calendar size={12} />
+                                <span className="text-xs font-bold">Periode {data.qurban_year || 2026}</span>
+                            </div>
                         </div>
-                        <div className="flex items-center space-x-1.5 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full">
-                            <Calendar size={12} />
-                            <span className="text-xs font-bold">Periode {data.qurban_year || 2026}</span>
+                        <div className="flex items-center space-x-1.5 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full">
+                            <Users size={12} />
+                            <span className="text-xs font-bold">Target {data.target_participants || (data.target_animal === 'sapi' ? 7 : 1)} Peserta</span>
                         </div>
                     </div>
 
@@ -778,9 +855,9 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center space-x-5 hover:bg-slate-50/50 hover:shadow-md transition-all duration-300 cursor-pointer relative group overflow-hidden"
+                                    className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center space-x-5 hover:bg-slate-50/50 hover:shadow-md transition-all duration-300 cursor-pointer relative group"
                                 >
-                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
+                                    <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-[2rem] ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
 
                                     {/* Avatar */}
                                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm ${avatarColor} group-hover:scale-105 transition-transform duration-300`}>
@@ -839,6 +916,16 @@ export default function GroupDetail() {
                                                     className={`absolute right-0 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden ${idx >= data.participants.length - 2 ? 'bottom-full mb-2 origin-bottom-right' : 'top-10 origin-top-right'
                                                         }`}
                                                 >
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            handleShareLink(participant)
+                                                        }}
+                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
+                                                    >
+                                                        <Share2 size={18} className="text-slate-400" />
+                                                        <span>Bagikan Link</span>
+                                                    </button>
                                                     <button
                                                         onClick={(e) => handleEditParticipantClick(participant, e)}
                                                         className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
@@ -939,22 +1026,20 @@ export default function GroupDetail() {
                                             <span>Sumber Dana</span>
                                         </label>
                                         <div className="relative">
-                                            <select
+                                            <button
                                                 id="group-trx-participant"
-                                                name="participant_id"
-                                                value={trxParticipantId}
-                                                onChange={(e) => setTrxParticipantId(e.target.value)}
-                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
-                                                required
+                                                type="button"
+                                                onClick={() => setIsSelectParticipantOpen(true)}
+                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl font-bold text-left flex justify-between items-center"
                                             >
-                                                <option value="">-- Pilih Peserta --</option>
-                                                {data.participants.map(p => (
-                                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
-                                                <ChevronLeft size={16} className="rotate-[-90deg]" />
-                                            </div>
+                                                <span className={trxParticipantId ? 'text-slate-700' : 'text-slate-400'}>
+                                                    {trxParticipantId
+                                                        ? data.participants.find(p => p.id === trxParticipantId)?.name || 'Peserta'
+                                                        : '-- Pilih Peserta --'}
+                                                </span>
+                                                <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400" />
+                                            </button>
+                                            <input type="hidden" name="participant_id" value={trxParticipantId} required />
                                         </div>
                                     </div>
 
@@ -1234,7 +1319,7 @@ export default function GroupDetail() {
                             </div>
 
                             <div>
-                                <label htmlFor="add-participant-phone" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor Telepon (Opsional)</label>
+                                <label htmlFor="add-participant-phone" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nomor WhatsApp (Aktif)</label>
                                 <input
                                     id="add-participant-phone"
                                     name="phone"
@@ -1395,69 +1480,17 @@ export default function GroupDetail() {
                                                         {trx.payment_method || 'Tunai'}
                                                     </span>
 
-                                                    {/* Edit Dropdown Trigger */}
+                                                    {/* Delete Button (Direct) */}
                                                     <button
-                                                        data-dropdown-trigger
                                                         onClick={(e) => {
                                                             e.stopPropagation()
-                                                            const newId = activeTransactionDropdown === trx.id ? null : trx.id
-                                                            setActiveTransactionDropdown(newId)
+                                                            setTransactionToDelete(trx)
+                                                            setIsDeleteTransactionModalOpen(true)
                                                         }}
-                                                        className="w-8 h-8 rounded-full bg-transparent hover:bg-slate-200 flex items-center justify-center text-slate-400 transition"
+                                                        className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition"
                                                     >
-                                                        <MoreVertical size={16} />
+                                                        <Trash2 size={16} />
                                                     </button>
-
-                                                    {/* Dropdown Menu */}
-                                                    {activeTransactionDropdown === trx.id && (
-                                                        <div
-                                                            data-dropdown
-                                                            className="absolute right-0 top-8 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right py-1"
-                                                        >
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setEditingTransaction(trx)
-                                                                    setTrxAmount(formatNumber(trx.amount))
-                                                                    setCalculatorMode('edit')
-                                                                    setShowCalculator(true)
-                                                                    setActiveTransactionDropdown(null)
-                                                                }}
-                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 transition"
-                                                            >
-                                                                <Pencil size={14} className="text-slate-400" />
-                                                                <span>Edit Nominal</span>
-                                                            </button>
-
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setEditingTransaction(trx)
-                                                                    setShowTransactionDatePicker(true)
-                                                                    setActiveTransactionDropdown(null)
-                                                                }}
-                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 transition"
-                                                            >
-                                                                <Calendar size={14} className="text-slate-400" />
-                                                                <span>Edit Tanggal</span>
-                                                            </button>
-
-                                                            <div className="h-px bg-slate-50 my-1"></div>
-
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setTransactionToDelete(trx)
-                                                                    setIsDeleteTransactionModalOpen(true)
-                                                                    setActiveTransactionDropdown(null)
-                                                                }}
-                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-red-500 hover:bg-red-50 flex items-center space-x-3 transition"
-                                                            >
-                                                                <Trash2 size={14} className="text-red-400" />
-                                                                <span>Hapus</span>
-                                                            </button>
-                                                        </div>
-                                                    )}
 
                                                     {trx.receipt_url && (
                                                         <a
@@ -1678,6 +1711,55 @@ export default function GroupDetail() {
                     </div>
                 )
             }
+            {/* Participant Selection Bottom Sheet */}
+            {
+                isSelectParticipantOpen && data?.participants && (
+                    <div
+                        onClick={() => setIsSelectParticipantOpen(false)}
+                        className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/60 backdrop-blur-sm p-0 animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
+                                <h2 className="text-xl font-black text-slate-800">Pilih Peserta</h2>
+                                <button onClick={() => setIsSelectParticipantOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-3">
+                                {data.participants.map(p => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => {
+                                            setTrxParticipantId(p.id)
+                                            setIsSelectParticipantOpen(false)
+                                        }}
+                                        className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${trxParticipantId === p.id
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                    >
+                                        <span className="text-sm">{p.name}</span>
+                                        {trxParticipantId === p.id && <CheckCircle size={20} className="text-white" />}
+                                    </button>
+                                ))}
+                                {data.participants.length === 0 && (
+                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada peserta tersedia</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {/* Share Modal */}
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
+                participant={shareParticipant}
+                slug={shareParticipant?.slug}
+            />
         </motion.div>
     )
 }

@@ -15,6 +15,8 @@ export default function Dashboard() {
     const [totalSavings, setTotalSavings] = useState(0)
     const [totalTarget, setTotalTarget] = useState(0)
     const [growthPercentage, setGrowthPercentage] = useState(0)
+    const [totalParticipants, setTotalParticipants] = useState(0)
+    const [paidParticipants, setPaidParticipants] = useState(0)
     const [profile, setProfile] = useState(null)
 
     // Filter & UI State
@@ -45,11 +47,16 @@ export default function Dashboard() {
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [editFormData, setEditFormData] = useState({ id: null, name: '', target_animal: 'sapi', total_price: '', qurban_year: 2026 })
+    const [editFormData, setEditFormData] = useState({ id: null, name: '', target_animal: 'sapi', total_price: '', target_participants: 7, qurban_year: 2026 })
     const [editLoading, setEditLoading] = useState(false)
+
+    // History Filter State
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
     // Quick Transaction & Notification State
     const [isQuickTransactionModalOpen, setIsQuickTransactionModalOpen] = useState(false)
+    const [isQuickTrxGroupModalOpen, setIsQuickTrxGroupModalOpen] = useState(false)
+    const [isQuickTrxParticipantModalOpen, setIsQuickTrxParticipantModalOpen] = useState(false)
     const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false)
     const [quickTrxFormData, setQuickTrxFormData] = useState({
         group_id: '',
@@ -94,44 +101,7 @@ export default function Dashboard() {
         }
     }, [])
 
-    const fetchHistoryData = async () => {
-        setHistoryLoading(true)
-        try {
-            let query = supabase
-                .from('transactions')
-                .select('*, participants(name, group_id, groups(name))')
-                .order('transaction_date', { ascending: false })
 
-            if (historyFilterGroup !== 'Semua') {
-                // This is tricky because filtering by deep relation field (participants.group_id) in Supabase/PostgREST 
-                // usually requires !inner join or specific syntax.
-                // For simplicity, let's fetch all and filter in JS if dataset is small, 
-                // OR use: .eq('participants.group_id', historyFilterGroup) if Supabase supports it directly now.
-                // Safest for now: fetch all and filter client side if not massive.
-            }
-
-            const { data, error } = await query
-            if (error) throw error
-
-            const formatted = data.map(trx => ({
-                ...trx,
-                formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
-                participantName: trx.participants?.name || 'Unknown',
-                groupName: trx.participants?.groups?.name || 'Unknown',
-                groupId: trx.participants?.group_id
-            }))
-
-            if (historyFilterGroup !== 'Semua') {
-                setHistoryTransactions(formatted.filter(t => t.groupId === historyFilterGroup))
-            } else {
-                setHistoryTransactions(formatted)
-            }
-        } catch (error) {
-            console.error('Error fetching history:', error)
-        } finally {
-            setHistoryLoading(false)
-        }
-    }
 
     const fetchNotificationData = async () => {
         setNotifLoading(true)
@@ -155,6 +125,42 @@ export default function Dashboard() {
             console.error('Error fetching notifications:', error)
         } finally {
             setNotifLoading(false)
+        }
+    }
+
+    const fetchHistoryData = async () => {
+        setHistoryLoading(true)
+        try {
+            let query = supabase
+                .from('transactions')
+                .select('*, participants(name, group_id, groups(name))')
+                .order('transaction_date', { ascending: false })
+
+            if (historyFilterGroup !== 'Semua') {
+                const group = groups.find(g => g.id === historyFilterGroup)
+                if (group && group.participants) {
+                    const participantIds = group.participants.map(p => p.id)
+                    query = query.in('participant_id', participantIds)
+                }
+            }
+
+            const { data, error } = await query
+
+            if (error) throw error
+
+            const formatted = data.map(trx => ({
+                ...trx,
+                formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
+                participantName: trx.participants?.name || 'Unknown',
+                groupName: trx.participants?.groups?.name || 'Unknown',
+                groupId: trx.participants?.group_id
+            }))
+
+            setHistoryTransactions(formatted)
+        } catch (error) {
+            console.error('Error fetching history:', error)
+        } finally {
+            setHistoryLoading(false)
         }
     }
 
@@ -275,20 +281,28 @@ export default function Dashboard() {
         fetchDashboardData()
 
         // Realtime Subscription for Global Updates
-        const channel = supabase
-            .channel('dashboard-realtime')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'transactions' },
-                () => {
-                    console.log('Realtime change detected in transactions! Refreshing dashboard...')
-                    fetchDashboardData()
-                }
-            )
-            .subscribe()
+        let channel = null
+        // Delay subscription to avoid strict-mode double-mount issues
+        const timeout = setTimeout(() => {
+            channel = supabase
+                .channel('dashboard-realtime')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'transactions' },
+                    () => {
+                        console.log('Realtime change detected in transactions! Refreshing dashboard...')
+                        fetchDashboardData()
+                    }
+                )
+                .subscribe()
+        }, 1000)
 
         return () => {
-            supabase.removeChannel(channel)
+            clearTimeout(timeout)
+            if (channel) {
+                // Fire and forget cleanup with error suppression
+                supabase.removeChannel(channel).catch(() => { })
+            }
         }
     }, [])
 
@@ -381,9 +395,37 @@ export default function Dashboard() {
 
             setGroups(processedGroups)
 
-            // Calculate Global Target
+            // Calculate Global Target & Participant Stats
             const globalTargetSum = processedGroups.reduce((sum, g) => sum + (g.total_price || 0), 0)
             setTotalTarget(globalTargetSum)
+
+            // Calculate Participant Stats
+            let totalPart = 0
+            let totalPaidPart = 0
+
+            processedGroups.forEach(group => {
+                const groupTargetPrice = group.total_price || 0
+                const targetParticipants = group.target_participants && group.target_participants > 0
+                    ? group.target_participants
+                    : (group.target_animal === 'sapi' ? 7 : 1)
+
+                const perPersonTarget = groupTargetPrice / targetParticipants
+
+                if (group.participants && Array.isArray(group.participants)) {
+                    totalPart += group.participants.length
+
+                    group.participants.forEach(p => {
+                        const pTotal = p.transactions ? p.transactions.reduce((sum, t) => sum + (t.amount || 0), 0) : 0
+                        // Check if paid (using a small threshold for floating point comparisons or exact match)
+                        if (perPersonTarget > 0 && pTotal >= (perPersonTarget - 100)) { // -100 tolerance for rounding
+                            totalPaidPart++
+                        }
+                    })
+                }
+            })
+
+            setTotalParticipants(totalPart)
+            setPaidParticipants(totalPaidPart)
 
             // Note: We used to setTotalSavings here, but we will override it with the global transaction sum below for accuracy logic requested
             // Actually, summing group collections IS the global total if all transactions belong to groups. 
@@ -489,7 +531,9 @@ export default function Dashboard() {
             id: group.id,
             name: group.name,
             target_animal: group.target_animal,
+            target_animal: group.target_animal,
             total_price: formatNumber(group.total_price),
+            target_participants: group.target_participants || (group.target_animal === 'sapi' ? 7 : 1),
             qurban_year: group.qurban_year || 2026
         })
         setIsEditModalOpen(true)
@@ -509,6 +553,7 @@ export default function Dashboard() {
                     name: editFormData.name,
                     target_animal: editFormData.target_animal,
                     total_price: unformatNumber(editFormData.total_price),
+                    target_participants: parseInt(editFormData.target_participants),
                     qurban_year: editFormData.qurban_year
                 })
                 .eq('id', editFormData.id)
@@ -642,20 +687,12 @@ export default function Dashboard() {
                     <div className="flex flex-col">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Assalamu'alaikum</p>
                         <h2 className="text-sm font-black text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
-                            {loading ? <Skeleton className="h-4 w-24 rounded-lg" /> : (profile?.full_name?.split(' ')[0] || 'Hamba Allah')}
+                            {loading ? <Skeleton className="h-4 w-24 rounded-lg" /> : (profile?.institution_name || profile?.full_name || 'Hamba Allah')}
                         </h2>
                     </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => setIsNotificationModalOpen(true)}
-                        className="relative p-2.5 bg-white rounded-full border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100 transition-all duration-300 shadow-sm hover:shadow-md group"
-                    >
-                        <Bell size={20} className="group-hover:rotate-12 transition-transform" />
-                        {notificationTransactions.length > 0 && (
-                            <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                        )}
-                    </button>
+
                     {/* Logout Button moved to Profile Menu, but keeping here as fallback or removing? The previous design had it. Let's keep it but cleaner. */}
                     <button
                         onClick={handleLogout}
@@ -728,6 +765,40 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                             </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    {/* Total Participants Card */}
+                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-600">
+                            <Users size={20} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-800 mb-1">
+                            {loading ? <Skeleton className="h-8 w-12" /> : totalParticipants}
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Peserta</p>
+                    </div>
+
+                    {/* Paid Participants Card */}
+                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center mb-3 text-emerald-600 relative z-10">
+                            <CheckCircle size={20} />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-800 mb-1 relative z-10">
+                            {loading ? <Skeleton className="h-8 w-12" /> : paidParticipants}
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest relative z-10">Peserta Lunas</p>
+
+                        {/* Progress Ring Background Effect */}
+                        {totalParticipants > 0 && (
+                            <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#10B981" strokeWidth="20"
+                                    strokeDasharray={`${(paidParticipants / totalParticipants) * 250} 250`}
+                                    className="transform -rotate-90 origin-center transition-all duration-1000" />
+                            </svg>
                         )}
                     </div>
                 </div>
@@ -820,109 +891,98 @@ export default function Dashboard() {
                             <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
                         </div>
                     ) : (
-                        <ul className="space-y-6">
-                            {filteredGroups.map((group) => (
-                                <li key={group.id} className="relative group/card">
-                                    <Link
-                                        to={`/groups/${group.id}`}
-                                        className="block bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/50 hover:border-emerald-200 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)] transition-all duration-500 relative overflow-hidden"
-                                    >
-                                        <div className="flex justify-between items-start mb-6 relative z-10">
-                                            <div>
-                                                <div className="flex items-center space-x-2 mb-2">
-                                                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${group.target_animal?.toLowerCase() === 'sapi' ? 'bg-emerald-50 text-emerald-600' :
-                                                        group.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-600'
+                        <ul className="space-y-4">
+                            {filteredGroups.map((group) => {
+                                const animalColor = group.target_animal?.toLowerCase() === 'sapi' ? 'emerald' :
+                                    group.target_animal?.toLowerCase() === 'kambing' ? 'amber' : 'slate'
+                                const progressPct = Math.round(group.progress)
+                                return (
+                                    <li key={group.id} className="relative group/card">
+                                        <Link
+                                            to={`/groups/${group.id}`}
+                                            className="block bg-white rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] border border-slate-100/80 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
+                                        >
+                                            {/* Row 1: Badges + Menu */}
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div className="flex items-center gap-2.5">
+                                                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide ${animalColor === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                                                        animalColor === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'
                                                         }`}>
                                                         {group.target_animal}
                                                     </span>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                    <span className="text-[12px] font-semibold text-slate-400">
                                                         {group.participantCount} Peserta
                                                     </span>
                                                 </div>
-                                                <h3 className="font-extrabold text-slate-800 text-xl group-hover/card:text-emerald-700 transition-colors duration-300">{group.name}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 text-emerald-600 uppercase tracking-wide">
+                                                        Periode {group.qurban_year || 2026}
+                                                    </span>
+                                                    <button
+                                                        data-dropdown-trigger
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            e.stopPropagation()
+                                                            setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                                        }}
+                                                        className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 hover:text-slate-500 transition-all duration-300"
+                                                    >
+                                                        <MoreVertical size={18} />
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            <div className="flex items-center space-x-2">
-                                                <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getYearBadgeStyle(group.qurban_year || 2026)}`}>
-                                                    '{String(group.qurban_year || 2026).slice(-2)}
-                                                </div>
+                                            {/* Row 2: Group Name */}
+                                            <h3 className="font-extrabold text-slate-800 text-xl mb-5 group-hover/card:text-emerald-700 transition-colors duration-300">{group.name}</h3>
+
+                                            {/* Row 3: Terkumpul % */}
+                                            <p className="text-sm font-bold text-emerald-600 mb-2">
+                                                Terkumpul {progressPct}%
+                                            </p>
+
+                                            {/* Row 4: Progress Bar */}
+                                            <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden mb-5">
+                                                <div
+                                                    style={{ width: `${Math.min(100, progressPct)}%` }}
+                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out shadow-[0_2px_8px_rgba(16,185,129,0.4)]"
+                                                ></div>
+                                            </div>
+
+                                            {/* Row 5: Amount + Target */}
+                                            <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                                                <span className="text-lg font-black text-slate-800 tracking-tight">{formatRupiah(group.collected)}</span>
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                                                    Target: <span className="text-slate-500">{formatRupiah(group.total_price)}</span>
+                                                </span>
+                                            </div>
+                                        </Link>
+
+                                        {/* Dropdown Menu */}
+                                        {activeDropdown === group.id && (
+                                            <div data-dropdown className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
                                                 <button
-                                                    data-dropdown-trigger
+                                                    onClick={(e) => openEditModal(group, e)}
+                                                    className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                                                >
+                                                    <Pencil size={16} />
+                                                    <span>Edit</span>
+                                                </button>
+                                                <button
                                                     onClick={(e) => {
                                                         e.preventDefault()
                                                         e.stopPropagation()
-                                                        setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                                        handleDeleteGroup(group, e)
                                                     }}
-                                                    className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-50 flex items-center justify-center text-slate-400 hover:text-emerald-600 transition-all duration-300"
+                                                    className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
                                                 >
-                                                    <MoreVertical size={16} />
+                                                    <Trash2 size={16} />
+                                                    <span>Hapus Group</span>
                                                 </button>
                                             </div>
-                                        </div>
-
-                                        <div className="space-y-3 relative z-10">
-                                            <div className="flex justify-between items-end">
-                                                <div>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Terkumpul</p>
-                                                    <p className="text-lg font-black text-slate-800">{formatRupiah(group.collected)}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Target</p>
-                                                    <p className="text-sm font-bold text-slate-500">{formatRupiah(group.total_price)}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="relative pt-1">
-                                                <div className="flex mb-2 items-center justify-between">
-                                                    <div>
-                                                        <span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-50 border border-emerald-100">
-                                                            Progress
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="text-xs font-black inline-block text-emerald-600">
-                                                            {Math.round(group.progress)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="overflow-hidden h-2.5 mb-2 text-xs flex rounded-full bg-slate-100 shadow-inner">
-                                                    <div
-                                                        style={{ width: `${Math.round(group.progress)}%` }}
-                                                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Decorative Background Blob */}
-                                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-50/50 rounded-full blur-2xl group-hover/card:bg-emerald-100/50 transition-colors duration-500"></div>
-                                    </Link>
-
-                                    {/* Dropdown Menu */}
-                                    {activeDropdown === group.id && (
-                                        <div data-dropdown className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
-                                            <button
-                                                onClick={(e) => openEditModal(group, e)}
-                                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
-                                            >
-                                                <Pencil size={16} />
-                                                <span>Edit</span>
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    e.stopPropagation()
-                                                    handleDeleteGroup(group, e)
-                                                }}
-                                                className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
-                                            >
-                                                <Trash2 size={16} />
-                                                <span>Hapus Group</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
+                                        )}
+                                    </li>
+                                )
+                            })}
                         </ul>
                     )}
                 </div>
@@ -967,13 +1027,34 @@ export default function Dashboard() {
                                         id="edit-group-animal"
                                         name="target_animal"
                                         value={editFormData.target_animal}
-                                        onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                        onChange={(e) => {
+                                            const animal = e.target.value
+                                            setEditFormData({
+                                                ...editFormData,
+                                                target_animal: animal,
+                                                target_participants: animal === 'sapi' ? 7 : 1
+                                            })
+                                        }}
                                         className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
                                     >
                                         <option value="sapi">Sapi</option>
                                         <option value="kambing">Kambing</option>
                                         <option value="domba">Domba</option>
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="edit-group-participants" className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Target Peserta</label>
+                                    <input
+                                        id="edit-group-participants"
+                                        name="target_participants"
+                                        type="number"
+                                        min="1"
+                                        value={editFormData.target_participants}
+                                        onChange={(e) => setEditFormData({ ...editFormData, target_participants: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        required
+                                    />
                                 </div>
 
                                 <div>
@@ -1426,22 +1507,18 @@ export default function Dashboard() {
                                                 <span>Pilih Group</span>
                                             </label>
                                             <div className="relative">
-                                                <select
-                                                    id="quick-trx-group"
-                                                    name="group_id"
-                                                    value={quickTrxFormData.group_id}
-                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, group_id: e.target.value, participant_id: '' })}
-                                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none"
-                                                    required
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsQuickTrxGroupModalOpen(true)}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold ${quickTrxFormData.group_id ? 'text-slate-700' : 'text-slate-400'}`}
                                                 >
-                                                    <option value="">-- Pilih Group --</option>
-                                                    {groups.map(g => (
-                                                        <option key={g.id} value={g.id}>{g.name} ({g.target_animal})</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
+                                                    <span>
+                                                        {quickTrxFormData.group_id
+                                                            ? groups.find(g => g.id === quickTrxFormData.group_id)?.name + ` (${groups.find(g => g.id === quickTrxFormData.group_id)?.target_animal})`
+                                                            : '-- Pilih Group --'}
+                                                    </span>
                                                     <ChevronDown size={16} />
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -1452,23 +1529,19 @@ export default function Dashboard() {
                                                 <span>Pilih Peserta</span>
                                             </label>
                                             <div className="relative">
-                                                <select
-                                                    id="quick-trx-participant"
-                                                    name="participant_id"
-                                                    value={quickTrxFormData.participant_id}
-                                                    onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, participant_id: e.target.value })}
-                                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 appearance-none disabled:opacity-50"
-                                                    required
+                                                <button
+                                                    type="button"
+                                                    onClick={() => !(!quickTrxFormData.group_id) && setIsQuickTrxParticipantModalOpen(true)}
                                                     disabled={!quickTrxFormData.group_id}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold disabled:opacity-50 ${quickTrxFormData.participant_id ? 'text-slate-700' : 'text-slate-400'}`}
                                                 >
-                                                    <option value="">-- Pilih Peserta --</option>
-                                                    {quickTrxFormData.group_id && groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
-                                                        <option key={p.id} value={p.id}>{p.name}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute right-4 top-4 text-slate-400 pointer-events-none">
+                                                    <span>
+                                                        {quickTrxFormData.participant_id && quickTrxFormData.group_id
+                                                            ? groups.find(g => g.id === quickTrxFormData.group_id)?.participants.find(p => p.id === quickTrxFormData.participant_id)?.name
+                                                            : '-- Pilih Peserta --'}
+                                                    </span>
                                                     <ChevronDown size={16} />
-                                                </div>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -1659,20 +1732,38 @@ export default function Dashboard() {
                                 </button>
                             </div>
 
-                            <div className="px-6 py-4 border-b border-gray-50 flex-none bg-white">
-                                <select
-                                    id="history-filter-group"
-                                    name="history_filter"
-                                    value={historyFilterGroup}
-                                    onChange={(e) => setHistoryFilterGroup(e.target.value)}
-                                    className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-sm"
+                            <div className="flex items-center space-x-3 px-6 py-4 border-b border-gray-50 bg-white">
+                                <button
+                                    onClick={() => setHistoryFilterGroup('Semua')}
+                                    className={`flex-none whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold transition active:scale-95 ${historyFilterGroup === 'Semua'
+                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                        : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100'
+                                        }`}
                                 >
-                                    <option value="Semua">Semua Group</option>
-                                    {groups.map(g => (
-                                        <option key={g.id} value={g.id}>{g.name}</option>
-                                    ))}
-                                </select>
+                                    Semua Group
+                                </button>
+
+                                <div className="relative flex-1 min-w-[150px]">
+                                    <button
+                                        onClick={() => setIsFilterModalOpen(true)}
+                                        className={`w-full text-left px-5 py-2.5 rounded-full text-xs font-bold transition flex justify-between items-center ${historyFilterGroup !== 'Semua'
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100'
+                                            }`}
+                                    >
+                                        <span className="truncate mr-2">
+                                            {historyFilterGroup === 'Semua'
+                                                ? 'Pilih Group...'
+                                                : groups.find(g => g.id === historyFilterGroup)?.name || 'Group Tidak Ditemukan'}
+                                        </span>
+                                        <ChevronDown size={14} />
+                                    </button>
+                                </div>
                             </div>
+
+
+
+
 
                             <div className="overflow-y-auto flex-1 p-6 pt-2 space-y-3">
                                 {historyLoading ? (
@@ -1702,6 +1793,138 @@ export default function Dashboard() {
                                         </div>
                                         <p className="text-slate-400 font-bold text-sm">Belum ada riwayat transaksi</p>
                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Filter Modal (Bottom Sheet) */}
+            {
+                isFilterModalOpen && (
+                    <div
+                        onClick={() => setIsFilterModalOpen(false)}
+                        className="fixed inset-0 z-[160] flex items-end justify-center bg-slate-900/60 backdrop-blur-sm p-0 animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
+                                <h2 className="text-xl font-black text-slate-800">Pilih Group</h2>
+                                <button onClick={() => setIsFilterModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-3">
+                                {groups.map(g => (
+                                    <button
+                                        key={g.id}
+                                        onClick={() => {
+                                            setHistoryFilterGroup(g.id)
+                                            setIsFilterModalOpen(false)
+                                        }}
+                                        className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${historyFilterGroup === g.id
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                    >
+                                        <span className="text-sm">{g.name}</span>
+                                        {historyFilterGroup === g.id && <CheckCircle size={20} className="text-white" />}
+                                    </button>
+                                ))}
+                                {groups.length === 0 && (
+                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada group tersedia</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Quick Transaction Group Selection Modal (Bottom Sheet) */}
+            {
+                isQuickTrxGroupModalOpen && (
+                    <div
+                        onClick={() => setIsQuickTrxGroupModalOpen(false)}
+                        className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/60 backdrop-blur-sm p-0 animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
+                                <h2 className="text-xl font-black text-slate-800">Pilih Group</h2>
+                                <button onClick={() => setIsQuickTrxGroupModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-3">
+                                {groups.map(g => (
+                                    <button
+                                        key={g.id}
+                                        onClick={() => {
+                                            setQuickTrxFormData({ ...quickTrxFormData, group_id: g.id, participant_id: '' })
+                                            setIsQuickTrxGroupModalOpen(false)
+                                        }}
+                                        className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${quickTrxFormData.group_id === g.id
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="text-sm">{g.name}</span>
+                                            <span className={`text-[10px] uppercase tracking-wider ${quickTrxFormData.group_id === g.id ? 'text-emerald-100' : 'text-slate-400'}`}>{g.target_animal}</span>
+                                        </div>
+                                        {quickTrxFormData.group_id === g.id && <CheckCircle size={20} className="text-white" />}
+                                    </button>
+                                ))}
+                                {groups.length === 0 && (
+                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada group tersedia</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Quick Transaction Participant Selection Modal (Bottom Sheet) */}
+            {
+                isQuickTrxParticipantModalOpen && quickTrxFormData.group_id && (
+                    <div
+                        onClick={() => setIsQuickTrxParticipantModalOpen(false)}
+                        className="fixed inset-0 z-[200] flex items-end justify-center bg-slate-900/60 backdrop-blur-sm p-0 animate-fade-in"
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
+                                <h2 className="text-xl font-black text-slate-800">Pilih Peserta</h2>
+                                <button onClick={() => setIsQuickTrxParticipantModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-3">
+                                {groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => {
+                                            setQuickTrxFormData({ ...quickTrxFormData, participant_id: p.id })
+                                            setIsQuickTrxParticipantModalOpen(false)
+                                        }}
+                                        className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${quickTrxFormData.participant_id === p.id
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                    >
+                                        <span className="text-sm">{p.name}</span>
+                                        {quickTrxFormData.participant_id === p.id && <CheckCircle size={20} className="text-white" />}
+                                    </button>
+                                ))}
+                                {(!groups.find(g => g.id === quickTrxFormData.group_id)?.participants || groups.find(g => g.id === quickTrxFormData.group_id)?.participants.length === 0) && (
+                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada peserta di group ini</div>
                                 )}
                             </div>
                         </div>

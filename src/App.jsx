@@ -7,6 +7,8 @@ import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import GroupDetail from './pages/GroupDetail'
 
+import PublicParticipant from './pages/PublicParticipant'
+
 function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -33,6 +35,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/p/:slug" element={<PublicParticipant />} />
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
 
         <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>

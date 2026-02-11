@@ -92,8 +92,7 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
                         onClick={handleConfirm}
                         className="row-span-2 bg-gradient-to-b from-emerald-500 to-emerald-600 active:from-emerald-600 active:to-emerald-700 transition-all rounded-[1.5rem] flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200 active:scale-95 active:shadow-none"
                     >
-                        <Check size={32} strokeWidth={3} className="mb-1" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">Simpan</span>
+                        <Check size={32} strokeWidth={3} />
                     </button>
 
                     {/* Row 4 */}

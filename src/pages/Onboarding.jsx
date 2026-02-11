@@ -13,6 +13,7 @@ export default function Onboarding() {
     const [groupName, setGroupName] = useState('')
     const [targetAnimal, setTargetAnimal] = useState('sapi')
     const [totalPrice, setTotalPrice] = useState('')
+    const [targetParticipants, setTargetParticipants] = useState(7)
     const [qurbanYear, setQurbanYear] = useState(2026)
 
     // Participants State
@@ -57,6 +58,7 @@ export default function Onboarding() {
                     name: groupName,
                     target_animal: targetAnimal,
                     total_price: unformatNumber(totalPrice),
+                    target_participants: parseInt(targetParticipants),
                     qurban_year: qurbanYear,
                     user_id: userId
                 })
@@ -151,13 +153,35 @@ export default function Onboarding() {
                                         id="onboard-target-animal"
                                         name="target_animal"
                                         value={targetAnimal}
-                                        onChange={(e) => setTargetAnimal(e.target.value)}
+                                        onChange={(e) => {
+                                            const animal = e.target.value
+                                            setTargetAnimal(animal)
+                                            if (animal === 'sapi') {
+                                                setTargetParticipants(7)
+                                            } else {
+                                                setTargetParticipants(1)
+                                            }
+                                        }}
                                         className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white appearance-none"
                                     >
                                         <option value="sapi">Sapi</option>
                                         <option value="kambing">Kambing</option>
                                         <option value="domba">Domba</option>
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="onboard-target-participants" className="block text-sm font-medium text-gray-700 mb-1">Target Peserta</label>
+                                    <input
+                                        id="onboard-target-participants"
+                                        name="target_participants"
+                                        type="number"
+                                        min="1"
+                                        value={targetParticipants}
+                                        onChange={(e) => setTargetParticipants(e.target.value)}
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
+                                        required
+                                    />
                                 </div>
 
                                 <div>
