@@ -92,9 +92,10 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
                         Let's keep it simple grid for now. */}
                     <button
                         onClick={handleConfirm}
-                        className="row-span-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-200"
+                        className="row-span-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200"
                     >
-                        <Check size={32} strokeWidth={3} />
+                        <Check size={28} strokeWidth={3} className="mb-1" />
+                        <span className="text-xs font-bold uppercase">Simpan</span>
                     </button>
 
                     {/* Row 4 */}

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal } from 'lucide-react'
 import DatePicker from '../components/DatePicker'
 import CalculatorModal from '../components/CalculatorModal'
 import Skeleton from '../components/Skeleton'
@@ -13,6 +13,46 @@ export default function GroupDetail() {
     const navigate = useNavigate()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+
+    // Filter Helper
+    const getFilteredHistory = (transactions) => {
+        if (!transactions) return []
+
+        const now = new Date()
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const startOfWeek = new Date(now)
+        startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1)) // Monday
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+        return transactions.filter(t => {
+            const tDate = new Date(t.transaction_date)
+            // Fix timezone issue by comparing localized date strings or pure dates
+            // Assuming transaction_date is YYYY-MM-DD string from db:
+            const trxDate = new Date(t.transaction_date + 'T00:00:00')
+
+            switch (historyFilterMode) {
+                case 'day':
+                    return trxDate.toDateString() === now.toDateString()
+                case 'week':
+                    return trxDate >= startOfWeek
+                case 'month':
+                    return trxDate >= startOfMonth
+                case 'custom':
+                    if (historyCustomDate.start && historyCustomDate.end) {
+                        const start = new Date(historyCustomDate.start + 'T00:00:00')
+                        const end = new Date(historyCustomDate.end + 'T23:59:59')
+                        return trxDate >= start && trxDate <= end
+                    }
+                    if (historyCustomDate.start) {
+                        const start = new Date(historyCustomDate.start + 'T00:00:00')
+                        return trxDate >= start
+                    }
+                    return true
+                default:
+                    return true
+            }
+        })
+    }
 
     // Transaction Modal State
     const [showModal, setShowModal] = useState(false)
@@ -28,6 +68,8 @@ export default function GroupDetail() {
     const [trxReceiptFile, setTrxReceiptFile] = useState(null)
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showCalculator, setShowCalculator] = useState(false)
+    const [calculatorMode, setCalculatorMode] = useState('new') // 'new' | 'edit'
+    const [editingTransaction, setEditingTransaction] = useState(null)
 
     // Edit Group State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -56,6 +98,15 @@ export default function GroupDetail() {
     // History Modal State
     const [selectedParticipantForHistory, setSelectedParticipantForHistory] = useState(null)
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+    const [activeTransactionDropdown, setActiveTransactionDropdown] = useState(null)
+
+    // History Filter State
+    const [historyFilterMode, setHistoryFilterMode] = useState('all') // 'all' | 'day' | 'week' | 'month' | 'custom'
+    const [historyCustomDate, setHistoryCustomDate] = useState({ start: null, end: null })
+    const [isHistoryFilterOpen, setIsHistoryFilterOpen] = useState(false)
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false)
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false)
+    const filterRef = useRef(null)
 
     // Pre-fill form when Edit Modal opens
     useEffect(() => {
@@ -70,29 +121,44 @@ export default function GroupDetail() {
     }, [isEditModalOpen, data])
 
     // Click Outside to Close Dropdown
+    // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (activeParticipantDropdown !== null) {
-                const dropdowns = document.querySelectorAll('[data-dropdown]')
-                const triggers = document.querySelectorAll('[data-dropdown-trigger]')
+            // Debugging
+            if (isHistoryFilterOpen) {
+                console.log('Click detected. Target:', event.target)
+                console.log('Filter Ref:', filterRef.current)
+                console.log('Contains?', filterRef.current && filterRef.current.contains(event.target))
+            }
 
-                let clickedInside = false
-                dropdowns.forEach(dropdown => {
-                    if (dropdown.contains(event.target)) clickedInside = true
-                })
-                triggers.forEach(trigger => {
-                    if (trigger.contains(event.target)) clickedInside = true
-                })
-
-                if (!clickedInside) {
+            // Existing dropdown logic
+            if (activeParticipantDropdown || activeTransactionDropdown) {
+                if (!event.target.closest('[data-dropdown-trigger]') && !event.target.closest('[data-dropdown]')) {
                     setActiveParticipantDropdown(null)
+                    setActiveTransactionDropdown(null)
+                }
+            }
+
+            // Close History Filter if clicking outside using Ref
+            if (isHistoryFilterOpen && filterRef.current) {
+                const isClickInside = filterRef.current.contains(event.target)
+
+                if (!isClickInside) {
+                    // Prevent closing if interacting with date pickers (simple check if they are open)
+                    if (!showStartDatePicker && !showEndDatePicker) {
+                        console.log('Closing filter dropdown')
+                        setIsHistoryFilterOpen(false)
+                    }
                 }
             }
         }
 
-        document.addEventListener('click', handleClickOutside)
-        return () => document.removeEventListener('click', handleClickOutside)
-    }, [activeParticipantDropdown])
+        // Use 'mousedown' to catch clicks before they might be stopped by other handlers,
+        // but 'click' is also fine if we ensure bubbling.
+        // Let's stick to 'mousedown' as it is often more reliable for "outside" checks.
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [activeParticipantDropdown, activeTransactionDropdown, isHistoryFilterOpen, showStartDatePicker, showEndDatePicker])
 
 
 
@@ -265,12 +331,14 @@ export default function GroupDetail() {
             id,
             name,
             phone,
+            user_id,
             transactions (
               id,
               amount,
               transaction_date,
               payment_method,
-              receipt_url
+              receipt_url,
+              user_id
             )
           )
         `)
@@ -289,10 +357,12 @@ export default function GroupDetail() {
     const processGroupData = (group) => {
         let totalCollected = 0
         const enrichedParticipants = group.participants.map(p => {
-            const pTotal = p.transactions?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0
+            const sortedTransactions = p.transactions?.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)) || []
+            const pTotal = sortedTransactions.reduce((sum, t) => sum + (t.amount || 0), 0)
             totalCollected += pTotal
             return {
                 ...p,
+                transactions: sortedTransactions,
                 totalPaid: pTotal
             }
         })
@@ -382,6 +452,69 @@ export default function GroupDetail() {
         } catch (error) {
             console.error('Transaction flow error:', error)
             alert(`Gagal menyimpan transaksi: ${error.message}`)
+        } finally {
+            setTrxLoading(false)
+        }
+    }
+
+    const handleUpdateTransactionAmount = async (newAmount) => {
+        if (!editingTransaction) return
+
+        const rawAmount = unformatNumber(newAmount)
+        console.log('Updating transaction:', editingTransaction.id, 'to amount:', rawAmount)
+        setTrxLoading(true)
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            console.log('Current User ID:', user?.id)
+            console.log('Transaction User ID:', editingTransaction.user_id)
+
+            if (user?.id && editingTransaction.user_id && user.id !== editingTransaction.user_id) {
+                console.warn('MISMATCH: Current user does not own this transaction!')
+            }
+
+            const { data: updatedData, error } = await supabase
+                .from('transactions')
+                .update({ amount: rawAmount })
+                .eq('id', editingTransaction.id)
+                .select()
+
+            if (error) {
+                console.error('Supabase update error:', error)
+                throw error
+            }
+
+            if (!updatedData || updatedData.length === 0) {
+                console.warn('Update returned no data. Possible RLS issue or ID mismatch.')
+                throw new Error('Update failed: No rows modified. Check permissions.')
+            }
+
+            console.log('Update success, Supabase returned:', updatedData)
+
+            // Refresh data
+            await fetchData()
+
+            // Update local state if needed (history modal updates automatically via fetchData -> selectedParticipant update not automatic though)
+            // We need to update the selectedParticipantForHistory locally to reflect changes immediately
+            if (selectedParticipantForHistory) {
+                const updatedParticipants = data?.participants || []
+                // Note: data might be stale in this closure if fetchData didn't update it yet (async state update)
+                // But we can just use the new value to update the local history view
+                setSelectedParticipantForHistory(prev => ({
+                    ...prev,
+                    transactions: prev.transactions.map(t =>
+                        t.id === editingTransaction.id ? { ...t, amount: rawAmount } : t
+                    )
+                }))
+            }
+
+            setShowCalculator(false)
+            setEditingTransaction(null)
+            setCalculatorMode('new')
+            setTrxAmount('') // Reset calculator display
+        } catch (error) {
+            console.error('Error updating transaction:', error)
+            alert(`Gagal mengupdate transaksi: ${error.message}`)
         } finally {
             setTrxLoading(false)
         }
@@ -713,7 +846,10 @@ export default function GroupDetail() {
                                                 name="amount"
                                                 type="text"
                                                 value={trxAmount}
-                                                onClick={() => setShowCalculator(true)}
+                                                onClick={() => {
+                                                    setCalculatorMode('new')
+                                                    setShowCalculator(true)
+                                                }}
                                                 readOnly={true}
                                                 placeholder="0"
                                                 className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 border-2 border-emerald-100 rounded-2xl focus:outline-none focus:border-emerald-500 text-3xl font-bold text-emerald-800 placeholder-emerald-200/50 cursor-pointer caret-transparent"
@@ -1002,11 +1138,12 @@ export default function GroupDetail() {
             {/* History Modal */}
             {isHistoryModalOpen && selectedParticipantForHistory && (
                 <div
-                    onClick={() => setIsHistoryModalOpen(false)}
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsHistoryModalOpen(false)
+                    }}
                     className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
                 >
                     <div
-                        onClick={(e) => e.stopPropagation()}
                         className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all"
                     >
                         {/* Header */}
@@ -1017,19 +1154,100 @@ export default function GroupDetail() {
                                     {selectedParticipantForHistory.name}
                                 </h3>
                             </div>
-                            <button
-                                onClick={() => setIsHistoryModalOpen(false)}
-                                className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition active:scale-90"
-                            >
-                                <X size={20} strokeWidth={2.5} />
-                            </button>
+
+                            {/* Filter Button (Replaces Close) */}
+                            <div className="relative" ref={filterRef}>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setIsHistoryFilterOpen(!isHistoryFilterOpen)
+                                    }}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${historyFilterMode !== 'all'
+                                        ? 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-200'
+                                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    <SlidersHorizontal size={20} />
+                                </button>
+
+                                {/* Filter Dropdown */}
+                                {isHistoryFilterOpen && (
+                                    <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 z-[110] overflow-hidden animate-scale-up origin-top-right p-2"
+                                    >
+                                        <div className="space-y-1">
+                                            {[
+                                                { id: 'all', label: 'Semua' },
+                                                { id: 'day', label: 'Hari Ini' },
+                                                { id: 'week', label: 'Minggu Ini' },
+                                                { id: 'month', label: 'Bulan Ini' },
+                                                { id: 'custom', label: 'Custom Tanggal' }
+                                            ].map(opt => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => {
+                                                        setHistoryFilterMode(opt.id)
+                                                        if (opt.id !== 'custom') setIsHistoryFilterOpen(false)
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex justify-between items-center transition ${historyFilterMode === opt.id ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    <span>{opt.label}</span>
+                                                    {historyFilterMode === opt.id && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Custom Date Range Picker */}
+                                        {historyFilterMode === 'custom' && (
+                                            <div className="mt-3 pt-3 border-t border-slate-50 px-2 pb-2">
+                                                <div className="space-y-2">
+                                                    <div>
+                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Dari Tanggal</label>
+                                                        <button
+                                                            onClick={() => setShowStartDatePicker(true)}
+                                                            className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
+                                                        >
+                                                            {historyCustomDate.start ? new Date(historyCustomDate.start).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Sampai Tanggal</label>
+                                                        <button
+                                                            onClick={() => setShowEndDatePicker(true)}
+                                                            className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
+                                                        >
+                                                            {historyCustomDate.end ? new Date(historyCustomDate.end).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Content */}
                         <div className="p-8 pt-2">
-                            {selectedParticipantForHistory.transactions && selectedParticipantForHistory.transactions.length > 0 ? (
+                            {/* Date Pickers for Custom Filter */}
+                            <DatePicker
+                                isOpen={showStartDatePicker}
+                                onClose={() => setShowStartDatePicker(false)}
+                                selectedDate={historyCustomDate.start}
+                                onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, start: date }))}
+                            />
+                            <DatePicker
+                                isOpen={showEndDatePicker}
+                                onClose={() => setShowEndDatePicker(false)}
+                                selectedDate={historyCustomDate.end}
+                                onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, end: date }))}
+                            />
+
+                            {getFilteredHistory(selectedParticipantForHistory.transactions).length > 0 ? (
                                 <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    {selectedParticipantForHistory.transactions.map((trx) => (
+                                    {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
                                         <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
                                             <div className="flex items-center space-x-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
@@ -1046,19 +1264,56 @@ export default function GroupDetail() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
+                                            <div className="flex items-center space-x-2 relative">
                                                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
                                                     {trx.payment_method || 'Tunai'}
                                                 </span>
+
+                                                {/* Edit Dropdown Trigger */}
+                                                <button
+                                                    data-dropdown-trigger
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        const newId = activeTransactionDropdown === trx.id ? null : trx.id
+                                                        setActiveTransactionDropdown(newId)
+                                                    }}
+                                                    className="w-8 h-8 rounded-full bg-transparent hover:bg-slate-200 flex items-center justify-center text-slate-400 transition"
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+
+                                                {/* Dropdown Menu */}
+                                                {activeTransactionDropdown === trx.id && (
+                                                    <div
+                                                        data-dropdown
+                                                        className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right"
+                                                    >
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setEditingTransaction(trx)
+                                                                setTrxAmount(formatNumber(trx.amount))
+                                                                setCalculatorMode('edit')
+                                                                setShowCalculator(true)
+                                                                setActiveTransactionDropdown(null)
+                                                            }}
+                                                            className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-2"
+                                                        >
+                                                            <Pencil size={14} className="text-slate-400" />
+                                                            <span>Edit Nominal</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+
                                                 {trx.receipt_url && (
                                                     <a
                                                         href={trx.receipt_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95"
+                                                        className="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95 border border-slate-100"
                                                         title="Lihat Bukti"
                                                     >
-                                                        <ReceiptText size={18} />
+                                                        <ReceiptText size={14} />
                                                     </a>
                                                 )}
                                             </div>
@@ -1211,10 +1466,21 @@ export default function GroupDetail() {
             {/* Calculator Modal */}
             <CalculatorModal
                 isOpen={showCalculator}
-                onClose={() => setShowCalculator(false)}
-                onConfirm={(val) => setTrxAmount(val)}
+                onClose={() => {
+                    setShowCalculator(false)
+                    setEditingTransaction(null)
+                    setCalculatorMode('new')
+                    if (calculatorMode === 'edit') setTrxAmount('') // reset if cancelling edit
+                }}
+                onConfirm={(val) => {
+                    if (calculatorMode === 'edit') {
+                        handleUpdateTransactionAmount(val)
+                    } else {
+                        setTrxAmount(val)
+                    }
+                }}
                 initialValue={trxAmount}
-                title="Masukkan Jumlah Setoran"
+                title={calculatorMode === 'edit' ? "Edit Jumlah Setoran" : "Masukkan Jumlah Setoran"}
             />
         </div >
     )

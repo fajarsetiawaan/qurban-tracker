@@ -273,6 +273,23 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchDashboardData()
+
+        // Realtime Subscription for Global Updates
+        const channel = supabase
+            .channel('dashboard-realtime')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'transactions' },
+                () => {
+                    console.log('Realtime change detected in transactions! Refreshing dashboard...')
+                    fetchDashboardData()
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
     }, [])
 
     // Handle ?modal=account|history|notif query param from GroupDetail navigation
