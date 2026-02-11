@@ -65,12 +65,12 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
                 </div>
 
                 {/* Keypad */}
-                <div className="p-4 grid grid-cols-4 gap-3 bg-white">
+                <div className="p-5 grid grid-cols-4 gap-3 bg-white">
                     {/* Row 1 */}
                     <KeyButton onClick={() => handleNumberClick('7')}>7</KeyButton>
                     <KeyButton onClick={() => handleNumberClick('8')}>8</KeyButton>
                     <KeyButton onClick={() => handleNumberClick('9')}>9</KeyButton>
-                    <ActionButton onClick={handleClear} className="bg-red-50 text-red-500 hover:bg-red-100">
+                    <ActionButton onClick={handleClear} className="bg-red-50 text-red-500 hover:bg-red-100 border border-red-100">
                         C
                     </ActionButton>
 
@@ -78,7 +78,7 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
                     <KeyButton onClick={() => handleNumberClick('4')}>4</KeyButton>
                     <KeyButton onClick={() => handleNumberClick('5')}>5</KeyButton>
                     <KeyButton onClick={() => handleNumberClick('6')}>6</KeyButton>
-                    <ActionButton onClick={handleBackspace} className="bg-slate-50 text-slate-600 hover:bg-slate-100">
+                    <ActionButton onClick={handleBackspace} className="bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100">
                         <Delete size={24} />
                     </ActionButton>
 
@@ -87,21 +87,19 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
                     <KeyButton onClick={() => handleNumberClick('2')}>2</KeyButton>
                     <KeyButton onClick={() => handleNumberClick('3')}>3</KeyButton>
 
-                    {/* Confirm Button (Spans 2 rows visually, but grid flow is row by row) */}
-                    {/* To make a tall button on the right we need CSS grid layout tweaks or rowSpan. 
-                        Let's keep it simple grid for now. */}
+                    {/* Confirm Button */}
                     <button
                         onClick={handleConfirm}
-                        className="row-span-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition rounded-2xl flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200"
+                        className="row-span-2 bg-gradient-to-b from-emerald-500 to-emerald-600 active:from-emerald-600 active:to-emerald-700 transition-all rounded-[1.5rem] flex flex-col items-center justify-center text-white shadow-lg shadow-emerald-200 active:scale-95 active:shadow-none"
                     >
-                        <Check size={28} strokeWidth={3} className="mb-1" />
-                        <span className="text-xs font-bold uppercase">Simpan</span>
+                        <Check size={32} strokeWidth={3} className="mb-1" />
+                        <span className="text-[10px] font-black uppercase tracking-wider">Simpan</span>
                     </button>
 
                     {/* Row 4 */}
                     <KeyButton onClick={() => handleNumberClick('0')}>0</KeyButton>
-                    <KeyButton onClick={() => handleNumberClick('00')} className="text-xl">00</KeyButton>
-                    <KeyButton onClick={() => handleNumberClick('000')} className="text-lg">000</KeyButton>
+                    <KeyButton onClick={() => handleNumberClick('00')} className="text-xl tracking-tighter">00</KeyButton>
+                    <KeyButton onClick={() => handleNumberClick('000')} className="text-lg tracking-tighter">000</KeyButton>
                 </div>
             </div>
         </div>
@@ -111,7 +109,7 @@ export default function CalculatorModal({ isOpen, onClose, onConfirm, initialVal
 const KeyButton = ({ children, onClick, className = "" }) => (
     <button
         onClick={onClick}
-        className={`h-20 rounded-2xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition flex items-center justify-center text-2xl font-bold text-slate-700 shadow-sm ${className}`}
+        className={`h-[4.5rem] rounded-[1.5rem] bg-slate-50 hover:bg-slate-100 active:bg-slate-200 active:scale-95 transition flex items-center justify-center text-2xl font-bold text-slate-700 shadow-sm border border-slate-100/50 ${className}`}
     >
         {children}
     </button>
@@ -120,7 +118,7 @@ const KeyButton = ({ children, onClick, className = "" }) => (
 const ActionButton = ({ children, onClick, className = "" }) => (
     <button
         onClick={onClick}
-        className={`h-20 rounded-2xl active:scale-95 transition flex items-center justify-center font-bold shadow-sm ${className}`}
+        className={`h-[4.5rem] rounded-[1.5rem] active:scale-95 transition flex items-center justify-center font-bold shadow-sm ${className}`}
     >
         {children}
     </button>

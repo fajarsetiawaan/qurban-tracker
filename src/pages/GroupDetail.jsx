@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal } from 'lucide-react'
 import DatePicker from '../components/DatePicker'
 import CalculatorModal from '../components/CalculatorModal'
+
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 
@@ -100,6 +101,9 @@ export default function GroupDetail() {
     const [selectedParticipantForHistory, setSelectedParticipantForHistory] = useState(null)
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
     const [activeTransactionDropdown, setActiveTransactionDropdown] = useState(null)
+    const [showTransactionDatePicker, setShowTransactionDatePicker] = useState(false)
+    const [isDeleteTransactionModalOpen, setIsDeleteTransactionModalOpen] = useState(false)
+    const [transactionToDelete, setTransactionToDelete] = useState(null)
 
     // History Filter State
     const [historyFilterMode, setHistoryFilterMode] = useState('all') // 'all' | 'day' | 'week' | 'month' | 'custom'
@@ -521,6 +525,75 @@ export default function GroupDetail() {
         }
     }
 
+    // Update Transaction Date (New)
+    const handleUpdateTransactionDate = async (newDate) => {
+        if (!editingTransaction || !newDate) return
+
+        try {
+            const { error } = await supabase
+                .from('transactions')
+                .update({ transaction_date: new Date(newDate).toISOString() }) // Ensure ISO string
+                .eq('id', editingTransaction.id)
+
+            if (error) throw error
+
+            // Refresh data
+            await fetchData()
+
+            // Update local state for immediate feedback
+            if (selectedParticipantForHistory) {
+                setSelectedParticipantForHistory(prev => ({
+                    ...prev,
+                    transactions: prev.transactions.map(t =>
+                        t.id === editingTransaction.id ? { ...t, transaction_date: new Date(newDate).toISOString() } : t
+                    ).sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)) // Re-sort desc
+                }))
+            }
+
+            setShowTransactionDatePicker(false)
+            setEditingTransaction(null)
+        } catch (error) {
+            console.error('Error updating transaction date:', error)
+            alert('Gagal mengupdate tanggal transaksi')
+        }
+    }
+
+    // Delete Transaction (New)
+    const handleDeleteTransaction = async () => {
+        if (!transactionToDelete) return
+
+        const trxId = transactionToDelete.id
+        setDeleteLoading(true)
+
+        try {
+            const { error } = await supabase
+                .from('transactions')
+                .delete()
+                .eq('id', trxId)
+
+            if (error) throw error
+
+            // Refresh data
+            await fetchData()
+
+            // Update local state
+            if (selectedParticipantForHistory) {
+                setSelectedParticipantForHistory(prev => ({
+                    ...prev,
+                    transactions: prev.transactions.filter(t => t.id !== trxId)
+                }))
+            }
+
+            setIsDeleteTransactionModalOpen(false)
+            setTransactionToDelete(null)
+        } catch (error) {
+            console.error('Error deleting transaction:', error)
+            alert('Gagal menghapus transaksi')
+        } finally {
+            setDeleteLoading(false)
+        }
+    }
+
     const resetModal = () => {
         setShowModal(false)
         setTrxStep('form')
@@ -609,28 +682,32 @@ export default function GroupDetail() {
                 </div>
 
                 {/* Chart Section */}
-                <div className="bg-white mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden">
-                    <div className="w-56 h-56 relative z-10">
-                        <PieChart width={224} height={224}>
+                <div className="bg-gradient-to-b from-white to-slate-50 mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden border border-slate-100/50">
+                    <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white to-transparent opacity-50 pointer-events-none" />
+                    <div className="w-64 h-64 relative z-10">
+                        <PieChart width={256} height={256}>
                             <Pie
                                 data={chartData}
-                                innerRadius={65}
-                                outerRadius={90}
-                                cornerRadius={10}
-                                paddingAngle={4}
+                                innerRadius={70}
+                                outerRadius={100}
+                                cornerRadius={12}
+                                paddingAngle={5}
                                 dataKey="value"
                                 stroke="none"
                             >
                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value) => `Rp ${value.toLocaleString()}`} />
+                            <Tooltip
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                formatter={(value) => `Rp ${value.toLocaleString()}`}
+                            />
                         </PieChart>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-xs text-slate-400 font-medium uppercase tracking-widest mb-1">Terkumpul</span>
-                            <span className="text-3xl font-bold text-emerald-600">
-                                {Math.round((data.totalCollected / data.total_price) * 100)}<span className="text-lg text-emerald-500">%</span>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none -mt-1">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Terkumpul</span>
+                            <span className="text-4xl font-black text-slate-800 tracking-tighter">
+                                {Math.round((data.totalCollected / data.total_price) * 100)}<span className="text-xl text-emerald-500 ml-0.5">%</span>
                             </span>
                         </div>
                     </div>
@@ -638,13 +715,19 @@ export default function GroupDetail() {
 
                 {/* Breakdown Stats */}
                 <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="bg-emerald-50 p-4 rounded-3xl">
-                        <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider mb-1">Masuk</p>
-                        <p className="text-lg font-bold text-emerald-800">Rp {data.totalCollected.toLocaleString()}</p>
+                    <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-5 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-[2rem] -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-2 relative z-10">Terkumpul</p>
+                        <p className="text-xl font-black text-emerald-700 tracking-tight relative z-10">
+                            Rp {formatNumber(data.totalCollected)}
+                        </p>
                     </div>
-                    <div className="bg-slate-100 p-4 rounded-3xl">
-                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Kurang</p>
-                        <p className="text-lg font-bold text-slate-700">Rp {data.shortage.toLocaleString()}</p>
+                    <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-100 p-5 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-slate-100 rounded-bl-[2rem] -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2 relative z-10">Kekurangan</p>
+                        <p className="text-xl font-black text-slate-700 tracking-tight relative z-10">
+                            Rp {formatNumber(data.shortage)}
+                        </p>
                     </div>
                 </div>
 
@@ -695,36 +778,43 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className="bg-white p-4 rounded-3xl shadow-sm border border-slate-50 flex items-center space-x-4 hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer relative group"
+                                    className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center space-x-5 hover:bg-slate-50/50 hover:shadow-md transition-all duration-300 cursor-pointer relative group overflow-hidden"
                                 >
+                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
+
                                     {/* Avatar */}
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor}`}>
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm ${avatarColor} group-hover:scale-105 transition-transform duration-300`}>
                                         {participant.name.substring(0, 2).toUpperCase()}
                                     </div>
 
                                     {/* Info */}
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <h3 className="font-bold text-slate-800">{participant.name}</h3>
-                                            <span className="font-bold text-slate-800">Rp {participant.totalPaid.toLocaleString()}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-baseline mb-2">
+                                            <h3 className="font-bold text-slate-800 text-base truncate pr-2">{participant.name}</h3>
+                                            <span className="font-extrabold text-slate-900 text-sm whitespace-nowrap">Rp {formatNumber(participant.totalPaid)}</span>
                                         </div>
 
                                         {/* Progress Bar */}
-                                        <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1">
+                                        <div className="w-full bg-slate-100 rounded-full h-2 mb-2 overflow-hidden">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${percentage}%` }}
-                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                className={`h-1.5 rounded-full ${percentage >= 100 ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                                                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                                                className={`h-full rounded-full ${percentage >= 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-emerald-400 to-emerald-300'}`}
                                             ></motion.div>
                                         </div>
-                                        <p className="text-[10px] text-slate-400 text-right">
-                                            {percentage >= 100 ? 'LUNAS' : `Sisa Rp ${(perPersonTarget - participant.totalPaid).toLocaleString()}`}
-                                        </p>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                                                {percentage >= 100 ? <span className="text-emerald-500 flex items-center gap-1"><CheckCircle size={10} strokeWidth={3} /> Lunas</span> : `${Math.round(percentage)}% Terkumpul`}
+                                            </p>
+                                            <p className="text-[10px] font-medium text-slate-400">
+                                                {percentage < 100 && `Sisa Rp ${formatNumber(perPersonTarget - participant.totalPaid)}`}
+                                            </p>
+                                        </div>
                                     </div>
 
                                     {/* Action Menu */}
-                                    <div className="relative">
+                                    <div className="relative pl-1">
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
                                             data-dropdown-trigger
@@ -1290,20 +1380,15 @@ export default function GroupDetail() {
                                     <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                                         {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
                                             <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
-                                                        {trx.payment_method?.toLowerCase() === 'transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
-                                                            <span>
-                                                                {trx.transaction_date
-                                                                    ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-                                                                    : 'Tanggal tidak tersedia'}
-                                                            </span>
-                                                        </p>
-                                                    </div>
+                                                <div>
+                                                    <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                                                        <span>
+                                                            {trx.transaction_date
+                                                                ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                                : 'Tanggal tidak tersedia'}
+                                                        </span>
+                                                    </p>
                                                 </div>
                                                 <div className="flex items-center space-x-2 relative">
                                                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
@@ -1327,7 +1412,7 @@ export default function GroupDetail() {
                                                     {activeTransactionDropdown === trx.id && (
                                                         <div
                                                             data-dropdown
-                                                            className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right"
+                                                            className="absolute right-0 top-8 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right py-1"
                                                         >
                                                             <button
                                                                 onClick={(e) => {
@@ -1338,10 +1423,38 @@ export default function GroupDetail() {
                                                                     setShowCalculator(true)
                                                                     setActiveTransactionDropdown(null)
                                                                 }}
-                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-2"
+                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 transition"
                                                             >
                                                                 <Pencil size={14} className="text-slate-400" />
                                                                 <span>Edit Nominal</span>
+                                                            </button>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setEditingTransaction(trx)
+                                                                    setShowTransactionDatePicker(true)
+                                                                    setActiveTransactionDropdown(null)
+                                                                }}
+                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 transition"
+                                                            >
+                                                                <Calendar size={14} className="text-slate-400" />
+                                                                <span>Edit Tanggal</span>
+                                                            </button>
+
+                                                            <div className="h-px bg-slate-50 my-1"></div>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setTransactionToDelete(trx)
+                                                                    setIsDeleteTransactionModalOpen(true)
+                                                                    setActiveTransactionDropdown(null)
+                                                                }}
+                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-red-500 hover:bg-red-50 flex items-center space-x-3 transition"
+                                                            >
+                                                                <Trash2 size={14} className="text-red-400" />
+                                                                <span>Hapus</span>
                                                             </button>
                                                         </div>
                                                     )}
@@ -1523,6 +1636,48 @@ export default function GroupDetail() {
                 initialValue={trxAmount}
                 title={calculatorMode === 'edit' ? "Edit Jumlah Setoran" : "Masukkan Jumlah Setoran"}
             />
-        </motion.div >
+            {/* Transaction Date Picker */}
+            <DatePicker
+                isOpen={showTransactionDatePicker}
+                onClose={() => setShowTransactionDatePicker(false)}
+                selectedDate={editingTransaction?.transaction_date ? new Date(editingTransaction.transaction_date) : new Date()}
+                onDateChange={(date) => {
+                    handleUpdateTransactionDate(date)
+                }}
+            />
+
+            {/* Delete Transaction Confirmation Modal */}
+            {
+                isDeleteTransactionModalOpen && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Trash2 className="text-red-500" size={32} />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Transaksi?</h3>
+                            <p className="text-slate-500 mb-6 text-sm">
+                                Apakah kamu yakin ingin menghapus transaksi sebesar <strong>{transactionToDelete ? formatNumber(transactionToDelete.amount) : ''}</strong>? Tindakan ini tidak dapat dibatalkan.
+                            </p>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setIsDeleteTransactionModalOpen(false)}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleDeleteTransaction}
+                                    disabled={deleteLoading}
+                                    className="flex-1 py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition shadow-lg shadow-red-200"
+                                >
+                                    {deleteLoading ? 'Menghapus...' : 'Ya, Hapus'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </motion.div>
     )
 }
