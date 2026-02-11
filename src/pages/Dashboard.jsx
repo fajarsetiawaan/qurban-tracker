@@ -563,6 +563,8 @@ export default function Dashboard() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session?.user?.id) throw new Error("User ID tidak ditemukan")
 
+            console.log('Profile Form Data State:', profileFormData)
+
             const updates = {
                 full_name: profileFormData.full_name || '',
                 phone_number: profileFormData.phone_number || '',
@@ -629,20 +631,38 @@ export default function Dashboard() {
     return (
         <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative">
             {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all duration-300 shadow-sm">
-                <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
-                        <img src="/logo-domba.png" alt="Logo" className="w-6 h-6 object-contain brightness-0 invert" />
+            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-xl border-b border-emerald-100/50 transition-all duration-300 shadow-sm">
+                <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setIsProfileMenuOpen(true)}>
+                    <div className="relative">
+                        <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-lg shadow-emerald-100 group-hover:scale-105 transition-transform duration-300 relative z-10 bg-gradient-to-tr from-emerald-100 to-white flex items-center justify-center">
+                            <img src="/logo-domba.png" alt="Profile" className="w-6 h-6 object-contain transform group-hover:rotate-12 transition-transform duration-500" />
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-emerald-400 blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
                     </div>
-                    <span className="text-xl font-black text-slate-800 tracking-tight font-heading">dombantara.id</span>
+                    <div className="flex flex-col">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Assalamu'alaikum</p>
+                        <h2 className="text-sm font-black text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
+                            {loading ? <Skeleton className="h-4 w-24 rounded-lg" /> : (profile?.full_name?.split(' ')[0] || 'Hamba Allah')}
+                        </h2>
+                    </div>
                 </div>
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-2">
+                    <button
+                        onClick={() => setIsNotificationModalOpen(true)}
+                        className="relative p-2.5 bg-white rounded-full border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100 transition-all duration-300 shadow-sm hover:shadow-md group"
+                    >
+                        <Bell size={20} className="group-hover:rotate-12 transition-transform" />
+                        {notificationTransactions.length > 0 && (
+                            <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        )}
+                    </button>
+                    {/* Logout Button moved to Profile Menu, but keeping here as fallback or removing? The previous design had it. Let's keep it but cleaner. */}
                     <button
                         onClick={handleLogout}
-                        className="p-2 rounded-full hover:bg-slate-50 text-slate-400 hover:text-red-600 transition active:scale-95"
+                        className="p-2.5 bg-white rounded-full border border-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300 shadow-sm hover:shadow-md"
                         title="Logout"
                     >
-                        <LogOut size={22} />
+                        <LogOut size={20} />
                     </button>
                 </div>
             </header>
@@ -656,70 +676,57 @@ export default function Dashboard() {
                     WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%)'
                 }}
             >
-                <div className="flex flex-col mb-8 mt-2">
-                    <h1 className="text-base font-bold text-slate-400 mb-1">Assalamu'alaikum,</h1>
-                    <p className="text-3xl font-black text-slate-900 leading-tight tracking-tight">
-                        {profile?.institution_name || 'Sahabat Qurban'}
-                    </p>
-                </div>
+                <div className="mt-6"></div>
 
                 {/* Hero Card (Balance) */}
-                <div className="bg-gradient-to-br from-emerald-600 to-green-500 rounded-3xl p-6 shadow-xl shadow-emerald-200 mb-8 relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
+                <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[2.5rem] p-8 shadow-xl shadow-emerald-200/50 mb-8 relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-500 group border border-emerald-400/20">
                     {/* Background Pattern */}
-                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-yellow-300 opacity-10 blur-2xl"></div>
+                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-emerald-300 opacity-20 blur-2xl"></div>
 
                     <div className="relative z-10 text-white">
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start mb-6">
                             <div>
-                                <div className="flex items-center space-x-2 mb-2 opacity-90">
-                                    <Wallet size={18} />
-                                    <span className="text-sm font-medium tracking-wide">Total Tabungan Qurban</span>
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm">
+                                        <Wallet size={14} className="text-emerald-50" />
+                                    </div>
+                                    <span className="text-xs font-bold text-emerald-100 uppercase tracking-widest">Total Tabungan</span>
                                 </div>
                                 {loading ? (
-                                    <Skeleton className="h-10 w-3/4 bg-white/30 rounded-lg" />
+                                    <Skeleton className="h-10 w-48 bg-white/20 rounded-xl" />
                                 ) : (
                                     <div>
-                                        <h2 className="text-4xl font-bold tracking-tight mb-1">
+                                        <h2 className="text-4xl font-black tracking-tight mb-2 drop-shadow-sm">
                                             {formatRupiah(totalSavings)}
                                         </h2>
                                         {totalTarget > 0 && (
-                                            <p className="text-emerald-100 text-sm font-medium opacity-90">
-                                                Target: {formatRupiah(totalTarget)}
-                                            </p>
+                                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-800/30 border border-emerald-400/30 backdrop-blur-md">
+                                                <p className="text-emerald-50 text-[10px] font-bold uppercase tracking-wide">
+                                                    Target: <span className="text-white">{formatRupiah(totalTarget)}</span>
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
                                 )}
-                            </div>
-                            {/* Decorative Icon */}
-                            <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
-                                <TrendingUp size={32} className="text-white" />
                             </div>
                         </div>
 
                         {/* Global Progress Bar */}
                         {totalTarget > 0 && !loading && (
-                            <div className="mt-6">
-                                <div className="flex justify-between text-xs font-bold text-emerald-100 mb-1.5 uppercase tracking-wider">
-                                    <span>Progress Global</span>
-                                    <span>{Math.round((totalSavings / totalTarget) * 100)}%</span>
+                            <div className="mt-8 bg-black/10 p-4 rounded-2xl border border-white/5 backdrop-blur-sm group-hover:bg-black/20 transition-colors">
+                                <div className="flex justify-between text-[10px] font-bold text-emerald-100 mb-2 uppercase tracking-widest">
+                                    <span className="flex items-center gap-1"><TrendingUp size={12} /> Progress Global</span>
+                                    <span className="text-white">{Math.round((totalSavings / totalTarget) * 100)}%</span>
                                 </div>
-                                <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
+                                <div className="w-full bg-black/20 rounded-full h-2.5 overflow-hidden">
                                     <div
-                                        className="h-full bg-white rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                        className="h-full bg-gradient-to-r from-emerald-200 to-white rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(255,255,255,0.6)] relative"
                                         style={{ width: `${Math.min(100, (totalSavings / totalTarget) * 100)}%` }}
-                                    ></div>
+                                    >
+                                        <div className="absolute right-0 top-0 bottom-0 w-1 bg-white/80 blur-[2px]"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Growth Badge (if no target or extra info) */}
-                        {growthPercentage !== 0 && totalTarget === 0 && (
-                            <div className="mt-6 flex items-center space-x-2 bg-white/20 w-fit px-3 py-1 rounded-full backdrop-blur-sm">
-                                <TrendingUp size={14} className={growthPercentage >= 0 ? "text-green-100" : "text-red-100"} />
-                                <span className={`text-xs font-semibold ${growthPercentage >= 0 ? "text-green-50" : "text-red-50"}`}>
-                                    {growthPercentage > 0 ? '+' : ''}{growthPercentage.toFixed(1)}% bulan ini
-                                </span>
                             </div>
                         )}
                     </div>
@@ -813,34 +820,32 @@ export default function Dashboard() {
                             <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
                         </div>
                     ) : (
-                        <ul className="space-y-4">
+                        <ul className="space-y-6">
                             {filteredGroups.map((group) => (
-                                <li key={group.id} className="relative">
+                                <li key={group.id} className="relative group/card">
                                     <Link
                                         to={`/groups/${group.id}`}
-                                        className="block bg-white p-5 rounded-3xl shadow-[0_4px_20px_-12px_rgba(0,0,0,0.1)] border border-slate-50 hover:border-emerald-200 hover:shadow-emerald-100/50 transition duration-300 group"
+                                        className="block bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/50 hover:border-emerald-200 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)] transition-all duration-500 relative overflow-hidden"
                                     >
-                                        <div className="flex justify-between items-start mb-3">
+                                        <div className="flex justify-between items-start mb-6 relative z-10">
                                             <div>
-                                                <div className="flex justify-start items-center space-x-2 mb-2">
-                                                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider inline-block">
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest ${group.target_animal?.toLowerCase() === 'sapi' ? 'bg-emerald-50 text-emerald-600' :
+                                                        group.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-600'
+                                                        }`}>
                                                         {group.target_animal}
                                                     </span>
-                                                    <span className="text-xs font-medium text-slate-400">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                         {group.participantCount} Peserta
                                                     </span>
                                                 </div>
-                                                <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition mb-3">{group.name}</h3>
+                                                <h3 className="font-extrabold text-slate-800 text-xl group-hover/card:text-emerald-700 transition-colors duration-300">{group.name}</h3>
                                             </div>
 
-                                            {/* Quick Actions & Badge */}
                                             <div className="flex items-center space-x-2">
-                                                {/* Year Badge - In Flow */}
                                                 <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getYearBadgeStyle(group.qurban_year || 2026)}`}>
-                                                    Periode {group.qurban_year || 2026}
+                                                    '{String(group.qurban_year || 2026).slice(-2)}
                                                 </div>
-
-                                                {/* Quick Actions Trigger */}
                                                 <button
                                                     data-dropdown-trigger
                                                     onClick={(e) => {
@@ -848,31 +853,49 @@ export default function Dashboard() {
                                                         e.stopPropagation()
                                                         setActiveDropdown(activeDropdown === group.id ? null : group.id)
                                                     }}
-                                                    className="bg-slate-50 p-2 rounded-full text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition relative z-10"
+                                                    className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-50 flex items-center justify-center text-slate-400 hover:text-emerald-600 transition-all duration-300"
                                                 >
-                                                    <MoreVertical size={20} />
+                                                    <MoreVertical size={16} />
                                                 </button>
                                             </div>
                                         </div>
 
-                                        {/* Progress Visual */}
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between text-xs font-medium mb-1">
-                                                <span className="text-emerald-600 font-bold">Terkumpul {Math.round(group.progress)}%</span>
+                                        <div className="space-y-3 relative z-10">
+                                            <div className="flex justify-between items-end">
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Terkumpul</p>
+                                                    <p className="text-lg font-black text-slate-800">{formatRupiah(group.collected)}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Target</p>
+                                                    <p className="text-sm font-bold text-slate-500">{formatRupiah(group.total_price)}</p>
+                                                </div>
                                             </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden mb-2">
-                                                <div
-                                                    className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-1000"
-                                                    style={{ width: `${Math.round(group.progress)}%` }}
-                                                ></div>
-                                            </div>
-                                            <div className="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                                                <span className="text-xs font-bold text-slate-700">{formatRupiah(group.collected)}</span>
-                                                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">
-                                                    Target: <span className="text-slate-600 font-bold">{formatRupiah(group.total_price)}</span>
-                                                </span>
+
+                                            <div className="relative pt-1">
+                                                <div className="flex mb-2 items-center justify-between">
+                                                    <div>
+                                                        <span className="text-[10px] font-bold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-50 border border-emerald-100">
+                                                            Progress
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-xs font-black inline-block text-emerald-600">
+                                                            {Math.round(group.progress)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="overflow-hidden h-2.5 mb-2 text-xs flex rounded-full bg-slate-100 shadow-inner">
+                                                    <div
+                                                        style={{ width: `${Math.round(group.progress)}%` }}
+                                                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
+                                                    ></div>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {/* Decorative Background Blob */}
+                                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-50/50 rounded-full blur-2xl group-hover/card:bg-emerald-100/50 transition-colors duration-500"></div>
                                     </Link>
 
                                     {/* Dropdown Menu */}
@@ -1026,7 +1049,15 @@ export default function Dashboard() {
                                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
                                         {!isEditingProfile && (
                                             <button
-                                                onClick={() => setIsEditingProfile(true)}
+                                                onClick={() => {
+                                                    setProfileFormData({
+                                                        full_name: profile?.full_name || '',
+                                                        phone_number: profile?.phone_number || '',
+                                                        institution_name: profile?.institution_name || '',
+                                                        address: profile?.address || ''
+                                                    })
+                                                    setIsEditingProfile(true)
+                                                }}
                                                 className="text-emerald-600 text-sm font-bold hover:underline flex items-center space-x-1"
                                             >
                                                 <Pencil size={14} />

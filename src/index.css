@@ -31,3 +31,9 @@ body {
     scrollbar-width: none;
     /* Firefox */
 }
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}

@@ -103,14 +103,14 @@ export default function Onboarding() {
     return (
         <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans">
             {/* Header (App Style) - Fixed */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-4 flex items-center shadow-sm transition-all duration-300">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100/50 px-6 py-4 flex items-center shadow-sm transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
+                    className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full border border-slate-100 hover:border-emerald-100 shadow-sm transition-all duration-300 group"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={22} className="group-hover:-translate-x-0.5 transition-transform" />
                 </button>
-                <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Buat Group Baru</h1>
+                <h1 className="text-base font-black text-slate-800 tracking-tight">Buat Group Baru</h1>
             </header>
 
 
@@ -139,7 +139,7 @@ export default function Onboarding() {
                                     placeholder="Contoh: Kelompok Masjid Al-Hidayah"
                                     value={groupName}
                                     onChange={(e) => setGroupName(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
                                     required
                                 />
                             </div>
@@ -152,7 +152,7 @@ export default function Onboarding() {
                                         name="target_animal"
                                         value={targetAnimal}
                                         onChange={(e) => setTargetAnimal(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white appearance-none"
                                     >
                                         <option value="sapi">Sapi</option>
                                         <option value="kambing">Kambing</option>
@@ -170,7 +170,7 @@ export default function Onboarding() {
                                         placeholder="Contoh: 21.000.000"
                                         value={totalPrice}
                                         onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 bg-white placeholder-gray-400"
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
                                     />
                                 </div>
 
@@ -181,7 +181,7 @@ export default function Onboarding() {
                                         name="qurban_year"
                                         value={qurbanYear}
                                         onChange={(e) => setQurbanYear(parseInt(e.target.value))}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white appearance-none"
                                     >
                                         <option value={2026}>2026</option>
                                         <option value={2027}>2027</option>
