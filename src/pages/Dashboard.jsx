@@ -531,7 +531,6 @@ export default function Dashboard() {
             id: group.id,
             name: group.name,
             target_animal: group.target_animal,
-            target_animal: group.target_animal,
             total_price: formatNumber(group.total_price),
             target_participants: group.target_participants || (group.target_animal === 'sapi' ? 7 : 1),
             qurban_year: group.qurban_year || 2026
