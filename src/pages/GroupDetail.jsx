@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal } from 'lucide-react'
@@ -562,15 +563,21 @@ export default function GroupDetail() {
     const perPersonTarget = data.participants.length > 0 ? data.total_price / data.participants.length : 0
 
     return (
-        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans"
+        >
             {/* Header (App Style) - Fixed */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100/50 px-6 py-4 flex items-center justify-between shadow-sm transition-all duration-300">
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => navigate(-1)}
                     className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full border border-slate-100 shadow-sm transition"
                 >
                     <ArrowLeft size={20} />
-                </button>
+                </motion.button>
                 <h1 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Group Info</h1>
                 <div className="relative">
                     <button
@@ -656,7 +663,20 @@ export default function GroupDetail() {
                             <span className="text-xs font-bold">Tambah</span>
                         </button>
                     </div>
-                    <div className="space-y-4">
+                    <motion.div
+                        className="space-y-4"
+                        initial="hidden"
+                        animate="visible"
+                        variants={{
+                            hidden: { opacity: 0 },
+                            visible: {
+                                opacity: 1,
+                                transition: {
+                                    staggerChildren: 0.1
+                                }
+                            }
+                        }}
+                    >
                         {data.participants.map((participant, idx) => {
                             const percentage = perPersonTarget > 0 ? Math.min(100, (participant.totalPaid / perPersonTarget) * 100) : 0
                             // Generate random pastel color based on index
@@ -664,8 +684,13 @@ export default function GroupDetail() {
                             const avatarColor = colors[idx % colors.length]
 
                             return (
-                                <div
+                                <motion.div
                                     key={participant.id}
+                                    variants={{
+                                        hidden: { opacity: 0, y: 20 },
+                                        visible: { opacity: 1, y: 0 }
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={() => {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
@@ -686,10 +711,12 @@ export default function GroupDetail() {
 
                                         {/* Progress Bar */}
                                         <div className="w-full bg-slate-100 rounded-full h-1.5 mb-1">
-                                            <div
-                                                className={`h-1.5 rounded-full transition-all duration-1000 ${percentage >= 100 ? 'bg-emerald-500' : 'bg-emerald-400'}`}
-                                                style={{ width: `${percentage}%` }}
-                                            ></div>
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, ease: "easeOut" }}
+                                                className={`h-1.5 rounded-full ${percentage >= 100 ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                                            ></motion.div>
                                         </div>
                                         <p className="text-[10px] text-slate-400 text-right">
                                             {percentage >= 100 ? 'LUNAS' : `Sisa Rp ${(perPersonTarget - participant.totalPaid).toLocaleString()}`}
@@ -698,7 +725,8 @@ export default function GroupDetail() {
 
                                     {/* Action Menu */}
                                     <div className="relative">
-                                        <button
+                                        <motion.button
+                                            whileTap={{ scale: 0.9 }}
                                             data-dropdown-trigger
                                             onClick={(e) => {
                                                 e.stopPropagation()
@@ -708,37 +736,42 @@ export default function GroupDetail() {
                                             className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition z-10 relative"
                                         >
                                             <MoreVertical size={20} />
-                                        </button>
+                                        </motion.button>
 
                                         {/* Dropdown */}
-                                        {activeParticipantDropdown === participant.id && (
-                                            <div
-                                                data-dropdown
-                                                className={`absolute right-0 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up ${idx >= data.participants.length - 2 ? 'bottom-full mb-2 origin-bottom-right' : 'top-10 origin-top-right'
-                                                    }`}
-                                            >
-                                                <button
-                                                    onClick={(e) => handleEditParticipantClick(participant, e)}
-                                                    className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
+                                        <AnimatePresence>
+                                            {activeParticipantDropdown === participant.id && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                    data-dropdown
+                                                    className={`absolute right-0 w-44 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden ${idx >= data.participants.length - 2 ? 'bottom-full mb-2 origin-bottom-right' : 'top-10 origin-top-right'
+                                                        }`}
                                                 >
-                                                    <Pencil size={18} className="text-slate-400" />
-                                                    <span>Edit</span>
-                                                </button>
-                                                <button
-                                                    onClick={(e) => handleDeleteParticipantClick(participant, e)}
-                                                    className="w-full text-left px-5 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center space-x-3"
-                                                >
-                                                    <Trash2 size={18} />
-                                                    <span>Hapus</span>
-                                                </button>
-                                            </div>
-                                        )}
+                                                    <button
+                                                        onClick={(e) => handleEditParticipantClick(participant, e)}
+                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-3 border-b border-slate-50"
+                                                    >
+                                                        <Pencil size={18} className="text-slate-400" />
+                                                        <span>Edit</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteParticipantClick(participant, e)}
+                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center space-x-3"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                        <span>Hapus</span>
+                                                    </button>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
 
                                     </div>
-                                </div>
+                                </motion.div>
                             )
                         })}
-                    </div>
+                    </motion.div>
                 </div>
             </main>
 
@@ -1136,216 +1169,224 @@ export default function GroupDetail() {
                 </div>
             )}
             {/* History Modal */}
-            {isHistoryModalOpen && selectedParticipantForHistory && (
-                <div
-                    onClick={(e) => {
-                        if (e.target === e.currentTarget) setIsHistoryModalOpen(false)
-                    }}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in"
-                >
-                    <div
-                        className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto overflow-hidden animate-scale-up transform transition-all"
+            <AnimatePresence>
+                {isHistoryModalOpen && selectedParticipantForHistory && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) setIsHistoryModalOpen(false)
+                        }}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
                     >
-                        {/* Header */}
-                        <div className="flex justify-between items-center p-8 pb-4">
-                            <div>
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Riwayat Transfer</p>
-                                <h3 className="text-2xl font-black text-slate-800 leading-tight">
-                                    {selectedParticipantForHistory.name}
-                                </h3>
-                            </div>
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto overflow-hidden"
+                        >
+                            {/* Header */}
+                            <div className="flex justify-between items-center p-8 pb-4">
+                                <div>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Riwayat Transfer</p>
+                                    <h3 className="text-2xl font-black text-slate-800 leading-tight">
+                                        {selectedParticipantForHistory.name}
+                                    </h3>
+                                </div>
 
-                            {/* Filter Button (Replaces Close) */}
-                            <div className="relative" ref={filterRef}>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        setIsHistoryFilterOpen(!isHistoryFilterOpen)
-                                    }}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${historyFilterMode !== 'all'
-                                        ? 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-200'
-                                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                                        }`}
-                                >
-                                    <SlidersHorizontal size={20} />
-                                </button>
-
-                                {/* Filter Dropdown */}
-                                {isHistoryFilterOpen && (
-                                    <div
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 z-[110] overflow-hidden animate-scale-up origin-top-right p-2"
+                                {/* Filter Button (Replaces Close) */}
+                                <div className="relative" ref={filterRef}>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setIsHistoryFilterOpen(!isHistoryFilterOpen)
+                                        }}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${historyFilterMode !== 'all'
+                                            ? 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-200'
+                                            : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                                            }`}
                                     >
-                                        <div className="space-y-1">
-                                            {[
-                                                { id: 'all', label: 'Semua' },
-                                                { id: 'day', label: 'Hari Ini' },
-                                                { id: 'week', label: 'Minggu Ini' },
-                                                { id: 'month', label: 'Bulan Ini' },
-                                                { id: 'custom', label: 'Custom Tanggal' }
-                                            ].map(opt => (
-                                                <button
-                                                    key={opt.id}
-                                                    onClick={() => {
-                                                        setHistoryFilterMode(opt.id)
-                                                        if (opt.id !== 'custom') setIsHistoryFilterOpen(false)
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex justify-between items-center transition ${historyFilterMode === opt.id ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'
-                                                        }`}
-                                                >
-                                                    <span>{opt.label}</span>
-                                                    {historyFilterMode === opt.id && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
-                                                </button>
-                                            ))}
-                                        </div>
+                                        <SlidersHorizontal size={20} />
+                                    </button>
 
-                                        {/* Custom Date Range Picker */}
-                                        {historyFilterMode === 'custom' && (
-                                            <div className="mt-3 pt-3 border-t border-slate-50 px-2 pb-2">
-                                                <div className="space-y-2">
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Dari Tanggal</label>
-                                                        <button
-                                                            onClick={() => setShowStartDatePicker(true)}
-                                                            className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
-                                                        >
-                                                            {historyCustomDate.start ? new Date(historyCustomDate.start).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
-                                                        </button>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Sampai Tanggal</label>
-                                                        <button
-                                                            onClick={() => setShowEndDatePicker(true)}
-                                                            className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
-                                                        >
-                                                            {historyCustomDate.end ? new Date(historyCustomDate.end).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
-                                                        </button>
+                                    {/* Filter Dropdown */}
+                                    {isHistoryFilterOpen && (
+                                        <div
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 z-[110] overflow-hidden animate-scale-up origin-top-right p-2"
+                                        >
+                                            <div className="space-y-1">
+                                                {[
+                                                    { id: 'all', label: 'Semua' },
+                                                    { id: 'day', label: 'Hari Ini' },
+                                                    { id: 'week', label: 'Minggu Ini' },
+                                                    { id: 'month', label: 'Bulan Ini' },
+                                                    { id: 'custom', label: 'Custom Tanggal' }
+                                                ].map(opt => (
+                                                    <button
+                                                        key={opt.id}
+                                                        onClick={() => {
+                                                            setHistoryFilterMode(opt.id)
+                                                            if (opt.id !== 'custom') setIsHistoryFilterOpen(false)
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex justify-between items-center transition ${historyFilterMode === opt.id ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'
+                                                            }`}
+                                                    >
+                                                        <span>{opt.label}</span>
+                                                        {historyFilterMode === opt.id && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* Custom Date Range Picker */}
+                                            {historyFilterMode === 'custom' && (
+                                                <div className="mt-3 pt-3 border-t border-slate-50 px-2 pb-2">
+                                                    <div className="space-y-2">
+                                                        <div>
+                                                            <label className="text-[10px] font-bold text-slate-400 uppercase">Dari Tanggal</label>
+                                                            <button
+                                                                onClick={() => setShowStartDatePicker(true)}
+                                                                className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
+                                                            >
+                                                                {historyCustomDate.start ? new Date(historyCustomDate.start).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
+                                                            </button>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[10px] font-bold text-slate-400 uppercase">Sampai Tanggal</label>
+                                                            <button
+                                                                onClick={() => setShowEndDatePicker(true)}
+                                                                className="w-full mt-1 px-3 py-2 bg-slate-50 rounded-lg text-xs font-bold text-slate-700 text-left hover:bg-slate-100"
+                                                            >
+                                                                {historyCustomDate.end ? new Date(historyCustomDate.end).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-8 pt-2">
+                                {/* Date Pickers for Custom Filter */}
+                                <DatePicker
+                                    isOpen={showStartDatePicker}
+                                    onClose={() => setShowStartDatePicker(false)}
+                                    selectedDate={historyCustomDate.start}
+                                    onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, start: date }))}
+                                />
+                                <DatePicker
+                                    isOpen={showEndDatePicker}
+                                    onClose={() => setShowEndDatePicker(false)}
+                                    selectedDate={historyCustomDate.end}
+                                    onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, end: date }))}
+                                />
+
+                                {getFilteredHistory(selectedParticipantForHistory.transactions).length > 0 ? (
+                                    <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                        {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
+                                            <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
+                                                        {trx.payment_method?.toLowerCase() === 'transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                                                            <span>
+                                                                {trx.transaction_date
+                                                                    ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                                    : 'Tanggal tidak tersedia'}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2 relative">
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                        {trx.payment_method || 'Tunai'}
+                                                    </span>
+
+                                                    {/* Edit Dropdown Trigger */}
+                                                    <button
+                                                        data-dropdown-trigger
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            const newId = activeTransactionDropdown === trx.id ? null : trx.id
+                                                            setActiveTransactionDropdown(newId)
+                                                        }}
+                                                        className="w-8 h-8 rounded-full bg-transparent hover:bg-slate-200 flex items-center justify-center text-slate-400 transition"
+                                                    >
+                                                        <MoreVertical size={16} />
+                                                    </button>
+
+                                                    {/* Dropdown Menu */}
+                                                    {activeTransactionDropdown === trx.id && (
+                                                        <div
+                                                            data-dropdown
+                                                            className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right"
+                                                        >
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation()
+                                                                    setEditingTransaction(trx)
+                                                                    setTrxAmount(formatNumber(trx.amount))
+                                                                    setCalculatorMode('edit')
+                                                                    setShowCalculator(true)
+                                                                    setActiveTransactionDropdown(null)
+                                                                }}
+                                                                className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-2"
+                                                            >
+                                                                <Pencil size={14} className="text-slate-400" />
+                                                                <span>Edit Nominal</span>
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {trx.receipt_url && (
+                                                        <a
+                                                            href={trx.receipt_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95 border border-slate-100"
+                                                            title="Lihat Bukti"
+                                                        >
+                                                            <ReceiptText size={14} />
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
-                                        )}
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
+                                            <ReceiptText size={40} className="text-slate-300" />
+                                        </div>
+                                        <h4 className="text-slate-800 font-bold text-lg mb-2">Belum ada transaksi</h4>
+                                        <p className="text-slate-400 text-sm max-w-[200px] leading-relaxed">
+                                            Peserta ini belum melakukan pembayaran apapun untuk saat ini.
+                                        </p>
                                     </div>
                                 )}
-                            </div>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-8 pt-2">
-                            {/* Date Pickers for Custom Filter */}
-                            <DatePicker
-                                isOpen={showStartDatePicker}
-                                onClose={() => setShowStartDatePicker(false)}
-                                selectedDate={historyCustomDate.start}
-                                onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, start: date }))}
-                            />
-                            <DatePicker
-                                isOpen={showEndDatePicker}
-                                onClose={() => setShowEndDatePicker(false)}
-                                selectedDate={historyCustomDate.end}
-                                onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, end: date }))}
-                            />
-
-                            {getFilteredHistory(selectedParticipantForHistory.transactions).length > 0 ? (
-                                <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
-                                        <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl group hover:bg-emerald-50/50 transition border border-transparent hover:border-emerald-100">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
-                                                    {trx.payment_method?.toLowerCase() === 'transfer' ? <CreditCard size={20} /> : <Banknote size={20} />}
-                                                </div>
-                                                <div>
-                                                    <p className="text-lg font-black text-emerald-700">Rp {trx.amount.toLocaleString()}</p>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
-                                                        <span>
-                                                            {trx.transaction_date
-                                                                ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-                                                                : 'Tanggal tidak tersedia'}
-                                                        </span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2 relative">
-                                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>
-                                                    {trx.payment_method || 'Tunai'}
-                                                </span>
-
-                                                {/* Edit Dropdown Trigger */}
-                                                <button
-                                                    data-dropdown-trigger
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        const newId = activeTransactionDropdown === trx.id ? null : trx.id
-                                                        setActiveTransactionDropdown(newId)
-                                                    }}
-                                                    className="w-8 h-8 rounded-full bg-transparent hover:bg-slate-200 flex items-center justify-center text-slate-400 transition"
-                                                >
-                                                    <MoreVertical size={16} />
-                                                </button>
-
-                                                {/* Dropdown Menu */}
-                                                {activeTransactionDropdown === trx.id && (
-                                                    <div
-                                                        data-dropdown
-                                                        className="absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-scale-up origin-top-right"
-                                                    >
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                setEditingTransaction(trx)
-                                                                setTrxAmount(formatNumber(trx.amount))
-                                                                setCalculatorMode('edit')
-                                                                setShowCalculator(true)
-                                                                setActiveTransactionDropdown(null)
-                                                            }}
-                                                            className="w-full text-left px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-2"
-                                                        >
-                                                            <Pencil size={14} className="text-slate-400" />
-                                                            <span>Edit Nominal</span>
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {trx.receipt_url && (
-                                                    <a
-                                                        href={trx.receipt_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95 border border-slate-100"
-                                                        title="Lihat Bukti"
-                                                    >
-                                                        <ReceiptText size={14} />
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                                {/* Footer Button */}
+                                <div className="mt-8">
+                                    <button
+                                        onClick={() => setIsHistoryModalOpen(false)}
+                                        className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition active:scale-[0.98] shadow-xl shadow-slate-200"
+                                    >
+                                        Tutup
+                                    </button>
                                 </div>
-                            ) : (
-                                <div className="flex flex-col items-center justify-center py-16 text-center">
-                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
-                                        <ReceiptText size={40} className="text-slate-300" />
-                                    </div>
-                                    <h4 className="text-slate-800 font-bold text-lg mb-2">Belum ada transaksi</h4>
-                                    <p className="text-slate-400 text-sm max-w-[200px] leading-relaxed">
-                                        Peserta ini belum melakukan pembayaran apapun untuk saat ini.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Footer Button */}
-                            <div className="mt-8">
-                                <button
-                                    onClick={() => setIsHistoryModalOpen(false)}
-                                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition active:scale-[0.98] shadow-xl shadow-slate-200"
-                                >
-                                    Tutup
-                                </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            )
-            }
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Delete Confirmation Modal */}
             {
                 isDeleteModalOpen && (
@@ -1482,6 +1523,6 @@ export default function GroupDetail() {
                 initialValue={trxAmount}
                 title={calculatorMode === 'edit' ? "Edit Jumlah Setoran" : "Masukkan Jumlah Setoran"}
             />
-        </div >
+        </motion.div >
     )
 }
