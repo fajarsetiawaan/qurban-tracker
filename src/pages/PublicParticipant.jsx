@@ -90,7 +90,7 @@ export default function PublicParticipant() {
                         ) : (
                             <>
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${data?.target_animal?.toLowerCase() === 'sapi' ? 'bg-emerald-100 text-emerald-700' :
-                                        data?.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                                    data?.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                                     }`}>
                                     {data?.group_name}
                                 </span>
@@ -166,7 +166,7 @@ export default function PublicParticipant() {
                                             <div>
                                                 <p className="text-base font-black text-slate-800">{formatRupiah(trx.amount)}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                                                    {new Date(trx.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    {new Date(trx.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                                                 </p>
                                             </div>
                                         </div>

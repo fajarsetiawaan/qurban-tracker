@@ -376,7 +376,7 @@ export default function GroupDetail() {
     const processGroupData = (group) => {
         let totalCollected = 0
         const enrichedParticipants = group.participants.map(p => {
-            const sortedTransactions = p.transactions?.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)) || []
+            const sortedTransactions = p.transactions?.sort((a, b) => new Date(b.transaction_date + 'T00:00:00') - new Date(a.transaction_date + 'T00:00:00')) || []
             const pTotal = sortedTransactions.reduce((sum, t) => sum + (t.amount || 0), 0)
             totalCollected += pTotal
             return {
@@ -543,10 +543,16 @@ export default function GroupDetail() {
     const handleUpdateTransactionDate = async (newDate) => {
         if (!editingTransaction || !newDate) return
 
+        // newDate is already a YYYY-MM-DD string from DatePicker
+        const dateStr = typeof newDate === 'string' ? newDate : (() => {
+            const d = new Date(newDate);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        })();
+
         try {
             const { error } = await supabase
                 .from('transactions')
-                .update({ transaction_date: new Date(newDate).toISOString() }) // Ensure ISO string
+                .update({ transaction_date: dateStr })
                 .eq('id', editingTransaction.id)
 
             if (error) throw error
@@ -559,8 +565,8 @@ export default function GroupDetail() {
                 setSelectedParticipantForHistory(prev => ({
                     ...prev,
                     transactions: prev.transactions.map(t =>
-                        t.id === editingTransaction.id ? { ...t, transaction_date: new Date(newDate).toISOString() } : t
-                    ).sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)) // Re-sort desc
+                        t.id === editingTransaction.id ? { ...t, transaction_date: dateStr } : t
+                    ).sort((a, b) => new Date(b.transaction_date + 'T00:00:00') - new Date(a.transaction_date + 'T00:00:00')) // Re-sort desc
                 }))
             }
 
@@ -1077,7 +1083,7 @@ export default function GroupDetail() {
                                             className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
                                         >
                                             <span>
-                                                {new Date(trxDate).toLocaleDateString('id-ID', {
+                                                {new Date(trxDate + 'T00:00:00').toLocaleDateString('id-ID', {
                                                     day: 'numeric',
                                                     month: 'long',
                                                     year: 'numeric'
@@ -1149,7 +1155,7 @@ export default function GroupDetail() {
                                         <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
                                             <div className="flex justify-between">
                                                 <span className="text-slate-500 text-sm">Tanggal</span>
-                                                <span className="font-medium text-slate-800 text-sm">{new Date(lastTransaction.transaction_date || lastTransaction.created_at).toLocaleDateString('id-ID')}</span>
+                                                <span className="font-medium text-slate-800 text-sm">{new Date((lastTransaction.transaction_date || lastTransaction.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span className="text-slate-500 text-sm">Pengirim</span>
@@ -1470,7 +1476,7 @@ export default function GroupDetail() {
                                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
                                                         <span>
                                                             {trx.transaction_date
-                                                                ? new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                                ? new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
                                                                 : 'Tanggal tidak tersedia'}
                                                         </span>
                                                     </p>
@@ -1673,7 +1679,7 @@ export default function GroupDetail() {
             <DatePicker
                 isOpen={showTransactionDatePicker}
                 onClose={() => setShowTransactionDatePicker(false)}
-                selectedDate={editingTransaction?.transaction_date ? new Date(editingTransaction.transaction_date) : new Date()}
+                selectedDate={editingTransaction?.transaction_date ? editingTransaction.transaction_date : new Date()}
                 onDateChange={(date) => {
                     handleUpdateTransactionDate(date)
                 }}

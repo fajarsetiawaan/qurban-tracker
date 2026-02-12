@@ -1,17 +1,45 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
-import { formatNumber } from '../lib/utils'; // Ensure utility is imported if needed, though not used here directly
+
+/**
+ * Safely parse a date value into a local Date object.
+ * Handles YYYY-MM-DD strings by appending T00:00:00 to force local timezone parsing
+ * instead of UTC (which causes off-by-one day issues in UTC+ timezones).
+ * @param {string|Date} value - Date string or Date object
+ * @returns {Date} Local Date object
+ */
+function parseLocalDate(value) {
+    if (!value) return new Date();
+    if (value instanceof Date) return value;
+    // If it's a YYYY-MM-DD string, append T00:00:00 to parse as local time
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return new Date(value + 'T00:00:00');
+    }
+    return new Date(value);
+}
+
+/**
+ * Format a Date object to a YYYY-MM-DD string using local timezone.
+ * @param {Date} date
+ * @returns {string}
+ */
+function toLocalDateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
 
 export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange }) {
     if (!isOpen) return null;
 
-    const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate || new Date()));
-    const [tempSelectedDate, setTempSelectedDate] = useState(selectedDate ? new Date(selectedDate) : new Date());
+    const [currentMonth, setCurrentMonth] = useState(parseLocalDate(selectedDate));
+    const [tempSelectedDate, setTempSelectedDate] = useState(parseLocalDate(selectedDate));
 
     // Sync state when prop changes
     useEffect(() => {
         if (selectedDate) {
-            const date = new Date(selectedDate);
+            const date = parseLocalDate(selectedDate);
             setTempSelectedDate(date);
             setCurrentMonth(date);
         } else {
@@ -47,7 +75,8 @@ export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange
     };
 
     const handleConfirm = () => {
-        onDateChange(tempSelectedDate);
+        // Output a local YYYY-MM-DD string to avoid UTC timezone offset issues
+        onDateChange(toLocalDateString(tempSelectedDate));
         onClose();
     };
 

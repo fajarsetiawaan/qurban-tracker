@@ -1575,7 +1575,7 @@ export default function Dashboard() {
                                                 className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
                                             >
                                                 <span>
-                                                    {new Date(quickTrxFormData.date).toLocaleDateString('id-ID', {
+                                                    {new Date(quickTrxFormData.date + 'T00:00:00').toLocaleDateString('id-ID', {
                                                         day: 'numeric',
                                                         month: 'long',
                                                         year: 'numeric'
@@ -1645,7 +1645,7 @@ export default function Dashboard() {
                                             <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500 text-sm">Tanggal</span>
-                                                    <span className="font-medium text-slate-800 text-sm">{new Date(lastQuickTrx.transaction_date || lastQuickTrx.created_at).toLocaleDateString('id-ID')}</span>
+                                                    <span className="font-medium text-slate-800 text-sm">{new Date((lastQuickTrx.transaction_date || lastQuickTrx.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500 text-sm">Pengirim</span>
@@ -1772,7 +1772,7 @@ export default function Dashboard() {
                                         <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-3xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow duration-300">
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                                                    {new Date(trx.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    {new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </p>
                                                 <h4 className="font-bold text-slate-800 text-sm mb-0.5">{trx.participantName}</h4>
                                                 <p className="text-xs font-medium text-slate-500">{trx.groupName} • {trx.payment_method || 'Tunai'}</p>
