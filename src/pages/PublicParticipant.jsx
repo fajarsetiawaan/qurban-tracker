@@ -69,9 +69,9 @@ export default function PublicParticipant() {
         : 0
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 pb-12">
+        <div className="h-[100dvh] overflow-y-auto bg-slate-50 font-sans selection:bg-emerald-200 pb-32 no-scrollbar">
             {/* Header */}
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-emerald-100/50 shadow-sm">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-emerald-100/50 shadow-sm">
                 <div className="px-6 py-4 max-w-md mx-auto flex justify-between items-center">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-200">
