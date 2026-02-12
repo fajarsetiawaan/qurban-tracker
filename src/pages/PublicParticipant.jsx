@@ -77,7 +77,7 @@ export default function PublicParticipant() {
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-200">
                             <img src="/logo-domba.png" alt="Logo" className="w-6 h-6 object-contain brightness-0 invert" />
                         </div>
-                        <span className="text-lg font-black text-slate-800 tracking-tight font-heading">dombantara.id</span>
+                        <span className="text-sm font-black text-slate-800 tracking-tight font-heading">TABUNGAN QURBAN DIGITAL</span>
                     </div>
                 </div>
             </header>
@@ -85,7 +85,7 @@ export default function PublicParticipant() {
             <main className="max-w-md mx-auto px-6 pt-8 space-y-8 animate-fade-in">
                 {/* Participant Identity */}
                 <div className="text-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">TABUNGAN QURBAN DIGITAL</p>
+
                     <h1 className="text-2xl font-black text-slate-800 mb-1">
                         {loading ? <Skeleton className="h-8 w-48 mx-auto" /> : data?.participant_name}
                     </h1>
