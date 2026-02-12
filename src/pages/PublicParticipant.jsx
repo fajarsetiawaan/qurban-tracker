@@ -58,9 +58,14 @@ export default function PublicParticipant() {
         )
     }
 
-    // Calculate Progress
+    // Calculate Individual Target
+    const groupTotal = data ? (parseInt(data.formatted_total_price.replace(/,/g, '')) || 0) : 0
+    const participantCount = data?.target_participants || (data?.target_animal?.toLowerCase() === 'sapi' ? 7 : 1)
+    const individualTarget = groupTotal / participantCount
+
+    // Calculate Progress based on Individual Target
     const progress = data
-        ? Math.min(100, (data.total_collected / (parseInt(data.formatted_total_price.replace(/,/g, '')) || 1)) * 100)
+        ? Math.min(100, (data.total_collected / individualTarget) * 100)
         : 0
 
     return (
@@ -80,7 +85,7 @@ export default function PublicParticipant() {
             <main className="max-w-md mx-auto px-6 pt-8 space-y-8 animate-fade-in">
                 {/* Participant Identity */}
                 <div className="text-center">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Riwayat Tabungan Qurban</p>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">TABUNGAN QURBAN DIGITAL</p>
                     <h1 className="text-2xl font-black text-slate-800 mb-1">
                         {loading ? <Skeleton className="h-8 w-48 mx-auto" /> : data?.participant_name}
                     </h1>
@@ -116,10 +121,10 @@ export default function PublicParticipant() {
                             <h3 className="text-4xl font-black tracking-tight drop-shadow-sm mb-2">
                                 {loading ? <Skeleton className="h-10 w-48 bg-white/20 rounded-xl mx-auto" /> : formatRupiah(data?.total_collected || 0)}
                             </h3>
-                            {data?.formatted_total_price && (
+                            {individualTarget > 0 && (
                                 <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-800/30 border border-emerald-400/30 backdrop-blur-md">
                                     <p className="text-emerald-50 text-[10px] font-bold uppercase tracking-wide">
-                                        Target: <span className="text-white">Rp {data.formatted_total_price}</span>
+                                        Target: <span className="text-white">{formatRupiah(individualTarget)}</span>
                                     </p>
                                 </div>
                             )}
@@ -166,7 +171,19 @@ export default function PublicParticipant() {
                                             <div>
                                                 <p className="text-base font-black text-slate-800">{formatRupiah(trx.amount)}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                                                    {new Date(trx.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                    {(() => {
+                                                        const dateVal = trx.date || trx.transaction_date || trx.created_at;
+                                                        if (!dateVal) return 'Tanggal tidak tersedia';
+                                                        // If it's YYYY-MM-DD, append time to force local
+                                                        const dateToParse = typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateVal)
+                                                            ? dateVal + 'T00:00:00'
+                                                            : dateVal;
+                                                        try {
+                                                            return new Date(dateToParse).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                                                        } catch (e) {
+                                                            return dateVal; // Fallback to raw string if parsing fails
+                                                        }
+                                                    })()}
                                                 </p>
                                             </div>
                                         </div>
