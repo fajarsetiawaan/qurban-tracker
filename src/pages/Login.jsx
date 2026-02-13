@@ -60,7 +60,7 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F0FDF4] flex items-center justify-center p-6 relative overflow-hidden font-sans selection:bg-emerald-200">
+        <div className="min-h-screen bg-[#F0FDF4] flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200">
             {/* Ambient Mesh Gradient Background */}
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
             <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
