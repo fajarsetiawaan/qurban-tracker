@@ -1,6 +1,21 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function MobileLayout() {
+    useEffect(() => {
+        const lockOrientation = async () => {
+            try {
+                if (window.screen?.orientation?.lock) {
+                    await window.screen.orientation.lock('portrait')
+                }
+            } catch (err) {
+                // Ignore error if browser doesn't support locking
+            }
+        }
+
+        lockOrientation()
+    }, [])
+
     return (
         // Premium Desktop Background
         <div className="h-[100dvh] bg-slate-100 sm:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] sm:from-slate-50 sm:via-gray-100 sm:to-slate-200 sm:flex sm:items-center sm:justify-center sm:py-8 font-sans text-slate-900 overflow-hidden relative selection:bg-emerald-200">
