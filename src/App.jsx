@@ -16,6 +16,19 @@ function App() {
   const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
+    // Orientation Lock logic
+    const lockOrientation = async () => {
+      try {
+        if (window.screen?.orientation?.lock) {
+          await window.screen.orientation.lock('portrait').catch(() => { });
+        } else if (window.screen?.lockOrientation) {
+          window.screen.lockOrientation('portrait');
+        }
+      } catch (err) { }
+    }
+
+    lockOrientation()
+
     // Check session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -33,9 +46,18 @@ function App() {
       setShowSplash(false)
     }, 2500)
 
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        lockOrientation()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       subscription.unsubscribe()
       clearTimeout(splashTimer)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
