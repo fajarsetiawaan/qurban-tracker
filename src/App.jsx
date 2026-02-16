@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import MobileLayout from './components/Layout/MobileLayout'
+import SplashScreen from './components/SplashScreen'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -12,8 +13,10 @@ import PublicParticipant from './pages/PublicParticipant'
 function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showSplash, setShowSplash] = useState(true)
 
   useEffect(() => {
+    // Check session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setLoading(false)
@@ -25,11 +28,19 @@ function App() {
       setSession(session)
     })
 
-    return () => subscription.unsubscribe()
+    // Splash Screen Timer (min 2.5 seconds)
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false)
+    }, 2500)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(splashTimer)
+    }
   }, [])
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  if (showSplash || loading) {
+    return <SplashScreen />
   }
 
   return (

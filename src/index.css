@@ -37,3 +37,36 @@ body {
         transform: translateX(100%);
     }
 }
+
+/* Splash Screen Animations */
+@keyframes logo-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0));
+    }
+
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+    }
+}
+
+@keyframes loading-bar {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+.animate-logo-pulse {
+    animation: logo-pulse 2s ease-in-out infinite;
+}
+
+.animate-loading-bar {
+    animation: loading-bar 2.5s ease-in-out forwards;
+}
