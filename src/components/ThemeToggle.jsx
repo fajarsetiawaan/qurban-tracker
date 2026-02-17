@@ -1,14 +1,12 @@
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
-import { useToast } from "../contexts/ToastContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 const ThemeToggle = () => {
-    const { theme } = useTheme();
-    const { addToast } = useToast();
+    const { theme, toggleTheme } = useTheme();
 
     const handleToggle = () => {
-        addToast("Fitur ini akan segera hadir", "info");
+        toggleTheme();
     };
 
     return (

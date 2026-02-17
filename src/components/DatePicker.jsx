@@ -106,10 +106,10 @@ export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange
                     onClick={() => handleDayClick(day)}
                     className={`h-10 w-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all duration-200
                         ${isSelected
-                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200 scale-105'
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 scale-105'
                             : isToday
-                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'}`}
+                                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white border border-transparent'}`}
                 >
                     {day}
                 </button>
@@ -126,22 +126,22 @@ export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-[2rem] shadow-2xl p-6 w-full max-w-sm animate-scale-up"
+                className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden p-6 w-full max-w-sm animate-scale-up border border-slate-100 dark:border-slate-800"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <button
                         onClick={handlePrevMonth}
-                        className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                        className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition"
                     >
                         <ChevronLeft size={20} />
                     </button>
-                    <h2 className="text-lg font-black text-slate-800 tracking-tight">
+                    <h2 className="text-lg font-black text-slate-800 dark:text-white tracking-tight">
                         {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                     </h2>
                     <button
                         onClick={handleNextMonth}
-                        className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                        className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 transition"
                     >
                         <ChevronRight size={20} />
                     </button>
@@ -152,7 +152,7 @@ export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange
                     {/* Weekday Labels */}
                     <div className="grid grid-cols-7 gap-1 mb-2 text-center">
                         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-                            <div key={d} className="h-10 flex items-center justify-center text-xs font-bold text-slate-300 uppercase tracking-wide">
+                            <div key={d} className="h-10 flex items-center justify-center text-xs font-bold text-slate-300 dark:text-slate-600 uppercase tracking-wide">
                                 {d}
                             </div>
                         ))}
@@ -167,14 +167,14 @@ export default function DatePicker({ isOpen, onClose, selectedDate, onDateChange
                 <div className="mt-8 flex items-center space-x-3">
                     <button
                         onClick={onClose}
-                        className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition flex items-center justify-center space-x-2"
+                        className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center justify-center space-x-2"
                     >
                         <X size={18} />
                         <span>Batal</span>
                     </button>
                     <button
                         onClick={handleConfirm}
-                        className="flex-1 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg shadow-emerald-200 flex items-center justify-center space-x-2 active:scale-95 duration-200"
+                        className="flex-1 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 flex items-center justify-center space-x-2 active:scale-95 duration-200"
                     >
                         <Check size={18} strokeWidth={3} />
                         <span>Pilih</span>

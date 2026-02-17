@@ -60,44 +60,44 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F0FDF4] flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200">
+        <div className="min-h-screen bg-[#F0FDF4] dark:bg-[#0B1120] flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900">
             {/* Ambient Mesh Gradient Background */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob"></div>
-            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-2000"></div>
-            <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-green-200/40 rounded-full mix-blend-multiply filter blur-[100px] animate-blob animation-delay-4000"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/40 dark:bg-emerald-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob"></div>
+            <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-200/40 dark:bg-teal-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] bg-green-200/40 dark:bg-green-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000"></div>
 
-            <div className="max-w-md w-full bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] p-10 border border-white/50 relative z-10 hover:shadow-[0_35px_70px_-15px_rgba(16,185,129,0.15)] transition-all duration-500">
+            <div className="max-w-md w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] p-10 border border-white/50 dark:border-slate-800/50 relative z-10 hover:shadow-[0_35px_70px_-15px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_35px_70px_-15px_rgba(16,185,129,0.1)] transition-all duration-500">
                 <div className="text-center mb-10">
-                    <div className="w-24 h-24 bg-gradient-to-tr from-emerald-100 to-white rounded-3xl mx-auto mb-3 flex items-center justify-center shadow-inner border border-white">
+                    <div className="w-24 h-24 bg-gradient-to-tr from-emerald-100 to-white dark:from-slate-800 dark:to-slate-700 rounded-3xl mx-auto mb-3 flex items-center justify-center shadow-inner border border-white dark:border-slate-700">
                         <img src="/logo-domba.png" alt="Logo Dombantara" className="w-16 h-16 object-contain drop-shadow-md transform hover:scale-110 transition-transform duration-300" />
                     </div>
-                    <h1 className="text-3xl font-black text-slate-800 tracking-tight mb-2">
+                    <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight mb-2">
                         {isSignUp ? 'Gabung Sekarang' : 'Dombantara.id'}
                     </h1>
-                    <p className="text-slate-500 font-medium text-lg">
+                    <p className="text-slate-500 dark:text-slate-400 font-medium text-lg">
                         {isSignUp ? 'Mulai perjalanan qurbanmu' : 'Smart Qurban System'}
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50/50 backdrop-blur-sm text-red-600 p-4 rounded-2xl mb-6 text-sm font-bold border border-red-100 flex items-center animate-shake">
+                    <div className="bg-red-50/50 dark:bg-red-900/20 backdrop-blur-sm text-red-600 dark:text-red-400 p-4 rounded-2xl mb-6 text-sm font-bold border border-red-100 dark:border-red-900/30 flex items-center animate-shake">
                         <span className="mr-2 text-lg">⚠️</span> {error}
                     </div>
                 )}
 
                 {successMsg && (
-                    <div className="bg-emerald-50/50 backdrop-blur-sm text-emerald-600 p-4 rounded-2xl mb-6 text-sm font-bold border border-emerald-100 flex items-center animate-fade-in">
+                    <div className="bg-emerald-50/50 dark:bg-emerald-900/20 backdrop-blur-sm text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl mb-6 text-sm font-bold border border-emerald-100 dark:border-emerald-900/30 flex items-center animate-fade-in">
                         <span className="mr-2 text-lg">✅</span> {successMsg}
                     </div>
                 )}
 
                 {isRegistered ? (
                     <div className="text-center py-8">
-                        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-                            <Mail className="w-10 h-10 text-emerald-600" />
+                        <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                            <Mail className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-800 mb-3">📩 Cek Email Anda!</h2>
-                        <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-3">📩 Cek Email Anda!</h2>
+                        <p className="text-slate-600 dark:text-slate-300 mb-8 max-w-sm mx-auto">
                             Link verifikasi telah dikirim ke email Anda. Silakan klik link tersebut untuk mulai menggunakan Dombantara.id.
                         </p>
                         <button
@@ -107,7 +107,7 @@ export default function Login() {
                                 setError(null)
                                 setSuccessMsg(null)
                             }}
-                            className="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 focus:ring-4 focus:ring-slate-300 transition-all duration-300"
+                            className="w-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 dark:hover:bg-slate-700 focus:ring-4 focus:ring-slate-300 dark:focus:ring-slate-700 transition-all duration-300"
                         >
                             Kembali ke Login
                         </button>
@@ -117,7 +117,7 @@ export default function Login() {
                         {isSignUp && (
                             <>
                                 <div className="space-y-1">
-                                    <label htmlFor="signup-fullname" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                                    <label htmlFor="signup-fullname" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nama Lengkap</label>
                                     <input
                                         id="signup-fullname"
                                         name="full_name"
@@ -125,14 +125,14 @@ export default function Login() {
                                         autoComplete="name"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300"
                                         placeholder="Nama Lengkap Anda"
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label htmlFor="signup-phone" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
+                                    <label htmlFor="signup-phone" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">No. WhatsApp</label>
                                     <input
                                         id="signup-phone"
                                         name="phone_number"
@@ -140,14 +140,14 @@ export default function Login() {
                                         autoComplete="tel"
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300"
                                         placeholder="08xxxxxxxxxx"
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label htmlFor="signup-institution" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Masjid/Instansi</label>
+                                    <label htmlFor="signup-institution" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nama Masjid/Instansi</label>
                                     <input
                                         id="signup-institution"
                                         name="institution_name"
@@ -155,21 +155,21 @@ export default function Login() {
                                         autoComplete="organization"
                                         value={institutionName}
                                         onChange={(e) => setInstitutionName(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                        className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300"
                                         placeholder="Nama Masjid atau Instansi"
                                         required
                                     />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label htmlFor="signup-address" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Alamat</label>
+                                    <label htmlFor="signup-address" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Alamat</label>
                                     <textarea
                                         id="signup-address"
                                         name="address"
                                         autoComplete="street-address"
                                         value={address}
                                         onChange={(e) => setAddress(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300 resize-none"
+                                        className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300 resize-none"
                                         placeholder="Alamat Lengkap"
                                         rows="2"
                                         required
@@ -179,7 +179,7 @@ export default function Login() {
                         )}
 
                         <div className="space-y-1">
-                            <label htmlFor="login-email" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Email</label>
+                            <label htmlFor="login-email" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Email</label>
                             <input
                                 id="login-email"
                                 name="email"
@@ -187,14 +187,14 @@ export default function Login() {
                                 autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300"
                                 placeholder="nama@email.com"
                                 required
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label htmlFor="login-password" className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                            <label htmlFor="login-password" className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Password</label>
                             <input
                                 id="login-password"
                                 name="password"
@@ -202,7 +202,7 @@ export default function Login() {
                                 autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-5 py-4 bg-white/70 border-2 border-slate-100 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 placeholder-slate-300 transition-all duration-300"
+                                className="w-full px-5 py-4 bg-white/70 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-all duration-300"
                                 placeholder="••••••••"
                                 required
                             />
@@ -229,16 +229,16 @@ export default function Login() {
                             className="text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors duration-300"
                         >
                             {isSignUp ? (
-                                <span>Sudah punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Masuk disini</span></span>
+                                <span>Sudah punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Masuk disini</span></span>
                             ) : (
-                                <span>Belum punya akun? <span className="text-emerald-600 underline decoration-2 decoration-emerald-200 underline-offset-2">Daftar sekarang</span></span>
+                                <span>Belum punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Daftar sekarang</span></span>
                             )}
                         </button>
                     )}
                 </div>
             </div>
 
-            <p className="absolute bottom-6 text-xs font-bold text-emerald-800/20 tracking-widest uppercase">
+            <p className="absolute bottom-6 text-xs font-bold text-emerald-800/20 dark:text-emerald-400/20 tracking-widest uppercase">
                 © 2026 Dombantara ID
             </p>
         </div>

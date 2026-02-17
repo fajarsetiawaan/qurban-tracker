@@ -78,7 +78,7 @@ _Semoga dimudahkan dan menjadi amal yang berkah. Aamiin._ 🤲`
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative z-10"
+                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden relative z-10"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 p-6 text-white relative overflow-hidden">
@@ -101,8 +101,8 @@ _Semoga dimudahkan dan menjadi amal yang berkah. Aamiin._ 🤲`
                         <div className="p-6 space-y-5">
                             {/* Message Preview */}
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Preview Pesan</label>
-                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed font-medium max-h-48 overflow-y-auto custom-scrollbar">
+                                <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Preview Pesan</label>
+                                <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium max-h-48 overflow-y-auto custom-scrollbar">
                                     <p className="whitespace-pre-line">{message}</p>
                                 </div>
                             </div>
@@ -111,9 +111,9 @@ _Semoga dimudahkan dan menjadi amal yang berkah. Aamiin._ 🤲`
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     onClick={handleCopy}
-                                    className="flex items-center justify-center space-x-2 py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition active:scale-[0.98]"
+                                    className="flex items-center justify-center space-x-2 py-3.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition active:scale-[0.98]"
                                 >
-                                    {copied ? <Check size={18} className="text-emerald-600" /> : <Copy size={18} />}
+                                    {copied ? <Check size={18} className="text-emerald-600 dark:text-emerald-400" /> : <Copy size={18} />}
                                     <span>{copied ? 'Disalin!' : 'Salin Teks'}</span>
                                 </button>
 
@@ -127,15 +127,15 @@ _Semoga dimudahkan dan menjadi amal yang berkah. Aamiin._ 🤲`
                             </div>
 
                             {/* Direct Link */}
-                            <div className="pt-2 border-t border-slate-50">
-                                <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-100/50">
+                            <div className="pt-2 border-t border-slate-50 dark:border-slate-800">
+                                <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100/50 dark:border-emerald-900/30">
                                     <div className="flex items-center space-x-3 overflow-hidden">
-                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                            <ExternalLink size={14} className="text-emerald-600" />
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                                            <ExternalLink size={14} className="text-emerald-600 dark:text-emerald-400" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-[10px] text-emerald-600 font-bold uppercase">Public Link</p>
-                                            <p className="text-xs text-emerald-800 font-medium truncate">{shareUrl}</p>
+                                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Public Link</p>
+                                            <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium truncate">{shareUrl}</p>
                                         </div>
                                     </div>
                                 </div>

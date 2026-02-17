@@ -34,7 +34,7 @@ body {
 }
 
 #root {
-    background-color: #f8fafc;
+    background-color: var(--bg-primary);
     /* slate-50 */
     height: 100%;
     width: 100%;

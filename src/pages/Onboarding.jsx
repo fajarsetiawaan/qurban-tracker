@@ -103,16 +103,16 @@ export default function Onboarding() {
     }
 
     return (
-        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative font-sans">
+        <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 relative font-sans">
             {/* Header (App Style) - Fixed */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100/50 px-6 py-4 flex items-center shadow-sm transition-all duration-300">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-100/50 dark:border-slate-800/50 px-6 py-4 flex items-center shadow-sm dark:shadow-slate-900/10 transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
-                    className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full border border-slate-100 hover:border-emerald-100 shadow-sm transition-all duration-300 group"
+                    className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full border border-slate-100 dark:border-slate-800 hover:border-emerald-100 dark:hover:border-emerald-900/30 shadow-sm transition-all duration-300 group"
                 >
                     <ArrowLeft size={22} className="group-hover:-translate-x-0.5 transition-transform" />
                 </button>
-                <h1 className="text-base font-black text-slate-800 tracking-tight">Buat Group Baru</h1>
+                <h1 className="text-base font-black text-slate-800 dark:text-white tracking-tight">Buat Group Baru</h1>
             </header>
 
 
@@ -127,12 +127,12 @@ export default function Onboarding() {
                     )}
 
                     {/* Section 1: Data Grup */}
-                    <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-sm font-bold text-emerald-800 mb-4 border-b border-gray-100 pb-2 uppercase tracking-wide">Informasi Group</h2>
+                    <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                        <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-400 mb-4 border-b border-gray-100 dark:border-slate-800 pb-2 uppercase tracking-wide">Informasi Group</h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="onboard-group-name" className="block text-sm font-medium text-gray-700 mb-1">Nama Kelompok</label>
+                                <label htmlFor="onboard-group-name" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Kelompok</label>
                                 <input
                                     id="onboard-group-name"
                                     name="name"
@@ -141,14 +141,14 @@ export default function Onboarding() {
                                     placeholder="Contoh: Kelompok Masjid Al-Hidayah"
                                     value={groupName}
                                     onChange={(e) => setGroupName(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
+                                    className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-white dark:hover:bg-slate-800"
                                     required
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="onboard-target-animal" className="block text-sm font-medium text-gray-700 mb-1">Hewan</label>
+                                    <label htmlFor="onboard-target-animal" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Hewan</label>
                                     <select
                                         id="onboard-target-animal"
                                         name="target_animal"
@@ -162,7 +162,7 @@ export default function Onboarding() {
                                                 setTargetParticipants(1)
                                             }
                                         }}
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white appearance-none"
+                                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-white dark:hover:bg-slate-800 appearance-none"
                                     >
                                         <option value="sapi">Sapi</option>
                                         <option value="kambing">Kambing</option>
@@ -171,7 +171,7 @@ export default function Onboarding() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="onboard-target-participants" className="block text-sm font-medium text-gray-700 mb-1">Target Peserta</label>
+                                    <label htmlFor="onboard-target-participants" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Target Peserta</label>
                                     <input
                                         id="onboard-target-participants"
                                         name="target_participants"
@@ -179,13 +179,13 @@ export default function Onboarding() {
                                         min="1"
                                         value={targetParticipants}
                                         onChange={(e) => setTargetParticipants(e.target.value)}
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
+                                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-white dark:hover:bg-slate-800"
                                         required
                                     />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="onboard-total-price" className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+                                    <label htmlFor="onboard-total-price" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Harga (Rp)</label>
                                     <input
                                         id="onboard-total-price"
                                         name="total_price"
@@ -194,18 +194,18 @@ export default function Onboarding() {
                                         placeholder="Contoh: 21.000.000"
                                         value={totalPrice}
                                         onChange={(e) => setTotalPrice(formatNumber(e.target.value))}
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white"
+                                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-white dark:hover:bg-slate-800"
                                     />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="onboard-qurban-year" className="block text-sm font-medium text-gray-700 mb-1">Tahun Qurban</label>
+                                    <label htmlFor="onboard-qurban-year" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tahun Qurban</label>
                                     <select
                                         id="onboard-qurban-year"
                                         name="qurban_year"
                                         value={qurbanYear}
                                         onChange={(e) => setQurbanYear(parseInt(e.target.value))}
-                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 hover:border-emerald-300 hover:bg-white appearance-none"
+                                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all duration-300 font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-white dark:hover:bg-slate-800 appearance-none"
                                     >
                                         <option value={2026}>2026</option>
                                         <option value={2027}>2027</option>
@@ -216,13 +216,13 @@ export default function Onboarding() {
                     </section>
 
                     {/* Section 2: Data Peserta */}
-                    <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                        <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
-                            <h2 className="text-sm font-bold text-emerald-800 uppercase tracking-wide">Daftar Peserta</h2>
+                    <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                        <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-slate-800 pb-2">
+                            <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">Daftar Peserta</h2>
                             <button
                                 type="button"
                                 onClick={addParticipant}
-                                className="text-emerald-600 text-sm font-bold flex items-center hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full transition"
+                                className="text-emerald-600 dark:text-emerald-400 text-sm font-bold flex items-center hover:text-emerald-700 dark:hover:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full transition"
                             >
                                 <Plus size={16} className="mr-1" /> Tambah
                             </button>
@@ -230,8 +230,8 @@ export default function Onboarding() {
 
                         <div className="space-y-4">
                             {participants.map((participant, index) => (
-                                <div key={index} className="flex items-start space-x-3 bg-gray-50 p-4 rounded-xl border border-gray-100 animate-fade-in">
-                                    <div className="pt-2 text-xs font-bold text-gray-400 w-6 text-center">
+                                <div key={index} className="flex items-start space-x-3 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-xl border border-gray-100 dark:border-slate-700 animate-fade-in">
+                                    <div className="pt-2 text-xs font-bold text-gray-400 dark:text-slate-500 w-6 text-center">
                                         {index + 1}
                                     </div>
                                     <div className="flex-1 space-y-3">
@@ -243,7 +243,7 @@ export default function Onboarding() {
                                             placeholder="Nama Peserta"
                                             value={participant.name}
                                             onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                            className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                             required
                                         />
                                         <input
@@ -254,14 +254,14 @@ export default function Onboarding() {
                                             placeholder="No HP (Opsional)"
                                             value={participant.phone}
                                             onChange={(e) => handleParticipantChange(index, 'phone', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white"
+                                            className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                         />
                                     </div>
                                     {participants.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => removeParticipant(index)}
-                                            className="text-gray-400 hover:text-red-500 p-2 mt-1"
+                                            className="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-2 mt-1"
                                             title="Hapus Peserta"
                                         >
                                             <Trash2 size={18} />
@@ -276,7 +276,7 @@ export default function Onboarding() {
             </main>
 
             {/* Action Button - Fixed Bottom */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-50">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 z-50">
                 <button
                     type="submit"
                     form="onboarding-form"

@@ -676,9 +676,9 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="h-full flex flex-col overflow-hidden bg-slate-50 relative">
+        <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative">
             {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 backdrop-blur-xl border-b border-emerald-100/50 transition-all duration-300 shadow-sm">
+            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-emerald-100/50 dark:border-emerald-900/50 transition-all duration-300 shadow-sm">
                 <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setIsProfileMenuOpen(true)}>
                     <div className="relative">
                         <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-lg shadow-emerald-100 group-hover:scale-105 transition-transform duration-300 relative z-10 bg-gradient-to-tr from-emerald-100 to-white flex items-center justify-center">
@@ -687,8 +687,8 @@ export default function Dashboard() {
                         <div className="absolute inset-0 rounded-full bg-emerald-400 blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Assalamu'alaikum</p>
-                        <h2 className="text-sm font-black text-slate-800 leading-none group-hover:text-emerald-700 transition-colors">
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none mb-1">Assalamu'alaikum</p>
+                        <h2 className="text-sm font-black text-slate-800 dark:text-slate-100 leading-none group-hover:text-emerald-700 transition-colors">
                             {loading ? <Skeleton className="h-4 w-24 rounded-lg" /> : (profile?.institution_name || profile?.full_name || 'Hamba Allah')}
                         </h2>
                     </div>
@@ -698,7 +698,7 @@ export default function Dashboard() {
                     {/* Logout Button moved to Profile Menu, but keeping here as fallback or removing? The previous design had it. Let's keep it but cleaner. */}
                     <button
                         onClick={handleLogout}
-                        className="p-2.5 bg-white rounded-full border border-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300 shadow-sm hover:shadow-md"
+                        className="p-2.5 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300 shadow-sm hover:shadow-md"
                         title="Logout"
                     >
                         <LogOut size={20} />
@@ -774,25 +774,25 @@ export default function Dashboard() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     {/* Total Participants Card */}
-                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center">
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
                         <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-600">
                             <Users size={20} />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 mb-1">
+                        <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-1">
                             {loading ? <Skeleton className="h-8 w-12" /> : totalParticipants}
                         </h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Peserta</p>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Peserta</p>
                     </div>
 
                     {/* Paid Participants Card */}
-                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center relative overflow-hidden">
                         <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center mb-3 text-emerald-600 relative z-10">
                             <CheckCircle size={20} />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-800 mb-1 relative z-10">
+                        <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-1 relative z-10">
                             {loading ? <Skeleton className="h-8 w-12" /> : paidParticipants}
                         </h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest relative z-10">Peserta Lunas</p>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest relative z-10">Peserta Lunas</p>
 
                         {/* Progress Ring Background Effect */}
                         {totalParticipants > 0 && (
@@ -808,7 +808,7 @@ export default function Dashboard() {
                 {/* Groups List */}
                 <div className="mb-24">
                     <div className="flex justify-between items-end mb-4 relative z-50">
-                        <h2 className="text-lg font-bold text-slate-800">
+                        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
                             {filterStatus === 'Semua' && filterYear === 'Semua' ? 'Group Qurban Anda' :
                                 filterYear !== 'Semua' ? `Group Periode ${filterYear}` : `Group ${filterStatus}`}
                         </h2>
@@ -818,14 +818,14 @@ export default function Dashboard() {
                                 <button
                                     ref={filterButtonRef}
                                     onClick={() => setShowFilterMenu(!showFilterMenu)}
-                                    className={`p-2 rounded-full transition ${showFilterMenu || filterStatus !== 'Semua' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
+                                    className={`p-2 rounded-full transition ${showFilterMenu || filterStatus !== 'Semua' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'}`}
                                 >
                                     <SlidersHorizontal size={20} />
                                 </button>
 
                                 {/* Filter Dropdown */}
                                 {showFilterMenu && (
-                                    <div ref={filterMenuRef} className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 z-[150] animate-fade-in space-y-3">
+                                    <div ref={filterMenuRef} className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-3 z-[150] animate-fade-in space-y-3">
                                         {/* Section 1: Jenis Hewan */}
                                         <div>
                                             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-2">Jenis Hewan</h3>
@@ -837,7 +837,7 @@ export default function Dashboard() {
                                                             setFilterStatus(status)
                                                             setShowFilterMenu(false)
                                                         }}
-                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterStatus === status ? 'bg-emerald-50 text-emerald-600' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                                                     >
                                                         <span>{status}</span>
                                                         {filterStatus === status && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
@@ -846,7 +846,7 @@ export default function Dashboard() {
                                             </div>
                                         </div>
 
-                                        <hr className="border-slate-50" />
+                                        <hr className="border-slate-50 dark:border-slate-800" />
 
                                         {/* Section 2: Periode */}
                                         <div>
@@ -859,7 +859,7 @@ export default function Dashboard() {
                                                             setFilterYear(year)
                                                             setShowFilterMenu(false)
                                                         }}
-                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                                                        className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold flex justify-between items-center transition ${filterYear === year ? 'bg-blue-50 text-blue-600' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                                                     >
                                                         <span>{year === 'Semua' ? 'Semua Tahun' : year}</span>
                                                         {filterYear === year && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
@@ -872,124 +872,126 @@ export default function Dashboard() {
                             </div>
 
                             {/* Create Group Button */}
-                            <Link to="/onboarding" className="p-2 bg-slate-900 text-white rounded-full hover:bg-black transition shadow-lg shadow-slate-300">
+                            <Link to="/onboarding" className="p-2 bg-slate-900 dark:bg-emerald-600 text-white rounded-full hover:bg-black dark:hover:bg-emerald-700 transition shadow-lg shadow-slate-300 dark:shadow-none">
                                 <Plus size={20} />
                             </Link>
                         </div>
                     </div>
 
-                    {loading ? (
-                        <div className="space-y-4">
-                            {[1, 2].map(i => (
-                                <div key={i} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                                    <Skeleton className="h-6 w-1/2 mb-3" />
-                                    <Skeleton className="h-2 w-full rounded-full" />
-                                </div>
-                            ))}
-                        </div>
-                    ) : groups.length === 0 ? (
-                        <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200">
-                            <p className="text-slate-400 italic mb-4">Belum ada group qurban</p>
-                            <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
-                        </div>
-                    ) : (
-                        <ul className="space-y-4">
-                            {filteredGroups.map((group) => {
-                                const animalColor = group.target_animal?.toLowerCase() === 'sapi' ? 'emerald' :
-                                    group.target_animal?.toLowerCase() === 'kambing' ? 'amber' : 'slate'
-                                const progressPct = Math.round(group.progress)
-                                return (
-                                    <li key={group.id} className="relative group/card">
-                                        <Link
-                                            to={`/groups/${group.id}`}
-                                            className="block bg-white rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] border border-slate-100/80 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
-                                        >
-                                            {/* Row 1: Badges + Menu */}
-                                            <div className="flex justify-between items-center mb-3">
-                                                <div className="flex items-center gap-2.5">
-                                                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide ${animalColor === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                                                        animalColor === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'
-                                                        }`}>
-                                                        {group.target_animal}
-                                                    </span>
-                                                    <span className="text-[12px] font-semibold text-slate-400">
-                                                        {group.participantCount} Peserta
+                    {
+                        loading ? (
+                            <div className="space-y-4">
+                                {[1, 2].map(i => (
+                                    <div key={i} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                                        <Skeleton className="h-6 w-1/2 mb-3" />
+                                        <Skeleton className="h-2 w-full rounded-full" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : groups.length === 0 ? (
+                            <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200">
+                                <p className="text-slate-400 italic mb-4">Belum ada group qurban</p>
+                                <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
+                            </div>
+                        ) : (
+                            <ul className="space-y-4">
+                                {filteredGroups.map((group) => {
+                                    const animalColor = group.target_animal?.toLowerCase() === 'sapi' ? 'emerald' :
+                                        group.target_animal?.toLowerCase() === 'kambing' ? 'amber' : 'slate'
+                                    const progressPct = Math.round(group.progress)
+                                    return (
+                                        <li key={group.id} className="relative group/card">
+                                            <Link
+                                                to={`/groups/${group.id}`}
+                                                className="block bg-white dark:bg-slate-900 rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:shadow-none border border-slate-100/80 dark:border-slate-800 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
+                                            >
+                                                {/* Row 1: Badges + Menu */}
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide ${animalColor === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                                                            animalColor === 'amber' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                                                            }`}>
+                                                            {group.target_animal}
+                                                        </span>
+                                                        <span className="text-[12px] font-semibold text-slate-400">
+                                                            {group.participantCount} Peserta
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 text-emerald-600 uppercase tracking-wide">
+                                                            Periode {group.qurban_year || 2026}
+                                                        </span>
+                                                        <button
+                                                            data-dropdown-trigger
+                                                            onClick={(e) => {
+                                                                e.preventDefault()
+                                                                e.stopPropagation()
+                                                                setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                                            }}
+                                                            className="w-8 h-8 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-600 hover:text-slate-500 transition-all duration-300"
+                                                        >
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Row 2: Group Name */}
+                                                <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-xl mb-5 group-hover/card:text-emerald-700 transition-colors duration-300">{group.name}</h3>
+
+                                                {/* Row 3: Terkumpul % */}
+                                                <p className="text-sm font-bold text-emerald-600 mb-2">
+                                                    Terkumpul {progressPct}%
+                                                </p>
+
+                                                {/* Row 4: Progress Bar */}
+                                                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden mb-5">
+                                                    <div
+                                                        style={{ width: `${Math.min(100, progressPct)}%` }}
+                                                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out shadow-[0_2px_8px_rgba(16,185,129,0.4)]"
+                                                    ></div>
+                                                </div>
+
+                                                {/* Row 5: Amount + Target */}
+                                                <div className="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800">
+                                                    <span className="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight">{formatRupiah(group.collected)}</span>
+                                                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                                                        Target: <span className="text-slate-500 dark:text-slate-400">{formatRupiah(group.total_price)}</span>
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 text-emerald-600 uppercase tracking-wide">
-                                                        Periode {group.qurban_year || 2026}
-                                                    </span>
+                                            </Link>
+
+                                            {/* Dropdown Menu */}
+                                            {activeDropdown === group.id && (
+                                                <div data-dropdown className="absolute right-4 top-14 w-40 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-2 z-20 animate-scale-up">
                                                     <button
-                                                        data-dropdown-trigger
+                                                        onClick={(e) => openEditModal(group, e)}
+                                                        className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                                                    >
+                                                        <Pencil size={16} />
+                                                        <span>Edit</span>
+                                                    </button>
+                                                    <button
                                                         onClick={(e) => {
                                                             e.preventDefault()
                                                             e.stopPropagation()
-                                                            setActiveDropdown(activeDropdown === group.id ? null : group.id)
+                                                            handleDeleteGroup(group, e)
                                                         }}
-                                                        className="w-8 h-8 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-300 hover:text-slate-500 transition-all duration-300"
+                                                        className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
                                                     >
-                                                        <MoreVertical size={18} />
+                                                        <Trash2 size={16} />
+                                                        <span>Hapus Group</span>
                                                     </button>
                                                 </div>
-                                            </div>
+                                            )}
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        )
+                    }
+                </div >
 
-                                            {/* Row 2: Group Name */}
-                                            <h3 className="font-extrabold text-slate-800 text-xl mb-5 group-hover/card:text-emerald-700 transition-colors duration-300">{group.name}</h3>
-
-                                            {/* Row 3: Terkumpul % */}
-                                            <p className="text-sm font-bold text-emerald-600 mb-2">
-                                                Terkumpul {progressPct}%
-                                            </p>
-
-                                            {/* Row 4: Progress Bar */}
-                                            <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden mb-5">
-                                                <div
-                                                    style={{ width: `${Math.min(100, progressPct)}%` }}
-                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out shadow-[0_2px_8px_rgba(16,185,129,0.4)]"
-                                                ></div>
-                                            </div>
-
-                                            {/* Row 5: Amount + Target */}
-                                            <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                                                <span className="text-lg font-black text-slate-800 tracking-tight">{formatRupiah(group.collected)}</span>
-                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
-                                                    Target: <span className="text-slate-500">{formatRupiah(group.total_price)}</span>
-                                                </span>
-                                            </div>
-                                        </Link>
-
-                                        {/* Dropdown Menu */}
-                                        {activeDropdown === group.id && (
-                                            <div data-dropdown className="absolute right-4 top-14 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-20 animate-scale-up">
-                                                <button
-                                                    onClick={(e) => openEditModal(group, e)}
-                                                    className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
-                                                >
-                                                    <Pencil size={16} />
-                                                    <span>Edit</span>
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault()
-                                                        e.stopPropagation()
-                                                        handleDeleteGroup(group, e)
-                                                    }}
-                                                    className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
-                                                >
-                                                    <Trash2 size={16} />
-                                                    <span>Hapus Group</span>
-                                                </button>
-                                            </div>
-                                        )}
-                                    </li>
-                                )
-                            })}
-                        </ul>
-                    )}
-                </div>
-
-            </main>
+            </main >
 
             {/* Edit Group Modal (Reused) */}
             {
@@ -1000,11 +1002,11 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-lg font-bold text-slate-800">Edit Group</h2>
-                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Edit Group</h2>
+                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 dark:bg-slate-800 dark:text-slate-500 dark:hover:text-slate-300 p-2 rounded-full">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -1018,7 +1020,7 @@ export default function Dashboard() {
                                         type="text"
                                         value={editFormData.name}
                                         onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
                                         required
                                     />
                                 </div>
@@ -1037,7 +1039,7 @@ export default function Dashboard() {
                                                 target_participants: animal === 'sapi' ? 7 : 1
                                             })
                                         }}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
                                     >
                                         <option value="sapi">Sapi</option>
                                         <option value="kambing">Kambing</option>
@@ -1054,7 +1056,7 @@ export default function Dashboard() {
                                         min="1"
                                         value={editFormData.target_participants}
                                         onChange={(e) => setEditFormData({ ...editFormData, target_participants: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
                                         required
                                     />
                                 </div>
@@ -1066,7 +1068,7 @@ export default function Dashboard() {
                                         name="qurban_year"
                                         value={editFormData.qurban_year}
                                         onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
                                     >
                                         <option value={2026}>2026</option>
                                         <option value={2027}>2027</option>
@@ -1081,7 +1083,7 @@ export default function Dashboard() {
                                         type="text"
                                         value={editFormData.total_price}
                                         onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700"
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
                                         required
                                     />
                                 </div>
@@ -1108,18 +1110,18 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh] m-4 relative"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[85vh] m-4 relative"
                         >
                             {/* Modal Header */}
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white sticky top-0 z-10 flex-none">
-                                <h2 className="text-2xl font-bold text-slate-800">My Account</h2>
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10 flex-none">
+                                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">My Account</h2>
 
                                 <button
                                     onClick={() => {
                                         setIsAccountModalOpen(false)
                                         setIsEditingProfile(false)
                                     }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition"
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition"
                                 >
                                     <X size={20} />
                                 </button>
@@ -1129,7 +1131,7 @@ export default function Dashboard() {
                                 {/* Profile Section */}
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center mb-2">
-                                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Data Profil</h3>
+                                        <h3 className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Data Profil</h3>
                                         {!isEditingProfile && (
                                             <button
                                                 onClick={() => {
@@ -1171,7 +1173,7 @@ export default function Dashboard() {
                                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Informasi Pribadi</h4>
 
                                         {/* Nama Lengkap */}
-                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-transparent'} rounded-2xl p-1`}>
                                             <div className="absolute left-4 top-3.5 text-slate-400">
                                                 <User size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                             </div>
@@ -1183,14 +1185,14 @@ export default function Dashboard() {
                                                 disabled={!isEditingProfile}
                                                 value={isEditingProfile ? profileFormData.full_name : (profile?.full_name || '')}
                                                 onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
-                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 dark:text-slate-200 focus:ring-0 placeholder:text-slate-300 dark:placeholder:text-slate-500 disabled:opacity-100`}
                                                 placeholder="Nama Lengkap"
                                             />
-                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Nama</span>}
+                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Nama</span>}
                                         </div>
 
                                         {/* Instansi */}
-                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-transparent'} rounded-2xl p-1`}>
                                             <div className="absolute left-4 top-3.5 text-slate-400">
                                                 <Building size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                             </div>
@@ -1202,14 +1204,14 @@ export default function Dashboard() {
                                                 disabled={!isEditingProfile}
                                                 value={isEditingProfile ? profileFormData.institution_name : (profile?.institution_name || '')}
                                                 onChange={(e) => setProfileFormData({ ...profileFormData, institution_name: e.target.value })}
-                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 dark:text-slate-200 focus:ring-0 placeholder:text-slate-300 dark:placeholder:text-slate-500 disabled:opacity-100`}
                                                 placeholder="Nama Instansi"
                                             />
-                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Instansi</span>}
+                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Instansi</span>}
                                         </div>
 
                                         {/* Email (Read Only) */}
-                                        <div className="relative bg-slate-50 border border-transparent rounded-2xl p-1 opacity-75">
+                                        <div className="relative bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-transparent rounded-2xl p-1 opacity-75">
                                             <div className="absolute left-4 top-3.5 text-slate-400">
                                                 <Mail size={18} />
                                             </div>
@@ -1220,9 +1222,9 @@ export default function Dashboard() {
                                                 autoComplete="email"
                                                 disabled
                                                 value={userEmail || ''}
-                                                className="w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-500 focus:ring-0 cursor-default"
+                                                className="w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-500 dark:text-slate-400 focus:ring-0 cursor-default"
                                             />
-                                            <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Email</span>
+                                            <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Email</span>
                                         </div>
                                     </div>
 
@@ -1231,7 +1233,7 @@ export default function Dashboard() {
                                         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kontak</h4>
 
                                         {/* WhatsApp */}
-                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-transparent'} rounded-2xl p-1`}>
                                             <div className="absolute left-4 top-3.5 text-slate-400">
                                                 <Phone size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                             </div>
@@ -1243,14 +1245,14 @@ export default function Dashboard() {
                                                 disabled={!isEditingProfile}
                                                 value={isEditingProfile ? profileFormData.phone_number : (profile?.phone_number || '-')}
                                                 onChange={(e) => setProfileFormData({ ...profileFormData, phone_number: e.target.value })}
-                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:opacity-100`}
+                                                className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 dark:text-slate-200 focus:ring-0 placeholder:text-slate-300 dark:placeholder:text-slate-500 disabled:opacity-100`}
                                                 placeholder="08..."
                                             />
-                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">WhatsApp</span>}
+                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">WhatsApp</span>}
                                         </div>
 
                                         {/* Alamat */}
-                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-50 border border-transparent'} rounded-2xl p-1`}>
+                                        <div className={`relative transition-all duration-300 ${isEditingProfile ? 'bg-white dark:bg-slate-800 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'bg-slate-50 dark:bg-slate-800 border border-transparent dark:border-transparent'} rounded-2xl p-1`}>
                                             <div className="absolute left-4 top-3.5 text-slate-400">
                                                 <MapPin size={18} className={isEditingProfile ? 'text-emerald-500' : ''} />
                                             </div>
@@ -1264,14 +1266,14 @@ export default function Dashboard() {
                                                 className={`w-full pl-12 pr-4 py-3.5 bg-transparent border-none rounded-xl font-bold text-slate-800 focus:ring-0 placeholder:text-slate-300 disabled:resize-none resize-none h-24 disabled:opacity-100 leading-relaxed`}
                                                 placeholder="Alamat lengkap..."
                                             />
-                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full">Alamat</span>}
+                                            {!isEditingProfile && <span className="absolute right-4 top-3.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">Alamat</span>}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {isEditingProfile && (
-                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 z-20 animate-slide-up">
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 z-20 animate-slide-up">
                                     <div className="flex space-x-3">
                                         <button
                                             onClick={() => {
@@ -1283,7 +1285,7 @@ export default function Dashboard() {
                                                 })
                                                 setIsEditingProfile(false)
                                             }}
-                                            className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition"
+                                            className="flex-1 py-3.5 rounded-xl font-bold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                                         >
                                             Batal
                                         </button>
@@ -1299,14 +1301,14 @@ export default function Dashboard() {
 
                             {!isEditingProfile && (
                                 <>
-                                    <hr className="border-slate-100 mt-6" />
+                                    <hr className="border-slate-100 dark:border-slate-800 mt-6" />
                                     {/* Actions (Delete Account) */}
                                     <div className="pt-6 pb-8 text-center">
                                         <button
                                             onClick={() => {
                                                 setIsDeleteConfirmOpen(true)
                                             }}
-                                            className="text-sm font-bold text-red-500 hover:text-red-600 hover:underline transition py-2 px-4 rounded-full hover:bg-red-50"
+                                            className="text-sm font-bold text-red-500 hover:text-red-600 hover:underline transition py-2 px-4 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
                                         >
                                             Hapus Akun
                                         </button>
@@ -1329,11 +1331,11 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-slate-800">Settings</h2>
-                                <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Settings</h2>
+                                <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -1367,23 +1369,23 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl dark:shadow-2xl overflow-hidden animate-scale-up border border-transparent dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                                <h2 className="text-xl font-bold text-slate-800">About</h2>
-                                <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-white">About</h2>
+                                <button onClick={() => setIsAboutModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
                             <div className="p-8 text-center">
-                                <div className="w-24 h-24 bg-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                                <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
                                     <img src="/logo-domba.png" alt="Logo Dombantara" className="w-16 h-16 object-contain" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-slate-800 mb-2">Dombantara.id</h3>
-                                <p className="text-slate-500 font-medium mb-6">Version 1.0.1</p>
-                                <div className="bg-slate-50 py-3 px-6 rounded-full inline-block">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Developed by</p>
-                                    <p className="text-sm font-bold text-slate-700">Fajar Setiawan</p>
+                                <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Dombantara.id</h3>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium mb-6">Version 1.0.1</p>
+                                <div className="bg-slate-50 dark:bg-slate-800 py-3 px-6 rounded-full inline-block">
+                                    <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Developed by</p>
+                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Fajar Setiawan</p>
                                 </div>
                             </div>
                         </div>
@@ -1400,12 +1402,12 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center"
                         >
                             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="text-red-500" size={32} />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">Hapus Group?</h3>
+                            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Hapus Group?</h3>
                             <p className="text-slate-500 mb-6 text-sm">
                                 Apakah kamu yakin ingin menghapus group <strong>"{groupToDelete?.name}"</strong>? Tindakan ini tidak dapat dibatalkan.
                             </p>
@@ -1413,7 +1415,7 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
                                     disabled={deleteLoading}
-                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+                                    className="flex-1 py-3 rounded-xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                                 >
                                     Batal
                                 </button>
@@ -1439,13 +1441,13 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-bounce-in"
                         >
                             <div className="p-8 text-center flex flex-col items-center">
                                 <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
                                     <Trash2 className="w-10 h-10 text-red-600" />
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-900 mb-2">Hapus Akun?</h2>
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-2">Hapus Akun?</h2>
                                 <p className="text-slate-500 font-medium mb-6 leading-relaxed max-w-[80%] mx-auto">
                                     apakah anda yakin ingin menghapus account ini ?
                                 </p>
@@ -1459,7 +1461,7 @@ export default function Dashboard() {
                                 <div className="grid grid-cols-2 gap-4 w-full">
                                     <button
                                         onClick={() => setIsDeleteConfirmOpen(false)}
-                                        className="py-4 rounded-2xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition active:scale-[0.98]"
+                                        className="py-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-[0.98]"
                                     >
                                         Batal
                                     </button>
@@ -1736,21 +1738,21 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-2xl font-black text-slate-800">Riwayat Transaksi</h2>
-                                <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
+                                <h2 className="text-2xl font-black text-slate-800 dark:text-white">Riwayat Transaksi</h2>
+                                <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="flex items-center space-x-3 px-6 py-4 border-b border-gray-50 bg-white">
+                            <div className="flex items-center space-x-3 px-6 py-4 border-b border-gray-50 dark:border-slate-800 bg-white dark:bg-slate-900">
                                 <button
                                     onClick={() => setHistoryFilterGroup('Semua')}
                                     className={`flex-none whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-bold transition active:scale-95 ${historyFilterGroup === 'Semua'
-                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                        : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100'
+                                        ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20'
+                                        : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     Semua Group
@@ -1760,8 +1762,8 @@ export default function Dashboard() {
                                     <button
                                         onClick={() => setIsFilterModalOpen(true)}
                                         className={`w-full text-left px-5 py-2.5 rounded-full text-xs font-bold transition flex justify-between items-center ${historyFilterGroup !== 'Semua'
-                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                            : 'bg-slate-50 text-slate-500 border border-slate-100 hover:bg-slate-100'
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20'
+                                            : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <span className="truncate mr-2">
@@ -1778,33 +1780,33 @@ export default function Dashboard() {
 
 
 
-                            <div className="overflow-y-auto flex-1 p-6 pt-2 space-y-3">
+                            <div className="overflow-y-auto flex-1 p-6 pt-2 space-y-3 custom-scrollbar">
                                 {historyLoading ? (
-                                    <div className="text-center py-10 text-slate-400">Loading...</div>
+                                    <div className="text-center py-10 text-slate-400 dark:text-slate-500">Loading...</div>
                                 ) : historyTransactions.length > 0 ? (
                                     historyTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-white border border-slate-100 p-4 rounded-3xl shadow-sm flex justify-between items-center hover:shadow-md transition-shadow duration-300">
+                                        <div key={trx.id} className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-3xl shadow-sm dark:shadow-none flex justify-between items-center hover:shadow-md transition-all duration-300">
                                             <div>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
                                                     {new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                 </p>
-                                                <h4 className="font-bold text-slate-800 text-sm mb-0.5">{trx.participantName}</h4>
-                                                <p className="text-xs font-medium text-slate-500">{trx.groupName} • {trx.payment_method || 'Tunai'}</p>
+                                                <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-0.5">{trx.participantName}</h4>
+                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{trx.groupName} • {trx.payment_method || 'Tunai'}</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="block font-black text-emerald-600 text-base">{trx.formattedAmount}</span>
+                                                <span className="block font-black text-emerald-600 dark:text-emerald-400 text-base">{trx.formattedAmount}</span>
                                                 {trx.receipt_url && (
-                                                    <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 hover:underline mt-1 inline-block">Lihat Bukti</a>
+                                                    <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 dark:text-blue-400 hover:underline mt-1 inline-block">Lihat Bukti</a>
                                                 )}
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="text-center py-12 flex flex-col items-center">
-                                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                                            <ReceiptText size={24} className="text-slate-300" />
+                                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                                            <ReceiptText size={24} className="text-slate-300 dark:text-slate-600" />
                                         </div>
-                                        <p className="text-slate-400 font-bold text-sm">Belum ada riwayat transaksi</p>
+                                        <p className="text-slate-400 dark:text-slate-500 font-bold text-sm">Belum ada riwayat transaksi</p>
                                     </div>
                                 )}
                             </div>
@@ -1822,15 +1824,15 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                            className="bg-white dark:bg-slate-900 w-full rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe border-t border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
-                                <h2 className="text-xl font-black text-slate-800">Pilih Group</h2>
-                                <button onClick={() => setIsFilterModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900">
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white">Pilih Group</h2>
+                                <button onClick={() => setIsFilterModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
-                            <div className="p-6 overflow-y-auto space-y-3">
+                            <div className="p-6 overflow-y-auto space-y-3 custom-scrollbar">
                                 {groups.map(g => (
                                     <button
                                         key={g.id}
@@ -1839,8 +1841,8 @@ export default function Dashboard() {
                                             setIsFilterModalOpen(false)
                                         }}
                                         className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${historyFilterGroup === g.id
-                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20'
+                                            : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <span className="text-sm">{g.name}</span>
@@ -1848,7 +1850,7 @@ export default function Dashboard() {
                                     </button>
                                 ))}
                                 {groups.length === 0 && (
-                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada group tersedia</div>
+                                    <div className="text-center py-8 text-slate-400 dark:text-slate-500 font-bold">Tidak ada group tersedia</div>
                                 )}
                             </div>
                         </div>
@@ -1865,15 +1867,15 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                            className="bg-white dark:bg-slate-900 w-full rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe border-t border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
-                                <h2 className="text-xl font-black text-slate-800">Pilih Group</h2>
-                                <button onClick={() => setIsQuickTrxGroupModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900">
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white">Pilih Group</h2>
+                                <button onClick={() => setIsQuickTrxGroupModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
-                            <div className="p-6 overflow-y-auto space-y-3">
+                            <div className="p-6 overflow-y-auto space-y-3 custom-scrollbar">
                                 {groups.map(g => (
                                     <button
                                         key={g.id}
@@ -1882,19 +1884,19 @@ export default function Dashboard() {
                                             setIsQuickTrxGroupModalOpen(false)
                                         }}
                                         className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${quickTrxFormData.group_id === g.id
-                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20'
+                                            : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <div className="flex flex-col">
                                             <span className="text-sm">{g.name}</span>
-                                            <span className={`text-[10px] uppercase tracking-wider ${quickTrxFormData.group_id === g.id ? 'text-emerald-100' : 'text-slate-400'}`}>{g.target_animal}</span>
+                                            <span className={`text-[10px] uppercase tracking-wider ${quickTrxFormData.group_id === g.id ? 'text-emerald-100' : 'text-slate-400 dark:text-slate-500'}`}>{g.target_animal}</span>
                                         </div>
                                         {quickTrxFormData.group_id === g.id && <CheckCircle size={20} className="text-white" />}
                                     </button>
                                 ))}
                                 {groups.length === 0 && (
-                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada group tersedia</div>
+                                    <div className="text-center py-8 text-slate-400 dark:text-slate-500 font-bold">Tidak ada group tersedia</div>
                                 )}
                             </div>
                         </div>
@@ -1911,15 +1913,15 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe"
+                            className="bg-white dark:bg-slate-900 w-full rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[70vh] pb-safe border-t border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white">
-                                <h2 className="text-xl font-black text-slate-800">Pilih Peserta</h2>
-                                <button onClick={() => setIsQuickTrxParticipantModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900">
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white">Pilih Peserta</h2>
+                                <button onClick={() => setIsQuickTrxParticipantModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
-                            <div className="p-6 overflow-y-auto space-y-3">
+                            <div className="p-6 overflow-y-auto space-y-3 custom-scrollbar">
                                 {groups.find(g => g.id === quickTrxFormData.group_id)?.participants.map(p => (
                                     <button
                                         key={p.id}
@@ -1928,8 +1930,8 @@ export default function Dashboard() {
                                             setIsQuickTrxParticipantModalOpen(false)
                                         }}
                                         className={`w-full py-4 px-6 rounded-2xl font-bold text-left flex justify-between items-center transition active:scale-[0.98] ${quickTrxFormData.participant_id === p.id
-                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20'
+                                            : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         <span className="text-sm">{p.name}</span>
@@ -1937,7 +1939,7 @@ export default function Dashboard() {
                                     </button>
                                 ))}
                                 {(!groups.find(g => g.id === quickTrxFormData.group_id)?.participants || groups.find(g => g.id === quickTrxFormData.group_id)?.participants.length === 0) && (
-                                    <div className="text-center py-8 text-slate-400 font-bold">Tidak ada peserta di group ini</div>
+                                    <div className="text-center py-8 text-slate-400 dark:text-slate-500 font-bold">Tidak ada peserta di group ini</div>
                                 )}
                             </div>
                         </div>
@@ -1954,44 +1956,44 @@ export default function Dashboard() {
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-2xl font-black text-slate-800">Notifikasi Hari Ini</h2>
-                                <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
+                                <h2 className="text-2xl font-black text-slate-800 dark:text-white">Notifikasi Hari Ini</h2>
+                                <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="overflow-y-auto flex-1 p-6 space-y-3">
+                            <div className="overflow-y-auto flex-1 p-6 space-y-3 custom-scrollbar">
                                 {notifLoading ? (
-                                    <div className="text-center py-10 text-slate-400">Loading...</div>
+                                    <div className="text-center py-10 text-slate-400 dark:text-slate-500">Loading...</div>
                                 ) : notificationTransactions.length > 0 ? (
                                     notificationTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-emerald-50/50 border border-emerald-100 p-4 rounded-3xl flex items-start space-x-4">
-                                            <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600 flex-none shadow-sm shadow-emerald-100">
+                                        <div key={trx.id} className="bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-3xl flex items-start space-x-4">
+                                            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-2xl text-emerald-600 dark:text-emerald-400 flex-none shadow-sm shadow-emerald-100 dark:shadow-none">
                                                 <Bell size={20} className="fill-current" />
                                             </div>
                                             <div className="flex-1 pt-1">
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <h4 className="font-black text-slate-800 text-sm">Setoran Baru!</h4>
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                                                    <h4 className="font-black text-slate-800 dark:text-emerald-100 text-sm">Setoran Baru!</h4>
+                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700">
                                                         {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                 </div>
-                                                <p className="text-sm text-slate-600 leading-relaxed">
-                                                    <span className="font-bold text-slate-800">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600">{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.
+                                                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                                                    <span className="font-bold text-slate-800 dark:text-white">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600 dark:text-emerald-400">{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.
                                                 </p>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                                        <div className="bg-slate-50 p-4 rounded-full mb-4">
-                                            <Bell size={32} className="text-slate-300" />
+                                        <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-full mb-4">
+                                            <Bell size={32} className="text-slate-300 dark:text-slate-600" />
                                         </div>
-                                        <p className="text-slate-800 font-bold">Tidak ada notifikasi hari ini</p>
-                                        <p className="text-xs text-slate-500 mt-1">Belum ada transaksi yang masuk hari ini.</p>
+                                        <p className="text-slate-800 dark:text-white font-bold">Tidak ada notifikasi hari ini</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Belum ada transaksi yang masuk hari ini.</p>
                                     </div>
                                 )}
                             </div>
@@ -2004,7 +2006,7 @@ export default function Dashboard() {
 
 
             {/* Refined Mobile Bottom Navigation - Fixed and over content */}
-            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)]">
+            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] dark:shadow-none">
                 {/* 1. Home */}
                 <button
                     onClick={() => navigate('/')}
@@ -2020,7 +2022,7 @@ export default function Dashboard() {
                 {/* 2. Transaction (History) */}
                 <button
                     onClick={() => setIsHistoryModalOpen(true)}
-                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                    className="flex flex-col items-center space-y-1 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 transition group"
                 >
                     <ReceiptText size={24} className="group-hover:scale-110 transition" />
                     <span className="text-[10px] font-medium">History</span>
@@ -2031,7 +2033,7 @@ export default function Dashboard() {
                     onClick={() => setIsQuickTransactionModalOpen(true)}
                     className="flex flex-col items-center justify-end -mt-8 space-y-1 group relative z-10"
                 >
-                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center border-[4px] border-slate-50 group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-600 to-green-500 rounded-full flex items-center justify-center border-[4px] border-slate-50 dark:border-slate-900 group-hover:scale-105 transition transform active:scale-95 cursor-pointer overflow-hidden p-2.5">
                         <img src="/logo-domba.png" alt="Add" className="w-full h-full object-contain brightness-0 invert" />
                     </div>
                     <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-green-500 transform translate-y-1">Quick Add</span>
@@ -2040,7 +2042,7 @@ export default function Dashboard() {
                 {/* 4. Notification */}
                 <button
                     onClick={() => setIsNotificationModalOpen(true)}
-                    className="flex flex-col items-center space-y-1 text-slate-400 hover:text-emerald-600 transition group"
+                    className="flex flex-col items-center space-y-1 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 transition group"
                 >
                     <Bell size={24} className="group-hover:scale-110 transition" />
                     <span className="text-[10px] font-medium">Notif</span>
@@ -2051,7 +2053,7 @@ export default function Dashboard() {
                 <div className="relative">
                     {/* Dropdown Menu */}
                     {isAccountDropdownOpen && (
-                        <div ref={accountDropdownRef} className="absolute bottom-full right-0 mb-4 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
+                        <div ref={accountDropdownRef} className="absolute bottom-full right-0 mb-4 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
                             <div className="p-2 space-y-1">
                                 <button
                                     onClick={() => {
@@ -2059,12 +2061,12 @@ export default function Dashboard() {
                                         setIsAccountModalOpen(true)
                                         setIsAccountDropdownOpen(false)
                                     }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 transition group"
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition group"
                                 >
-                                    <div className="bg-emerald-100 p-1.5 rounded-lg text-emerald-600 group-hover:bg-emerald-200">
+                                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-1.5 rounded-lg text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50">
                                         <User size={16} />
                                     </div>
-                                    <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-700">My Account</span>
+                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">My Account</span>
                                 </button>
 
                                 <button
@@ -2072,12 +2074,12 @@ export default function Dashboard() {
                                         setIsSettingsModalOpen(true)
                                         setIsAccountDropdownOpen(false)
                                     }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition group"
                                 >
-                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700">
                                         <Settings size={16} />
                                     </div>
-                                    <span className="text-sm font-bold text-slate-600">Setting</span>
+                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Setting</span>
                                 </button>
 
                                 <button
@@ -2085,24 +2087,24 @@ export default function Dashboard() {
                                         setIsAboutModalOpen(true)
                                         setIsAccountDropdownOpen(false)
                                     }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 transition group"
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition group"
                                 >
-                                    <div className="bg-slate-100 p-1.5 rounded-lg text-slate-500 group-hover:bg-slate-200">
+                                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700">
                                         <Info size={16} />
                                     </div>
-                                    <span className="text-sm font-bold text-slate-600">About</span>
+                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">About</span>
                                 </button>
 
-                                <hr className="border-slate-50 mx-2" />
+                                <hr className="border-slate-50 dark:border-slate-800 mx-2" />
 
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-red-50 transition group"
+                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition group"
                                 >
-                                    <div className="bg-red-100 p-1.5 rounded-lg text-red-600 group-hover:bg-red-200">
+                                    <div className="bg-red-100 dark:bg-red-900/30 p-1.5 rounded-lg text-red-600 dark:text-red-400 group-hover:bg-red-200 dark:group-hover:bg-red-900/50">
                                         <LogOut size={16} />
                                     </div>
-                                    <span className="text-sm font-bold text-red-600">Keluar</span>
+                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">Keluar</span>
                                 </button>
                             </div>
                         </div>
@@ -2111,13 +2113,13 @@ export default function Dashboard() {
                     <button
                         ref={accountButtonRef}
                         onClick={() => setIsAccountDropdownOpen(!isAccountDropdownOpen)}
-                        className={`flex flex-col items-center space-y-1 transition group ${isAccountDropdownOpen ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-600'}`}
+                        className={`flex flex-col items-center space-y-1 transition group ${isAccountDropdownOpen ? 'text-emerald-600' : 'text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500'}`}
                     >
                         <User size={24} className="group-hover:scale-110 transition" />
                         <span className="text-[10px] font-medium">Account</span>
                     </button>
                 </div>
             </nav>
-        </div>
+        </div >
     )
 }
