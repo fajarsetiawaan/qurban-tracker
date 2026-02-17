@@ -719,20 +719,20 @@ export default function GroupDetail() {
             exit={{ opacity: 0 }}
             className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative font-sans"
         >
-            {/* Header (App Style) - Fixed */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100/50 dark:border-slate-800/50 px-6 py-4 flex items-center justify-between shadow-sm transition-all duration-300">
+            {/* Header (App Style) - Fixed with Glassmorphism */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-100/50 dark:border-slate-800/50 px-6 py-4 flex items-center justify-between shadow-sm transition-all duration-300">
                 <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => navigate(-1)}
-                    className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm transition"
+                    className="w-10 h-10 flex items-center justify-center -ml-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-300"
                 >
                     <ArrowLeft size={20} />
                 </motion.button>
-                <h1 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">Group Info</h1>
+                <h1 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Info Group</h1>
                 <div className="relative">
                     <button
                         onClick={() => setIsEditModalOpen(true)}
-                        className="w-10 h-10 flex items-center justify-center -mr-2 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm transition"
+                        className="w-10 h-10 flex items-center justify-center -mr-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-300"
                     >
                         <MoreVertical size={20} />
                     </button>
@@ -764,8 +764,8 @@ export default function GroupDetail() {
 
                 </div>
 
-                {/* Chart Section */}
-                <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex flex-col items-center relative overflow-hidden border border-slate-100/50 dark:border-slate-800/50">
+                {/* Chart Section - Glassmorphism */}
+                <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none flex flex-col items-center relative overflow-hidden border border-slate-100/50 dark:border-slate-800/50">
                     <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white to-transparent dark:from-slate-800/20 opacity-50 pointer-events-none" />
                     <div className="w-64 h-64 relative z-10 outline-none focus:outline-none focus:ring-0" tabIndex="-1">
                         <PieChart width={256} height={256}>
@@ -875,7 +875,7 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className="bg-white dark:bg-slate-900 p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md transition-all duration-300 cursor-pointer relative group"
+                                    className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md dark:hover:shadow-slate-950/20 transition-all duration-300 cursor-pointer relative group"
                                 >
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-[2rem] ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
 
@@ -973,7 +973,7 @@ export default function GroupDetail() {
             </main>
 
             {/* Bottom Navbar (Glassmorphism) - Fixed */}
-            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] dark:shadow-none transition-colors duration-300">
+            <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-t border-slate-100/50 dark:border-slate-800/50 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] dark:shadow-slate-950/20 transition-all duration-300">
                 <button
                     onClick={() => navigate('/')}
                     className="flex flex-col items-center space-y-1 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 transition group"

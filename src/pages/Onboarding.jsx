@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Trash2, Plus, ArrowLeft } from 'lucide-react'
@@ -103,16 +104,21 @@ export default function Onboarding() {
     }
 
     return (
-        <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 relative font-sans">
-            {/* Header (App Style) - Fixed */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-100/50 dark:border-slate-800/50 px-6 py-4 flex items-center shadow-sm dark:shadow-slate-900/10 transition-all duration-300">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative font-sans"
+        >
+            {/* Header (App Style) - Fixed with Glassmorphism */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-slate-100/50 dark:border-slate-800/50 px-6 py-4 flex items-center shadow-sm dark:shadow-slate-950/20 transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
                     className="w-10 h-10 flex items-center justify-center -ml-2 mr-3 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full border border-slate-100 dark:border-slate-800 hover:border-emerald-100 dark:hover:border-emerald-900/30 shadow-sm transition-all duration-300 group"
                 >
                     <ArrowLeft size={22} className="group-hover:-translate-x-0.5 transition-transform" />
                 </button>
-                <h1 className="text-base font-black text-slate-800 dark:text-white tracking-tight">Buat Group Baru</h1>
+                <h1 className="text-base font-black text-slate-800 dark:text-white tracking-tight leading-none">Buat Group Baru</h1>
             </header>
 
 
@@ -126,8 +132,8 @@ export default function Onboarding() {
                         </div>
                     )}
 
-                    {/* Section 1: Data Grup */}
-                    <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                    {/* Section 1: Data Grup - Glassmorphism */}
+                    <section className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800/50">
                         <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-400 mb-4 border-b border-gray-100 dark:border-slate-800 pb-2 uppercase tracking-wide">Informasi Group</h2>
 
                         <div className="space-y-4">
@@ -215,8 +221,8 @@ export default function Onboarding() {
                         </div>
                     </section>
 
-                    {/* Section 2: Data Peserta */}
-                    <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800">
+                    {/* Section 2: Data Peserta - Glassmorphism */}
+                    <section className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800/50">
                         <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-slate-800 pb-2">
                             <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wide">Daftar Peserta</h2>
                             <button
@@ -275,8 +281,8 @@ export default function Onboarding() {
                 </form>
             </main>
 
-            {/* Action Button - Fixed Bottom */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 z-50">
+            {/* Action Button - Fixed Bottom with Glassmorphism */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-t border-gray-100 dark:border-slate-800/50 z-50">
                 <button
                     type="submit"
                     form="onboarding-form"
@@ -286,6 +292,6 @@ export default function Onboarding() {
                     {loading ? 'Menyimpan...' : 'Simpan Group & Peserta'}
                 </button>
             </div>
-        </div>
+        </motion.div>
     )
 }

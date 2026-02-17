@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { Mail } from 'lucide-react'
@@ -60,7 +61,12 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F0FDF4] dark:bg-[#0B1120] flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="min-h-screen bg-[#F0FDF4] dark:bg-slate-950 flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900"
+        >
             {/* Ambient Mesh Gradient Background */}
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/40 dark:bg-emerald-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob"></div>
             <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-200/40 dark:bg-teal-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000"></div>
@@ -241,6 +247,6 @@ export default function Login() {
             <p className="absolute bottom-6 text-xs font-bold text-emerald-800/20 dark:text-emerald-400/20 tracking-widest uppercase">
                 © 2026 Dombantara ID
             </p>
-        </div>
+        </motion.div>
     )
 }

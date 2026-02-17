@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { supabase } from './lib/supabase'
 import MobileLayout from './components/Layout/MobileLayout'
 import SplashScreen from './components/SplashScreen'
@@ -69,20 +70,30 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/p/:slug" element={<PublicParticipant />} />
-          <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
-
-          <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
-            <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
-            <Route path="/groups/:id" element={<GroupDetail />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-          </Route>
-        </Routes>
+        <AppContent session={session} />
       </BrowserRouter>
     </ThemeProvider>
+  )
+}
+
+function AppContent({ session }) {
+  const location = useLocation()
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/p/:slug" element={<PublicParticipant />} />
+        <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+
+        <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
+          <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
+          <Route path="/groups/:id" element={<GroupDetail />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
   )
 }
 

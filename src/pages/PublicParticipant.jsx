@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatNumber } from '../lib/utils'
@@ -45,13 +46,13 @@ export default function PublicParticipant() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                    <TrendingUp className="text-red-500 rotate-180" size={32} />
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-20 h-20 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4 border border-red-100 dark:border-red-900/30">
+                    <TrendingUp className="text-red-500 dark:text-red-400 rotate-180" size={32} />
                 </div>
-                <h2 className="text-xl font-bold text-slate-800 mb-2">Terjadi Kesalahan</h2>
-                <p className="text-slate-500 mb-6">{error}</p>
-                <a href="/" className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Terjadi Kesalahan</h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
+                <a href="/" className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 dark:shadow-none">
                     Kembali ke Beranda
                 </a>
             </div>
@@ -69,15 +70,20 @@ export default function PublicParticipant() {
         : 0
 
     return (
-        <div className="h-[100dvh] overflow-y-auto bg-slate-50 font-sans selection:bg-emerald-200 pb-32 no-scrollbar">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-emerald-100/50 shadow-sm">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-[100dvh] overflow-y-auto bg-slate-50 dark:bg-slate-950 font-sans selection:bg-emerald-200 dark:selection:bg-emerald-800/50 pb-32 no-scrollbar scroll-smooth transition-colors duration-300"
+        >
+            {/* Header (Glassmorphism) */}
+            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-emerald-100/50 dark:border-slate-800/50 shadow-sm dark:shadow-slate-950/20 transition-all duration-300">
                 <div className="px-6 py-4 max-w-md mx-auto flex justify-between items-center">
                     <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-200">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-200 dark:shadow-none">
                             <img src="/logo-domba.png" alt="Logo" className="w-6 h-6 object-contain brightness-0 invert" />
                         </div>
-                        <span className="text-sm font-black text-slate-800 tracking-tight font-heading">TABUNGAN QURBAN DIGITAL</span>
+                        <span className="text-sm font-black text-slate-800 dark:text-white tracking-tight font-heading">QURBAN TRACKER</span>
                     </div>
                 </div>
             </header>
@@ -86,7 +92,7 @@ export default function PublicParticipant() {
                 {/* Participant Identity */}
                 <div className="text-center">
 
-                    <h1 className="text-2xl font-black text-slate-800 mb-1">
+                    <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1">
                         {loading ? <Skeleton className="h-8 w-48 mx-auto" /> : data?.participant_name}
                     </h1>
                     <div className="flex justify-center items-center space-x-2">
@@ -94,20 +100,20 @@ export default function PublicParticipant() {
                             <Skeleton className="h-5 w-32" />
                         ) : (
                             <>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${data?.target_animal?.toLowerCase() === 'sapi' ? 'bg-emerald-100 text-emerald-700' :
-                                    data?.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${data?.target_animal?.toLowerCase() === 'sapi' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                    data?.target_animal?.toLowerCase() === 'kambing' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                                     }`}>
                                     {data?.group_name}
                                 </span>
-                                <span className="text-slate-400 text-xs font-medium">•</span>
-                                <span className="text-slate-500 text-xs font-bold">Periode {data?.qurban_year}</span>
+                                <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">•</span>
+                                <span className="text-slate-500 dark:text-slate-400 text-xs font-bold">Periode {data?.qurban_year}</span>
                             </>
                         )}
                     </div>
                 </div>
 
                 {/* Hero Stats Card */}
-                <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-emerald-200/50 group border border-emerald-400/20">
+                <section className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[2.5rem] p-8 text-white shadow-xl shadow-emerald-200/50 dark:shadow-none group border border-emerald-400/20 dark:border-emerald-500/10 transition-all duration-300">
                     {/* Background Pattern */}
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-emerald-300 opacity-20 blur-2xl"></div>
@@ -150,27 +156,27 @@ export default function PublicParticipant() {
 
                 {/* Transaction History */}
                 <section>
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Riwayat Transaksi</h3>
+                    <h3 className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 px-2">Riwayat Transaksi</h3>
                     <div className="space-y-4">
                         {loading ? (
                             [1, 2, 3].map(i => (
-                                <div key={i} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                                <div key={i} className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
                                     <Skeleton className="h-4 w-24" />
                                     <Skeleton className="h-4 w-16" />
                                 </div>
                             ))
                         ) : data?.transactions?.length > 0 ? (
                             data.transactions.map((trx, index) => (
-                                <div key={index} className="group relative bg-white p-5 rounded-2xl shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] border border-slate-100 hover:border-emerald-200 transition-all duration-300">
+                                <div key={index} className="group relative bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-2xl shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] dark:shadow-none border border-slate-100 dark:border-slate-800/50 hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all duration-300">
                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-emerald-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center space-x-4">
-                                            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                                            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/30">
                                                 <CheckCircle2 size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-base font-black text-slate-800">{formatRupiah(trx.amount)}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                                                <p className="text-base font-black text-slate-800 dark:text-white">{formatRupiah(trx.amount)}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">
                                                     {(() => {
                                                         const dateVal = trx.date || trx.transaction_date || trx.created_at;
                                                         if (!dateVal) return 'Tanggal tidak tersedia';
@@ -187,7 +193,7 @@ export default function PublicParticipant() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.method?.toLowerCase() === 'transfer' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.method?.toLowerCase() === 'transfer' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                                             }`}>
                                             {trx.method || 'Tunai'}
                                         </span>
@@ -195,19 +201,19 @@ export default function PublicParticipant() {
                                 </div>
                             ))
                         ) : (
-                            <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-slate-200">
-                                <p className="text-slate-400 text-sm font-medium">Belum ada riwayat transaksi</p>
+                            <div className="text-center py-12 bg-white/50 dark:bg-slate-900/40 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">Belum ada riwayat transaksi</p>
                             </div>
                         )}
                     </div>
                 </section>
 
                 <div className="pt-8 pb-12 text-center">
-                    <p className="text-xs text-slate-400 font-medium">
+                    <p className="text-xs text-slate-400 dark:text-slate-600 font-medium">
                         © {new Date().getFullYear()} Dombantara.id
                     </p>
                 </div>
             </main>
-        </div>
+        </motion.div>
     )
 }

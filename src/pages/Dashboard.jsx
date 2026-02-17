@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard, Moon, Sun } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -676,9 +677,14 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="h-full flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 relative"
+        >
             {/* Fixed Top Header */}
-            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-emerald-100/50 dark:border-emerald-900/50 transition-all duration-300 shadow-sm">
+            <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border-b border-emerald-100/50 dark:border-slate-800/50 transition-all duration-300 shadow-sm dark:shadow-slate-900/20">
                 <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setIsProfileMenuOpen(true)}>
                     <div className="relative">
                         <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white shadow-lg shadow-emerald-100 group-hover:scale-105 transition-transform duration-300 relative z-10 bg-gradient-to-tr from-emerald-100 to-white flex items-center justify-center">
@@ -774,7 +780,7 @@ export default function Dashboard() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     {/* Total Participants Card */}
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center">
+                    <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex flex-col justify-center items-center text-center">
                         <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center mb-3 text-blue-600">
                             <Users size={20} />
                         </div>
@@ -785,7 +791,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Paid Participants Card */}
-                    <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex flex-col justify-center items-center text-center relative overflow-hidden">
                         <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center mb-3 text-emerald-600 relative z-10">
                             <CheckCircle size={20} />
                         </div>
@@ -903,7 +909,7 @@ export default function Dashboard() {
                                         <li key={group.id} className="relative group/card">
                                             <Link
                                                 to={`/groups/${group.id}`}
-                                                className="block bg-white dark:bg-slate-900 rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:shadow-none border border-slate-100/80 dark:border-slate-800 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
+                                                className="block bg-white dark:bg-slate-900/60 backdrop-blur-lg rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:shadow-none border border-slate-100/80 dark:border-slate-800/50 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
                                             >
                                                 {/* Row 1: Badges + Menu */}
                                                 <div className="flex justify-between items-center mb-3">
@@ -2120,6 +2126,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
-        </div >
+        </motion.div>
     )
 }
