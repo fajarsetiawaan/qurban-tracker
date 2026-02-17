@@ -34,7 +34,7 @@ export default function Dashboard() {
 
     // Profile Menu & Modal State
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-    const { theme } = useTheme()
+    const { theme, toggleTheme } = useTheme()
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
@@ -701,13 +701,17 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center space-x-2">
 
-                    {/* Logout Button moved to Profile Menu, but keeping here as fallback or removing? The previous design had it. Let's keep it but cleaner. */}
+                    {/* Theme Toggle Button */}
                     <button
-                        onClick={handleLogout}
-                        className="p-2.5 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300 shadow-sm hover:shadow-md"
-                        title="Logout"
+                        onClick={toggleTheme}
+                        className="p-2.5 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all duration-300 shadow-sm hover:shadow-md group"
+                        title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     >
-                        <LogOut size={20} />
+                        {theme === 'dark' ? (
+                            <Sun size={20} className="group-hover:rotate-45 transition-transform duration-500" />
+                        ) : (
+                            <Moon size={20} className="group-hover:-rotate-12 transition-transform duration-500" />
+                        )}
                     </button>
                 </div>
             </header>
