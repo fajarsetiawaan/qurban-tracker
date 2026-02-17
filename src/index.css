@@ -1,9 +1,29 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    --bg-primary: #f8fafc;
+    /* slate-50 */
+    --text-primary: #1e293b;
+    /* slate-800 */
+}
+
+/* Base styles for dark mode */
+.dark {
+    --bg-primary: #0f172a;
+    /* slate-900 */
+    --text-primary: #f8fafc;
+    /* slate-50 */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
 html,
 body {
-    background-color: #f8fafc;
+    background-color: var(--bg-primary);
     /* slate-50 */
+    color: var(--text-primary);
     overscroll-behavior: none;
     height: 100%;
     margin: 0;
@@ -69,4 +89,21 @@ body {
 
 .animate-loading-bar {
     animation: loading-bar 2.5s ease-in-out forwards;
+}
+
+/* Remove default focus outline for Recharts */
+.recharts-wrapper {
+    outline: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus {
+    outline: none !important;
+}
+
+/* Remove tap highlight on mobile for interactive elements in charts */
+.recharts-surface,
+.recharts-layer {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
 }

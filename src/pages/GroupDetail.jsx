@@ -767,7 +767,7 @@ export default function GroupDetail() {
                 {/* Chart Section */}
                 <div className="bg-gradient-to-b from-white to-slate-50 mt-8 p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center relative overflow-hidden border border-slate-100/50">
                     <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-white to-transparent opacity-50 pointer-events-none" />
-                    <div className="w-64 h-64 relative z-10">
+                    <div className="w-64 h-64 relative z-10 outline-none focus:outline-none focus:ring-0" tabIndex="-1">
                         <PieChart width={256} height={256}>
                             <Pie
                                 data={chartData}
@@ -797,20 +797,26 @@ export default function GroupDetail() {
                 </div>
 
                 {/* Breakdown Stats */}
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                    <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-5 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                    <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 p-4 rounded-[2rem] shadow-sm relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-[2rem] -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
-                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-2 relative z-10">Terkumpul</p>
-                        <p className="text-xl font-black text-emerald-700 tracking-tight relative z-10">
-                            Rp {formatNumber(data.totalCollected)}
-                        </p>
+                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-1 relative z-10">Terkumpul</p>
+                        <div className="relative z-10 flex items-baseline space-x-1">
+                            <span className="text-xs font-bold text-emerald-500/80">Rp</span>
+                            <span className={`font-black text-emerald-700 tracking-tight ${formatNumber(data.totalCollected).length > 8 ? 'text-lg' : 'text-xl'}`}>
+                                {formatNumber(data.totalCollected)}
+                            </span>
+                        </div>
                     </div>
-                    <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-100 p-5 rounded-[2rem] shadow-sm relative overflow-hidden group">
+                    <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-100 p-4 rounded-[2rem] shadow-sm relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-16 h-16 bg-slate-100 rounded-bl-[2rem] -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500" />
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2 relative z-10">Kekurangan</p>
-                        <p className="text-xl font-black text-slate-700 tracking-tight relative z-10">
-                            Rp {formatNumber(data.shortage)}
-                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 relative z-10">Kekurangan</p>
+                        <div className="relative z-10 flex items-baseline space-x-1">
+                            <span className="text-xs font-bold text-slate-400/80">Rp</span>
+                            <span className={`font-black text-slate-700 tracking-tight ${formatNumber(data.shortage).length > 8 ? 'text-lg' : 'text-xl'}`}>
+                                {formatNumber(data.shortage)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

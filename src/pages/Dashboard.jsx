@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard, Moon, Sun } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
+import { useTheme } from '../contexts/ThemeContext'
 import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 import DatePicker from '../components/DatePicker'
@@ -31,6 +33,7 @@ export default function Dashboard() {
 
     // Profile Menu & Modal State
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+    const { theme } = useTheme()
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
@@ -1335,8 +1338,19 @@ export default function Dashboard() {
                                 </button>
                             </div>
                             <div className="p-6">
-                                <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                                    <p className="text-slate-500 font-medium text-sm">Fitur Dark Mode akan segera hadir</p>
+                                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="bg-white dark:bg-slate-700 p-2 rounded-xl text-slate-500 dark:text-slate-300 shadow-sm transition-colors duration-300">
+                                            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} className="text-orange-500" />}
+                                        </div>
+                                        <div>
+                                            <p className="text-slate-800 dark:text-slate-200 font-bold text-sm transition-colors duration-300">
+                                                {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Sesuaikan tampilan aplikasi</p>
+                                        </div>
+                                    </div>
+                                    <ThemeToggle />
                                 </div>
                             </div>
                         </div>

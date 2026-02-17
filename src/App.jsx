@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
 import GroupDetail from './pages/GroupDetail'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 import PublicParticipant from './pages/PublicParticipant'
 
@@ -66,20 +67,22 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/p/:slug" element={<PublicParticipant />} />
-        <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/p/:slug" element={<PublicParticipant />} />
+          <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
 
-        <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
-          <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
-          <Route path="/groups/:id" element={<GroupDetail />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
+            <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
+            <Route path="/groups/:id" element={<GroupDetail />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
