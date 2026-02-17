@@ -1740,16 +1740,36 @@ export default function Dashboard() {
             />
 
             {/* History Modal */}
-            {
-                isHistoryModalOpen && (
-                    <div
-                        onClick={() => setIsHistoryModalOpen(false)}
-                        className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
-                    >
-                        <div
+            <AnimatePresence>
+                {isHistoryModalOpen && (
+                    <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsHistoryModalOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(e, info) => {
+                                if (info.offset.y > 100) {
+                                    setIsHistoryModalOpen(false);
+                                }
+                            }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
+                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800 relative z-10 pointer-events-auto"
                         >
+                            {/* Drag Handle Indicator */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            </div>
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
                                 <h2 className="text-2xl font-black text-slate-800 dark:text-white">Riwayat Transaksi</h2>
                                 <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-full transition-colors">
@@ -1820,10 +1840,10 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
-                )
-            }
+                )}
+            </AnimatePresence>
 
             {/* Filter Modal (Bottom Sheet) */}
             {
@@ -1958,16 +1978,36 @@ export default function Dashboard() {
             }
 
             {/* Notification Modal (Today's Transactions) */}
-            {
-                isNotificationModalOpen && (
-                    <div
-                        onClick={() => setIsNotificationModalOpen(false)}
-                        className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
-                    >
-                        <div
+            <AnimatePresence>
+                {isNotificationModalOpen && (
+                    <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsNotificationModalOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md pointer-events-auto"
+                        />
+                        <motion.div
+                            initial={{ y: "100%" }}
+                            animate={{ y: 0 }}
+                            exit={{ y: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(e, info) => {
+                                if (info.offset.y > 100) {
+                                    setIsNotificationModalOpen(false);
+                                }
+                            }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl dark:shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
+                            className="bg-white dark:bg-slate-900 w-full max-w-md sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800 relative z-10 pointer-events-auto"
                         >
+                            {/* Drag Handle Indicator */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            </div>
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
                                 <h2 className="text-2xl font-black text-slate-800 dark:text-white">Notifikasi Hari Ini</h2>
                                 <button onClick={() => setIsNotificationModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-full transition-colors">
@@ -2007,10 +2047,10 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
-                )
-            }
+                )}
+            </AnimatePresence>
 
 
 
