@@ -1,15 +1,21 @@
 import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
+import { useToast } from "../contexts/ToastContext";
 import { useTheme } from "../contexts/ThemeContext";
 
 const ThemeToggle = () => {
-    const { theme, toggleTheme } = useTheme();
+    const { theme } = useTheme();
+    const { addToast } = useToast();
+
+    const handleToggle = () => {
+        addToast("Fitur ini akan segera hadir", "info");
+    };
 
     return (
         <div
             className={`w-16 h-9 rounded-full flex items-center p-1 cursor-pointer transition-colors duration-300 ${theme === "dark" ? "bg-slate-700 justify-end" : "bg-slate-200 justify-start"
                 }`}
-            onClick={toggleTheme}
+            onClick={handleToggle}
         >
             <motion.div
                 layout
@@ -20,9 +26,9 @@ const ThemeToggle = () => {
                     // Check drag distance/velocity to trigger toggle
                     const swipeThreshold = 5;
                     if (theme === 'light' && info.offset.x > swipeThreshold) {
-                        toggleTheme();
+                        handleToggle();
                     } else if (theme === 'dark' && info.offset.x < -swipeThreshold) {
-                        toggleTheme();
+                        handleToggle();
                     }
                 }}
                 transition={{
