@@ -1495,12 +1495,25 @@ export default function Dashboard() {
                         onClick={() => setIsQuickTransactionModalOpen(false)}
                         className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
                     >
-                        <div
+                        <motion.div
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={{ top: 0, bottom: 0.2 }}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                if (offset.y > 100 || velocity.y > 500) {
+                                    setIsQuickTransactionModalOpen(false);
+                                }
+                            }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-2xl font-black text-slate-800">
+                            {/* Drag Handle */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                            </div>
+
+                            <div className="flex justify-between items-center px-6 pb-4 pt-2 border-b border-slate-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white">
                                     {quickTrxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
                                 </h2>
                                 <button
@@ -1516,7 +1529,7 @@ export default function Dashboard() {
                                             receipt: null
                                         })
                                     }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition"
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition"
                                 >
                                     <X size={20} />
                                 </button>
@@ -1527,7 +1540,7 @@ export default function Dashboard() {
                                     <form onSubmit={handleQuickTransactionSubmit} className="space-y-5 pt-2 pb-4">
                                         {/* Group Selection */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-group" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-group" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <Users size={14} />
                                                 <span>Pilih Group</span>
                                             </label>
@@ -1535,7 +1548,7 @@ export default function Dashboard() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setIsQuickTrxGroupModalOpen(true)}
-                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold ${quickTrxFormData.group_id ? 'text-slate-700' : 'text-slate-400'}`}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold ${quickTrxFormData.group_id ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}
                                                 >
                                                     <span>
                                                         {quickTrxFormData.group_id
@@ -1549,7 +1562,7 @@ export default function Dashboard() {
 
                                         {/* Participant Selection */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <User size={14} />
                                                 <span>Pilih Peserta</span>
                                             </label>
@@ -1558,7 +1571,7 @@ export default function Dashboard() {
                                                     type="button"
                                                     onClick={() => !(!quickTrxFormData.group_id) && setIsQuickTrxParticipantModalOpen(true)}
                                                     disabled={!quickTrxFormData.group_id}
-                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold disabled:opacity-50 ${quickTrxFormData.participant_id ? 'text-slate-700' : 'text-slate-400'}`}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold disabled:opacity-50 ${quickTrxFormData.participant_id ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-600'}`}
                                                 >
                                                     <span>
                                                         {quickTrxFormData.participant_id && quickTrxFormData.group_id
@@ -1572,9 +1585,9 @@ export default function Dashboard() {
 
                                         {/* Amount */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-amount" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Jumlah Setoran</label>
+                                            <label htmlFor="quick-trx-amount" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Jumlah Setoran</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-3.5 text-emerald-600 font-bold text-lg">Rp</span>
+                                                <span className="absolute left-4 top-3.5 text-emerald-600 dark:text-emerald-500 font-bold text-lg">Rp</span>
                                                 <input
                                                     id="quick-trx-amount"
                                                     name="amount"
@@ -1582,7 +1595,7 @@ export default function Dashboard() {
                                                     value={quickTrxFormData.amount}
                                                     onClick={() => setShowCalculator(true)}
                                                     readOnly={true}
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50 transition-all cursor-pointer caret-transparent"
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 dark:bg-slate-800 border-2 border-emerald-100 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 dark:text-emerald-400 placeholder-emerald-200/50 dark:placeholder-slate-600 transition-all cursor-pointer caret-transparent"
                                                     placeholder="0"
                                                     required
                                                 />
@@ -1591,14 +1604,14 @@ export default function Dashboard() {
 
                                         {/* Date */}
                                         <div className="space-y-2">
-                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <Calendar size={14} />
                                                 <span>Tanggal Transaksi</span>
                                             </span>
                                             <button
                                                 type="button"
                                                 onClick={() => setShowDatePicker(true)}
-                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center"
                                             >
                                                 <span>
                                                     {new Date(quickTrxFormData.date + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -1613,25 +1626,25 @@ export default function Dashboard() {
 
                                         {/* Receipt */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-receipt" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
+                                            <label htmlFor="quick-trx-receipt" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
                                             <input
                                                 id="quick-trx-receipt"
                                                 name="receipt"
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
-                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 transition"
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 dark:file:bg-emerald-900/40 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-200 transition"
                                             />
                                         </div>
 
                                         {/* Method */}
                                         <div className="space-y-2">
-                                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Metode Pembayaran</span>
+                                            <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Metode Pembayaran</span>
                                             <div className="flex space-x-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Tunai' })}
-                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Tunai' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Tunai' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
                                                 >
                                                     <Banknote size={18} />
                                                     <span>Tunai</span>
@@ -1639,7 +1652,7 @@ export default function Dashboard() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Transfer' })}
-                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Transfer' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Transfer' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
                                                 >
                                                     <CreditCard size={18} />
                                                     <span>Transfer</span>
@@ -1717,7 +1730,7 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 )
             }
@@ -2170,6 +2183,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
-        </motion.div>
+        </motion.div >
     )
 }

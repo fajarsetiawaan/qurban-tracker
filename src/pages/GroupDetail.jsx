@@ -779,7 +779,7 @@ export default function GroupDetail() {
                                 stroke="none"
                             >
                                 {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color === '#F1F5F9' ? '#334155' : entry.color} strokeWidth={0} />
+                                    <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
                                 ))}
                             </Pie>
                             <Tooltip
@@ -1024,10 +1024,22 @@ export default function GroupDetail() {
                     onClick={resetModal}
                     className="fixed inset-0 z-[155] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                 >
-                    <div
+                    <motion.div
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 0 }}
+                        dragElastic={{ top: 0, bottom: 0.2 }}
+                        onDragEnd={(e, { offset, velocity }) => {
+                            if (offset.y > 100 || velocity.y > 500) {
+                                resetModal();
+                            }
+                        }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border border-slate-100 dark:border-slate-800"
+                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
                     >
+                        {/* Drag Handle */}
+                        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
+                            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                        </div>
                         <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100 dark:border-slate-800 flex-shrink-0">
                             <h2 className="text-lg font-bold text-slate-800 dark:text-white">
                                 {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
@@ -1080,7 +1092,7 @@ export default function GroupDetail() {
                                                 }}
                                                 readOnly={true}
                                                 placeholder="0"
-                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 dark:bg-emerald-900/20 border-2 border-emerald-100 dark:border-emerald-900/40 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-3xl font-bold text-emerald-800 dark:text-emerald-400 placeholder-emerald-200/50 dark:placeholder-emerald-800/50 cursor-pointer caret-transparent"
+                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 dark:bg-slate-800/50 border-2 border-emerald-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-3xl font-bold text-emerald-800 dark:text-emerald-400/90 placeholder-emerald-200/50 dark:placeholder-slate-600 cursor-pointer caret-transparent"
                                                 required
                                             />
                                         </div>
@@ -1204,7 +1216,7 @@ export default function GroupDetail() {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
 
@@ -1242,31 +1254,37 @@ export default function GroupDetail() {
 
                             <div>
                                 <label htmlFor="gd-edit-group-animal" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Hewan</label>
-                                <select
-                                    id="gd-edit-group-animal"
-                                    name="target_animal"
-                                    value={editFormData.target_animal}
-                                    onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
-                                >
-                                    <option value="sapi">Sapi</option>
-                                    <option value="kambing">Kambing</option>
-                                    <option value="domba">Domba</option>
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        id="gd-edit-group-animal"
+                                        name="target_animal"
+                                        value={editFormData.target_animal}
+                                        onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
+                                    >
+                                        <option value="sapi">Sapi</option>
+                                        <option value="kambing">Kambing</option>
+                                        <option value="domba">Domba</option>
+                                    </select>
+                                    <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
+                                </div>
                             </div>
 
                             <div>
                                 <label htmlFor="gd-edit-group-year" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tahun Qurban</label>
-                                <select
-                                    id="gd-edit-group-year"
-                                    name="qurban_year"
-                                    value={editFormData.qurban_year}
-                                    onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
-                                >
-                                    <option value={2026}>2026</option>
-                                    <option value={2027}>2027</option>
-                                </select>
+                                <div className="relative">
+                                    <select
+                                        id="gd-edit-group-year"
+                                        name="qurban_year"
+                                        value={editFormData.qurban_year}
+                                        onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
+                                    >
+                                        <option value={2026}>2026</option>
+                                        <option value={2027}>2027</option>
+                                    </select>
+                                    <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
+                                </div>
                             </div>
 
                             <div>
