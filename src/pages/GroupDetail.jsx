@@ -1217,8 +1217,8 @@ export default function GroupDetail() {
             />
             {/* Edit Group Modal */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up">
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up max-h-[85vh] flex flex-col">
                         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
                             <h2 className="text-lg font-bold text-slate-800 dark:text-white">Edit Group</h2>
                             <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
@@ -1309,11 +1309,11 @@ export default function GroupDetail() {
             {isAddParticipantModalOpen && (
                 <div
                     onClick={() => setIsAddParticipantModalOpen(false)}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                    className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up border border-slate-100 dark:border-slate-800"
+                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col"
                     >
                         <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
                             <h2 className="text-lg font-bold text-slate-800 dark:text-white">Tambah Peserta</h2>
@@ -1556,8 +1556,8 @@ export default function GroupDetail() {
             {/* Delete Confirmation Modal */}
             {
                 isDeleteModalOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up p-6 text-center">
                             <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="text-red-500 dark:text-red-400" size={32} />
                             </div>
@@ -1590,8 +1590,8 @@ export default function GroupDetail() {
             {/* Edit Participant Modal */}
             {
                 isEditParticipantModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-scale-up border border-slate-100 dark:border-slate-800">
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col">
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
                                 <h2 className="text-xl font-bold text-slate-800 dark:text-white">Edit Peserta</h2>
                                 <button onClick={() => setIsEditParticipantModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition">
@@ -1641,8 +1641,8 @@ export default function GroupDetail() {
             {/* Delete Participant Modal */}
             {
                 isDeleteParticipantModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up p-6 text-center">
                             <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="text-red-500 dark:text-red-400" size={32} />
                             </div>
@@ -1702,8 +1702,8 @@ export default function GroupDetail() {
             {/* Delete Transaction Confirmation Modal */}
             {
                 isDeleteTransactionModalOpen && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-scale-up p-6 text-center">
+                    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up p-6 text-center">
                             <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="text-red-500 dark:text-red-400" size={32} />
                             </div>
