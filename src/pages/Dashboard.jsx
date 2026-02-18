@@ -92,11 +92,6 @@ export default function Dashboard() {
                 filterButtonRef.current && !filterButtonRef.current.contains(event.target)) {
                 setShowFilterMenu(false)
             }
-            // Close account dropdown if clicked outside
-            if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target) &&
-                accountButtonRef.current && !accountButtonRef.current.contains(event.target)) {
-                setIsAccountDropdownOpen(false)
-            }
         }
 
         document.addEventListener('mousedown', handleClickOutside)
@@ -1392,7 +1387,7 @@ export default function Dashboard() {
                                     <img src="/logo-domba.png" alt="Logo Dombantara" className="w-16 h-16 object-contain" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">Dombantara.id</h3>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium mb-6">Version 1.0.1</p>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium mb-6">Version 1.2.14</p>
                                 <div className="bg-slate-50 dark:bg-slate-800 py-3 px-6 rounded-full inline-block">
                                     <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Developed by</p>
                                     <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Fajar Setiawan</p>
@@ -1495,12 +1490,25 @@ export default function Dashboard() {
                         onClick={() => setIsQuickTransactionModalOpen(false)}
                         className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
                     >
-                        <div
+                        <motion.div
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={{ top: 0, bottom: 0.2 }}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                if (offset.y > 100 || velocity.y > 500) {
+                                    setIsQuickTransactionModalOpen(false);
+                                }
+                            }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-white w-full max-w-sm sm:rounded-3xl rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up flex flex-col max-h-[85vh]"
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
                         >
-                            <div className="flex justify-between items-center p-6 border-b border-gray-100 flex-none bg-white z-10 sticky top-0">
-                                <h2 className="text-2xl font-black text-slate-800">
+                            {/* Drag Handle */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                            </div>
+
+                            <div className="flex justify-between items-center px-6 pb-4 pt-2 border-b border-slate-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
+                                <h2 className="text-xl font-black text-slate-800 dark:text-white">
                                     {quickTrxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
                                 </h2>
                                 <button
@@ -1516,7 +1524,7 @@ export default function Dashboard() {
                                             receipt: null
                                         })
                                     }}
-                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 p-2.5 rounded-full transition"
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition"
                                 >
                                     <X size={20} />
                                 </button>
@@ -1527,7 +1535,7 @@ export default function Dashboard() {
                                     <form onSubmit={handleQuickTransactionSubmit} className="space-y-5 pt-2 pb-4">
                                         {/* Group Selection */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-group" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-group" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <Users size={14} />
                                                 <span>Pilih Group</span>
                                             </label>
@@ -1535,7 +1543,7 @@ export default function Dashboard() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setIsQuickTrxGroupModalOpen(true)}
-                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold ${quickTrxFormData.group_id ? 'text-slate-700' : 'text-slate-400'}`}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold ${quickTrxFormData.group_id ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}`}
                                                 >
                                                     <span>
                                                         {quickTrxFormData.group_id
@@ -1549,7 +1557,7 @@ export default function Dashboard() {
 
                                         {/* Participant Selection */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <label htmlFor="quick-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <User size={14} />
                                                 <span>Pilih Peserta</span>
                                             </label>
@@ -1558,7 +1566,7 @@ export default function Dashboard() {
                                                     type="button"
                                                     onClick={() => !(!quickTrxFormData.group_id) && setIsQuickTrxParticipantModalOpen(true)}
                                                     disabled={!quickTrxFormData.group_id}
-                                                    className={`w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold disabled:opacity-50 ${quickTrxFormData.participant_id ? 'text-slate-700' : 'text-slate-400'}`}
+                                                    className={`w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold disabled:opacity-50 ${quickTrxFormData.participant_id ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-600'}`}
                                                 >
                                                     <span>
                                                         {quickTrxFormData.participant_id && quickTrxFormData.group_id
@@ -1572,9 +1580,9 @@ export default function Dashboard() {
 
                                         {/* Amount */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-amount" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Jumlah Setoran</label>
+                                            <label htmlFor="quick-trx-amount" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Jumlah Setoran</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-3.5 text-emerald-600 font-bold text-lg">Rp</span>
+                                                <span className="absolute left-4 top-3.5 text-emerald-600 dark:text-emerald-500 font-bold text-lg">Rp</span>
                                                 <input
                                                     id="quick-trx-amount"
                                                     name="amount"
@@ -1582,7 +1590,7 @@ export default function Dashboard() {
                                                     value={quickTrxFormData.amount}
                                                     onClick={() => setShowCalculator(true)}
                                                     readOnly={true}
-                                                    className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 placeholder-emerald-200/50 transition-all cursor-pointer caret-transparent"
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 dark:bg-slate-800 border-2 border-emerald-100 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 dark:text-emerald-400 placeholder-emerald-200/50 dark:placeholder-slate-600 transition-all cursor-pointer caret-transparent"
                                                     placeholder="0"
                                                     required
                                                 />
@@ -1591,14 +1599,14 @@ export default function Dashboard() {
 
                                         {/* Date */}
                                         <div className="space-y-2">
-                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
                                                 <Calendar size={14} />
                                                 <span>Tanggal Transaksi</span>
                                             </span>
                                             <button
                                                 type="button"
                                                 onClick={() => setShowDatePicker(true)}
-                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 text-left flex justify-between items-center"
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center"
                                             >
                                                 <span>
                                                     {new Date(quickTrxFormData.date + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -1613,25 +1621,25 @@ export default function Dashboard() {
 
                                         {/* Receipt */}
                                         <div className="space-y-2">
-                                            <label htmlFor="quick-trx-receipt" className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
+                                            <label htmlFor="quick-trx-receipt" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Bukti Transfer (Opsional)</label>
                                             <input
                                                 id="quick-trx-receipt"
                                                 name="receipt"
                                                 type="file"
                                                 accept="image/*"
                                                 onChange={(e) => setQuickTrxFormData({ ...quickTrxFormData, receipt: e.target.files[0] })}
-                                                className="w-full px-4 py-3.5 bg-slate-50 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 transition"
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 dark:file:bg-emerald-900/40 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-200 transition"
                                             />
                                         </div>
 
                                         {/* Method */}
                                         <div className="space-y-2">
-                                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Metode Pembayaran</span>
+                                            <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Metode Pembayaran</span>
                                             <div className="flex space-x-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Tunai' })}
-                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Tunai' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Tunai' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
                                                 >
                                                     <Banknote size={18} />
                                                     <span>Tunai</span>
@@ -1639,7 +1647,7 @@ export default function Dashboard() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setQuickTrxFormData({ ...quickTrxFormData, method: 'Transfer' })}
-                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Transfer' ? 'bg-slate-800 text-white shadow-lg shadow-slate-200' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${quickTrxFormData.method === 'Transfer' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
                                                 >
                                                     <CreditCard size={18} />
                                                     <span>Transfer</span>
@@ -1717,7 +1725,7 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 )
             }
@@ -2055,7 +2063,99 @@ export default function Dashboard() {
 
 
 
-            {/* Refined Mobile Bottom Navigation - Fixed and over content */}
+            {/* Full Screen Menu Overlay (Account) - Moved to Root */}
+            <AnimatePresence>
+                {isAccountDropdownOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: '100%' }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="fixed inset-0 z-[200] bg-slate-50 dark:bg-slate-950 flex flex-col"
+                    >
+                        {/* Header */}
+                        <div className="px-6 py-4 flex justify-between items-center bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                            <h2 className="text-xl font-bold text-slate-800 dark:text-white">Menu Akun</h2>
+                            <button
+                                onClick={() => setIsAccountDropdownOpen(false)}
+                                className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Menu Content */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {/* Profile Summary Card */}
+                            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center space-x-4">
+                                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-xl">
+                                    {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">{profile?.full_name || 'User'}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">{userEmail}</p>
+                                </div>
+                            </div>
+
+                            {/* Menu Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => {
+                                        fetchUserProfile()
+                                        setIsAccountModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
+                                >
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                        <User size={24} />
+                                    </div>
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">Profil Saya</span>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setIsSettingsModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
+                                >
+                                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                        <Settings size={24} />
+                                    </div>
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">Pengaturan</span>
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setIsAboutModalOpen(true)
+                                        setIsAccountDropdownOpen(false)
+                                    }}
+                                    className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
+                                >
+                                    <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                        <Info size={24} />
+                                    </div>
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">Tentang</span>
+                                </button>
+                            </div>
+
+                            {/* Logout Button */}
+                            <button
+                                onClick={handleLogout}
+                                className="w-full bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 p-4 rounded-2xl flex items-center justify-center space-x-2 text-red-600 dark:text-red-400 font-bold hover:bg-red-100 dark:hover:bg-red-900/20 transition active:scale-[0.98]"
+                            >
+                                <LogOut size={20} />
+                                <span>Keluar Aplikasi</span>
+                            </button>
+
+                            <div className="text-center text-xs text-slate-400 dark:text-slate-600 mt-8">
+                                Version 1.2.14
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 flex justify-between items-center px-6 py-3 pb-6 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] dark:shadow-none">
                 {/* 1. Home */}
                 <button
@@ -2102,63 +2202,8 @@ export default function Dashboard() {
                 {/* 5. Account with Dropdown */}
                 <div className="relative">
                     {/* Dropdown Menu */}
-                    {isAccountDropdownOpen && (
-                        <div ref={accountDropdownRef} className="absolute bottom-full right-0 mb-4 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden z-[120] animate-fade-in origin-bottom-right">
-                            <div className="p-2 space-y-1">
-                                <button
-                                    onClick={() => {
-                                        fetchUserProfile()
-                                        setIsAccountModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition group"
-                                >
-                                    <div className="bg-emerald-100 dark:bg-emerald-900/30 p-1.5 rounded-lg text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50">
-                                        <User size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">My Account</span>
-                                </button>
+                    {/* Full Screen Menu Overlay */}
 
-                                <button
-                                    onClick={() => {
-                                        setIsSettingsModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition group"
-                                >
-                                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700">
-                                        <Settings size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Setting</span>
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        setIsAboutModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
-                                    }}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition group"
-                                >
-                                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700">
-                                        <Info size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">About</span>
-                                </button>
-
-                                <hr className="border-slate-50 dark:border-slate-800 mx-2" />
-
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition group"
-                                >
-                                    <div className="bg-red-100 dark:bg-red-900/30 p-1.5 rounded-lg text-red-600 dark:text-red-400 group-hover:bg-red-200 dark:group-hover:bg-red-900/50">
-                                        <LogOut size={16} />
-                                    </div>
-                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">Keluar</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
 
                     <button
                         ref={accountButtonRef}
@@ -2170,6 +2215,6 @@ export default function Dashboard() {
                     </button>
                 </div>
             </nav>
-        </motion.div>
+        </motion.div >
     )
 }
