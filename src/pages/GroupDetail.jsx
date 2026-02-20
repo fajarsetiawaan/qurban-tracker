@@ -16,6 +16,16 @@ export default function GroupDetail() {
     const navigate = useNavigate()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [isDarkMode, setIsDarkMode] = useState(false)
+
+    useEffect(() => {
+        setIsDarkMode(document.documentElement.classList.contains('dark'))
+        const observer = new MutationObserver(() => {
+            setIsDarkMode(document.documentElement.classList.contains('dark'))
+        })
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+        return () => observer.disconnect()
+    }, [])
 
     // Filter Helper
     const getFilteredHistory = (transactions) => {
@@ -705,7 +715,7 @@ export default function GroupDetail() {
 
     const chartData = [
         { name: 'Terkumpul', value: data.totalCollected, color: '#10B981' },
-        { name: 'Kekurangan', value: data.shortage, color: '#F1F5F9' }
+        { name: 'Kekurangan', value: data.shortage, color: isDarkMode ? '#1E293B' : '#F1F5F9' }
     ]
 
     // Use target_participants if available and > 0, otherwise fallback to current participants length (or 1 to avoid division by zero)
