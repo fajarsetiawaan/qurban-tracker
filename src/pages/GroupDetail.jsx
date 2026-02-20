@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal, Share2 } from 'lucide-react'
+import { ArrowLeft, User, Plus, X, CheckCircle, Pencil, Trash2, MoreVertical, UserPlus, Home, ReceiptText, Bell, Calendar, Wallet, ChevronLeft, Users, Banknote, CreditCard, SlidersHorizontal, Share2, Check } from 'lucide-react'
 import DatePicker from '../components/DatePicker'
 import CalculatorModal from '../components/CalculatorModal'
 import ShareModal from '../components/ShareModal'
@@ -92,7 +92,6 @@ export default function GroupDetail() {
     const [addParticipantLoading, setAddParticipantLoading] = useState(false)
 
     // Participant Actions State
-    const [activeParticipantDropdown, setActiveParticipantDropdown] = useState(null)
     const [selectedParticipant, setSelectedParticipant] = useState(null)
     const [isEditParticipantModalOpen, setIsEditParticipantModalOpen] = useState(false)
     const [isDeleteParticipantModalOpen, setIsDeleteParticipantModalOpen] = useState(false)
@@ -118,6 +117,8 @@ export default function GroupDetail() {
     const [showStartDatePicker, setShowStartDatePicker] = useState(false)
     const [showEndDatePicker, setShowEndDatePicker] = useState(false)
     const filterRef = useRef(null)
+    const [isHistoryMenuOpen, setIsHistoryMenuOpen] = useState(false)
+    const historyMenuRef = useRef(null)
 
     // Pre-fill form when Edit Modal opens
     useEffect(() => {
@@ -143,9 +144,8 @@ export default function GroupDetail() {
             }
 
             // Existing dropdown logic
-            if (activeParticipantDropdown || activeTransactionDropdown) {
+            if (activeTransactionDropdown) {
                 if (!event.target.closest('[data-dropdown-trigger]') && !event.target.closest('[data-dropdown]')) {
-                    setActiveParticipantDropdown(null)
                     setActiveTransactionDropdown(null)
                 }
             }
@@ -162,6 +162,13 @@ export default function GroupDetail() {
                     }
                 }
             }
+
+            // Close History Menu if clicking outside
+            if (isHistoryMenuOpen && historyMenuRef.current) {
+                if (!historyMenuRef.current.contains(event.target)) {
+                    setIsHistoryMenuOpen(false)
+                }
+            }
         }
 
         // Use 'mousedown' to catch clicks before they might be stopped by other handlers,
@@ -169,7 +176,7 @@ export default function GroupDetail() {
         // Let's stick to 'mousedown' as it is often more reliable for "outside" checks.
         document.addEventListener('mousedown', handleClickOutside)
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [activeParticipantDropdown, activeTransactionDropdown, isHistoryFilterOpen, showStartDatePicker, showEndDatePicker])
+    }, [activeTransactionDropdown, isHistoryFilterOpen, showStartDatePicker, showEndDatePicker, isHistoryMenuOpen])
 
 
 
@@ -261,14 +268,12 @@ export default function GroupDetail() {
         setSelectedParticipant(participant)
         setEditParticipantData({ name: participant.name, phone: participant.phone || '' })
         setIsEditParticipantModalOpen(true)
-        setActiveParticipantDropdown(null)
     }
 
     const handleDeleteParticipantClick = (participant, e) => {
         e.stopPropagation()
         setSelectedParticipant(participant)
         setIsDeleteParticipantModalOpen(true)
-        setActiveParticipantDropdown(null)
     }
 
     const handleUpdateParticipant = async (e) => {
@@ -636,8 +641,6 @@ export default function GroupDetail() {
 
     // Share Link Logic
     const handleShareLink = async (participant) => {
-        // Close dropdown
-        setActiveParticipantDropdown(null)
 
         let slug = participant.slug
 
@@ -875,7 +878,7 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className={`bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md dark:hover:shadow-slate-950/20 transition-all duration-300 cursor-pointer relative group ${activeParticipantDropdown === participant.id ? 'z-40' : 'z-10'}`}
+                                    className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md dark:hover:shadow-slate-950/20 transition-all duration-300 cursor-pointer relative group z-10"
                                 >
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-[2rem] ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
 
@@ -908,61 +911,6 @@ export default function GroupDetail() {
                                                 {percentage < 100 && `Sisa Rp ${formatNumber(perPersonTarget - participant.totalPaid)}`}
                                             </p>
                                         </div>
-                                    </div>
-
-                                    {/* Action Menu */}
-                                    <div className="relative pl-1" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                                        <motion.button
-                                            whileTap={{ scale: 0.9 }}
-                                            data-dropdown-trigger
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                const newId = activeParticipantDropdown === participant.id ? null : participant.id
-                                                setActiveParticipantDropdown(newId)
-                                            }}
-                                            className="p-2 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition z-10 relative"
-                                        >
-                                            <MoreVertical size={20} />
-                                        </motion.button>
-
-                                        {/* Dropdown */}
-                                        <AnimatePresence>
-                                            {activeParticipantDropdown === participant.id && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                    data-dropdown
-                                                    className="absolute right-0 bottom-full mb-2 w-44 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden origin-bottom-right"
-                                                >
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            handleShareLink(participant)
-                                                        }}
-                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center space-x-3 border-b border-slate-50 dark:border-slate-800"
-                                                    >
-                                                        <Share2 size={18} className="text-slate-400 dark:text-slate-500" />
-                                                        <span>Bagikan Link</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => handleEditParticipantClick(participant, e)}
-                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center space-x-3 border-b border-slate-50 dark:border-slate-800"
-                                                    >
-                                                        <Pencil size={18} className="text-slate-400 dark:text-slate-500" />
-                                                        <span>Edit</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => handleDeleteParticipantClick(participant, e)}
-                                                        className="w-full text-left px-5 py-3.5 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-3"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                        <span>Hapus</span>
-                                                    </button>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-
                                     </div>
                                 </motion.div>
                             )
@@ -1018,206 +966,208 @@ export default function GroupDetail() {
             </nav>
 
             {/* Modal Overlay (Same implementation, cleaner style) */}
-            {showModal && (
-                <div
-                    onClick={resetModal}
-                    className="fixed inset-0 z-[155] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
-                >
-                    <motion.div
-                        drag="y"
-                        dragConstraints={{ top: 0, bottom: 0 }}
-                        dragElastic={{ top: 0, bottom: 0.2 }}
-                        onDragEnd={(e, { offset, velocity }) => {
-                            if (offset.y > 100 || velocity.y > 500) {
-                                resetModal();
-                            }
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
+            {
+                showModal && (
+                    <div
+                        onClick={resetModal}
+                        className="fixed inset-0 z-[155] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
-                        {/* Drag Handle */}
-                        <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
-                            <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
-                        </div>
-                        <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100 dark:border-slate-800 flex-shrink-0">
-                            <h2 className="text-lg font-bold text-slate-800 dark:text-white">
-                                {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
-                            </h2>
-                            <button onClick={resetModal} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
-                                <X size={20} />
-                            </button>
-                        </div>
+                        <motion.div
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={{ top: 0, bottom: 0.2 }}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                if (offset.y > 100 || velocity.y > 500) {
+                                    resetModal();
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
+                        >
+                            {/* Drag Handle */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                            </div>
+                            <div className="flex justify-between items-center p-6 border-b border-dashed border-slate-100 dark:border-slate-800 flex-shrink-0">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+                                    {trxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
+                                </h2>
+                                <button onClick={resetModal} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="overflow-y-auto p-6 pt-0 custom-scrollbar">
-                            {trxStep === 'form' && (
-                                <form onSubmit={handleSaveTransaction} className="space-y-6">
-                                    <div>
-                                        <label htmlFor="group-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
-                                            <Users size={14} />
-                                            <span>Sumber Dana</span>
-                                        </label>
-                                        <div className="relative">
+                            <div className="overflow-y-auto p-6 pt-0 custom-scrollbar">
+                                {trxStep === 'form' && (
+                                    <form onSubmit={handleSaveTransaction} className="space-y-6">
+                                        <div>
+                                            <label htmlFor="group-trx-participant" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
+                                                <Users size={14} />
+                                                <span>Sumber Dana</span>
+                                            </label>
+                                            <div className="relative">
+                                                <button
+                                                    id="group-trx-participant"
+                                                    type="button"
+                                                    onClick={() => setIsSelectParticipantOpen(true)}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl font-bold text-left flex justify-between items-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                >
+                                                    <span className={trxParticipantId ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}>
+                                                        {trxParticipantId
+                                                            ? data.participants.find(p => p.id === trxParticipantId)?.name || 'Peserta'
+                                                            : '-- Pilih Peserta --'}
+                                                    </span>
+                                                    <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400 dark:text-slate-500" />
+                                                </button>
+                                                <input type="hidden" name="participant_id" value={trxParticipantId} required />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor="group-trx-amount" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
+                                                <span>Jumlah Setoran</span>
+                                            </label>
+                                            <div className="relative">
+                                                <span className="absolute left-6 top-4 text-emerald-600 dark:text-emerald-500 font-bold text-xl">Rp</span>
+                                                <input
+                                                    id="group-trx-amount"
+                                                    name="amount"
+                                                    type="text"
+                                                    value={trxAmount}
+                                                    onClick={() => {
+                                                        setCalculatorMode('new')
+                                                        setShowCalculator(true)
+                                                    }}
+                                                    readOnly={true}
+                                                    placeholder="0"
+                                                    className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 dark:bg-slate-800/50 border-2 border-emerald-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-3xl font-bold text-emerald-800 dark:text-emerald-400/90 placeholder-emerald-200/50 dark:placeholder-slate-600 cursor-pointer caret-transparent"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
+                                                <Calendar size={14} />
+                                                <span>Tanggal Transaksi</span>
+                                            </span>
                                             <button
-                                                id="group-trx-participant"
                                                 type="button"
-                                                onClick={() => setIsSelectParticipantOpen(true)}
-                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl font-bold text-left flex justify-between items-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
+                                                onClick={() => setShowDatePicker(true)}
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
                                             >
-                                                <span className={trxParticipantId ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'}>
-                                                    {trxParticipantId
-                                                        ? data.participants.find(p => p.id === trxParticipantId)?.name || 'Peserta'
-                                                        : '-- Pilih Peserta --'}
+                                                <span>
+                                                    {new Date(trxDate + 'T00:00:00').toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric'
+                                                    })}
                                                 </span>
                                                 <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400 dark:text-slate-500" />
                                             </button>
-                                            <input type="hidden" name="participant_id" value={trxParticipantId} required />
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <label htmlFor="group-trx-amount" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
-                                            <span>Jumlah Setoran</span>
-                                        </label>
-                                        <div className="relative">
-                                            <span className="absolute left-6 top-4 text-emerald-600 dark:text-emerald-500 font-bold text-xl">Rp</span>
+                                        <div>
+                                            <label htmlFor="group-trx-receipt" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
+                                                <span>Bukti Transfer (Opsional)</span>
+                                            </label>
                                             <input
-                                                id="group-trx-amount"
-                                                name="amount"
-                                                type="text"
-                                                value={trxAmount}
-                                                onClick={() => {
-                                                    setCalculatorMode('new')
-                                                    setShowCalculator(true)
-                                                }}
-                                                readOnly={true}
-                                                placeholder="0"
-                                                className="w-full pl-14 pr-6 py-4 bg-emerald-50/50 dark:bg-slate-800/50 border-2 border-emerald-100 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-3xl font-bold text-emerald-800 dark:text-emerald-400/90 placeholder-emerald-200/50 dark:placeholder-slate-600 cursor-pointer caret-transparent"
-                                                required
+                                                id="group-trx-receipt"
+                                                name="receipt"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => setTrxReceiptFile(e.target.files[0])}
+                                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-900/30 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 text-slate-600 dark:text-slate-300"
                                             />
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
-                                            <Calendar size={14} />
-                                            <span>Tanggal Transaksi</span>
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowDatePicker(true)}
-                                            className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center transition-colors hover:bg-slate-100 dark:hover:bg-slate-700"
-                                        >
-                                            <span>
-                                                {new Date(trxDate + 'T00:00:00').toLocaleDateString('id-ID', {
-                                                    day: 'numeric',
-                                                    month: 'long',
-                                                    year: 'numeric'
-                                                })}
+                                        <div>
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
+                                                <span>Metode</span>
                                             </span>
-                                            <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400 dark:text-slate-500" />
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTrxMethod('Tunai')}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Tunai' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <Banknote size={18} />
+                                                    <span>Tunai</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setTrxMethod('Transfer')}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Transfer' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <CreditCard size={18} />
+                                                    <span>Transfer</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={trxLoading}
+                                            className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20 hover:bg-emerald-700 dark:hover:bg-emerald-500 transition active:scale-[0.98]"
+                                        >
+                                            {trxLoading ? 'Memproses...' : 'Simpan'}
+                                        </button>
+                                    </form>
+                                )}
+
+                                {trxStep === 'invoice' && lastTransaction && (
+                                    <div className="flex flex-col items-center">
+                                        <div className="bg-white dark:bg-slate-900 w-full p-0 relative">
+                                            <div className="text-center pb-8">
+                                                <div className="mx-auto w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
+                                                    <CheckCircle className="text-emerald-600 dark:text-emerald-400" size={40} />
+                                                </div>
+                                                <h3 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">{lastTransaction.formattedAmount}</h3>
+                                                <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                            </div>
+
+                                            <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 space-y-4">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">Tanggal</span>
+                                                    <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{new Date((lastTransaction.transaction_date || lastTransaction.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">Pengirim</span>
+                                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{lastTransaction.participantName}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">Metode</span>
+                                                    <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{lastTransaction.payment_method}</span>
+                                                </div>
+
+                                                {lastTransaction.receipt_url && (
+                                                    <div className="pt-2 text-center">
+                                                        <a
+                                                            href={lastTransaction.receipt_url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-center"
+                                                        >
+                                                            <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={resetModal}
+                                            className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl dark:shadow-none hover:bg-slate-800 dark:hover:bg-slate-700 transition"
+                                        >
+                                            Selesai
                                         </button>
                                     </div>
-
-                                    <div>
-                                        <label htmlFor="group-trx-receipt" className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
-                                            <span>Bukti Transfer (Opsional)</span>
-                                        </label>
-                                        <input
-                                            id="group-trx-receipt"
-                                            name="receipt"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => setTrxReceiptFile(e.target.files[0])}
-                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 dark:file:bg-emerald-900/30 file:text-emerald-700 dark:file:text-emerald-400 hover:file:bg-emerald-100 dark:hover:file:bg-emerald-900/50 text-slate-600 dark:text-slate-300"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1 mb-2">
-                                            <span>Metode</span>
-                                        </span>
-                                        <div className="flex space-x-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setTrxMethod('Tunai')}
-                                                className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Tunai' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-                                            >
-                                                <Banknote size={18} />
-                                                <span>Tunai</span>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setTrxMethod('Transfer')}
-                                                className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${trxMethod === 'Transfer' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-                                            >
-                                                <CreditCard size={18} />
-                                                <span>Transfer</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={trxLoading}
-                                        className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl shadow-emerald-200 dark:shadow-emerald-900/20 hover:bg-emerald-700 dark:hover:bg-emerald-500 transition active:scale-[0.98]"
-                                    >
-                                        {trxLoading ? 'Memproses...' : 'Simpan'}
-                                    </button>
-                                </form>
-                            )}
-
-                            {trxStep === 'invoice' && lastTransaction && (
-                                <div className="flex flex-col items-center">
-                                    <div className="bg-white dark:bg-slate-900 w-full p-0 relative">
-                                        <div className="text-center pb-8">
-                                            <div className="mx-auto w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
-                                                <CheckCircle className="text-emerald-600 dark:text-emerald-400" size={40} />
-                                            </div>
-                                            <h3 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">{lastTransaction.formattedAmount}</h3>
-                                            <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
-                                        </div>
-
-                                        <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 space-y-4">
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 dark:text-slate-400 text-sm">Tanggal</span>
-                                                <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{new Date((lastTransaction.transaction_date || lastTransaction.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 dark:text-slate-400 text-sm">Pengirim</span>
-                                                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{lastTransaction.participantName}</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-slate-500 dark:text-slate-400 text-sm">Metode</span>
-                                                <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{lastTransaction.payment_method}</span>
-                                            </div>
-
-                                            {lastTransaction.receipt_url && (
-                                                <div className="pt-2 text-center">
-                                                    <a
-                                                        href={lastTransaction.receipt_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center justify-center"
-                                                    >
-                                                        <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={resetModal}
-                                        className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 rounded-2xl font-bold mt-8 shadow-xl dark:shadow-none hover:bg-slate-800 dark:hover:bg-slate-700 transition"
-                                    >
-                                        Selesai
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )
+            }
 
             {/* Custom Date Picker Modal */}
             <DatePicker
@@ -1227,159 +1177,163 @@ export default function GroupDetail() {
                 onDateChange={setTrxDate}
             />
             {/* Edit Group Modal */}
-            {isEditModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up max-h-[85vh] flex flex-col">
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
-                            <h2 className="text-lg font-bold text-slate-800 dark:text-white">Edit Group</h2>
-                            <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
-                                <X size={20} />
-                            </button>
+            {
+                isEditModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in">
+                        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-3xl shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up max-h-[85vh] flex flex-col">
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">Edit Group</h2>
+                                <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
+                                <div>
+                                    <label htmlFor="gd-edit-group-name" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nama Kelompok</label>
+                                    <input
+                                        id="gd-edit-group-name"
+                                        name="name"
+                                        type="text"
+                                        value={editFormData.name}
+                                        onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="gd-edit-group-animal" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Hewan</label>
+                                    <div className="relative">
+                                        <select
+                                            id="gd-edit-group-animal"
+                                            name="target_animal"
+                                            value={editFormData.target_animal}
+                                            onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
+                                        >
+                                            <option value="sapi">Sapi</option>
+                                            <option value="kambing">Kambing</option>
+                                            <option value="domba">Domba</option>
+                                        </select>
+                                        <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="gd-edit-group-year" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tahun Qurban</label>
+                                    <div className="relative">
+                                        <select
+                                            id="gd-edit-group-year"
+                                            name="qurban_year"
+                                            value={editFormData.qurban_year}
+                                            onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
+                                        >
+                                            <option value={2026}>2026</option>
+                                            <option value={2027}>2027</option>
+                                        </select>
+                                        <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="gd-edit-group-price" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
+                                    <input
+                                        id="gd-edit-group-price"
+                                        name="total_price"
+                                        type="text"
+                                        value={editFormData.total_price}
+                                        onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
+                                        required
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={editLoading}
+                                    className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 dark:hover:bg-emerald-500 disabled:opacity-70 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20"
+                                >
+                                    {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                </button>
+
+                                {/* Delete Group Button inside Edit Modal */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsEditModalOpen(false)
+                                        setIsDeleteModalOpen(true)
+                                    }}
+                                    className="w-full border border-red-500 text-red-500 dark:text-red-400 py-3.5 rounded-xl font-bold mt-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                                >
+                                    Hapus Group
+                                </button>
+                            </form>
                         </div>
-
-                        <form onSubmit={handleUpdateGroup} className="p-6 space-y-4">
-                            <div>
-                                <label htmlFor="gd-edit-group-name" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nama Kelompok</label>
-                                <input
-                                    id="gd-edit-group-name"
-                                    name="name"
-                                    type="text"
-                                    value={editFormData.name}
-                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="gd-edit-group-animal" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Hewan</label>
-                                <div className="relative">
-                                    <select
-                                        id="gd-edit-group-animal"
-                                        name="target_animal"
-                                        value={editFormData.target_animal}
-                                        onChange={(e) => setEditFormData({ ...editFormData, target_animal: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
-                                    >
-                                        <option value="sapi">Sapi</option>
-                                        <option value="kambing">Kambing</option>
-                                        <option value="domba">Domba</option>
-                                    </select>
-                                    <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="gd-edit-group-year" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tahun Qurban</label>
-                                <div className="relative">
-                                    <select
-                                        id="gd-edit-group-year"
-                                        name="qurban_year"
-                                        value={editFormData.qurban_year}
-                                        onChange={(e) => setEditFormData({ ...editFormData, qurban_year: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 appearance-none"
-                                    >
-                                        <option value={2026}>2026</option>
-                                        <option value={2027}>2027</option>
-                                    </select>
-                                    <ChevronLeft size={20} className="absolute right-4 top-3.5 rotate-[-90deg] text-slate-400 pointer-events-none" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label htmlFor="gd-edit-group-price" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Total Harga (Rp)</label>
-                                <input
-                                    id="gd-edit-group-price"
-                                    name="total_price"
-                                    type="text"
-                                    value={editFormData.total_price}
-                                    onChange={(e) => setEditFormData({ ...editFormData, total_price: formatNumber(e.target.value) })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
-                                    required
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={editLoading}
-                                className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 dark:hover:bg-emerald-500 disabled:opacity-70 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20"
-                            >
-                                {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
-                            </button>
-
-                            {/* Delete Group Button inside Edit Modal */}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsEditModalOpen(false)
-                                    setIsDeleteModalOpen(true)
-                                }}
-                                className="w-full border border-red-500 text-red-500 dark:text-red-400 py-3.5 rounded-xl font-bold mt-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
-                            >
-                                Hapus Group
-                            </button>
-                        </form>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* Add Participant Modal */}
-            {isAddParticipantModalOpen && (
-                <div
-                    onClick={() => setIsAddParticipantModalOpen(false)}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
-                >
+            {
+                isAddParticipantModalOpen && (
                     <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col"
+                        onClick={() => setIsAddParticipantModalOpen(false)}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
-                            <h2 className="text-lg font-bold text-slate-800 dark:text-white">Tambah Peserta</h2>
-                            <button onClick={() => setIsAddParticipantModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
-                                <X size={20} />
-                            </button>
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden animate-slide-up sm:animate-scale-up border border-slate-100 dark:border-slate-800 max-h-[85vh] flex flex-col"
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-white">Tambah Peserta</h2>
+                                <button onClick={() => setIsAddParticipantModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddParticipant} className="p-6 space-y-4">
+                                <div>
+                                    <label htmlFor="add-participant-name" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nama Peserta</label>
+                                    <input
+                                        id="add-participant-name"
+                                        name="name"
+                                        type="text"
+                                        autoComplete="off"
+                                        value={newParticipant.name}
+                                        onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                                        placeholder="Contoh: Budi Santoso"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="add-participant-phone" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nomor WhatsApp (Aktif)</label>
+                                    <input
+                                        id="add-participant-phone"
+                                        name="phone"
+                                        type="tel"
+                                        autoComplete="off"
+                                        value={newParticipant.phone}
+                                        onChange={(e) => setNewParticipant({ ...newParticipant, phone: e.target.value })}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                                        placeholder="0812..."
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={addParticipantLoading}
+                                    className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 dark:hover:bg-emerald-500 disabled:opacity-70 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20"
+                                >
+                                    {addParticipantLoading ? 'Menyimpan...' : 'Simpan Peserta'}
+                                </button>
+                            </form>
                         </div>
-
-                        <form onSubmit={handleAddParticipant} className="p-6 space-y-4">
-                            <div>
-                                <label htmlFor="add-participant-name" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nama Peserta</label>
-                                <input
-                                    id="add-participant-name"
-                                    name="name"
-                                    type="text"
-                                    autoComplete="off"
-                                    value={newParticipant.name}
-                                    onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                                    placeholder="Contoh: Budi Santoso"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="add-participant-phone" className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Nomor WhatsApp (Aktif)</label>
-                                <input
-                                    id="add-participant-phone"
-                                    name="phone"
-                                    type="tel"
-                                    autoComplete="off"
-                                    value={newParticipant.phone}
-                                    onChange={(e) => setNewParticipant({ ...newParticipant, phone: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                                    placeholder="0812..."
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={addParticipantLoading}
-                                className="w-full bg-emerald-600 dark:bg-emerald-600 text-white py-4 rounded-xl font-bold mt-4 hover:bg-emerald-700 dark:hover:bg-emerald-500 disabled:opacity-70 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20"
-                            >
-                                {addParticipantLoading ? 'Menyimpan...' : 'Simpan Peserta'}
-                            </button>
-                        </form>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* History Modal */}
             <AnimatePresence>
                 {isHistoryModalOpen && selectedParticipantForHistory && (
@@ -1408,153 +1362,209 @@ export default function GroupDetail() {
                                     </h3>
                                 </div>
 
-                                {/* Filter Button (Replaces Close) */}
-                                <div className="relative" ref={filterRef}>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            setIsHistoryFilterOpen(!isHistoryFilterOpen)
-                                        }}
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${historyFilterMode !== 'all'
-                                            ? 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:shadow-none'
-                                            : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
-                                            }`}
-                                    >
-                                        <SlidersHorizontal size={20} />
-                                    </button>
+                                {/* Filter Button and Action Menu */}
+                                <div className="flex items-center space-x-2">
 
                                     {/* Filter Dropdown */}
-                                    {isHistoryFilterOpen && (
-                                        <div
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="absolute right-0 top-12 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 z-[110] overflow-hidden animate-scale-up origin-top-right p-2"
+                                    <div className="relative" ref={filterRef}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setIsHistoryFilterOpen(!isHistoryFilterOpen)
+                                                setIsHistoryMenuOpen(false) // Close menu if open
+                                            }}
+                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${historyFilterMode !== 'all'
+                                                ? 'bg-emerald-100 text-emerald-600 shadow-lg shadow-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:shadow-none'
+                                                : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                                }`}
                                         >
-                                            <div className="space-y-1">
-                                                {[
-                                                    { id: 'all', label: 'Semua' },
-                                                    { id: 'day', label: 'Hari Ini' },
-                                                    { id: 'week', label: 'Minggu Ini' },
-                                                    { id: 'month', label: 'Bulan Ini' },
-                                                    { id: 'custom', label: 'Custom Tanggal' }
-                                                ].map(opt => (
-                                                    <button
-                                                        key={opt.id}
-                                                        onClick={() => {
-                                                            setHistoryFilterMode(opt.id)
-                                                            if (opt.id !== 'custom') setIsHistoryFilterOpen(false)
-                                                        }}
-                                                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold flex justify-between items-center transition ${historyFilterMode === opt.id ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-                                                            }`}
-                                                    >
-                                                        <span>{opt.label}</span>
-                                                        {historyFilterMode === opt.id && <div className="w-2 h-2 rounded-full bg-emerald-500"></div>}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            <SlidersHorizontal size={20} />
+                                        </button>
 
-                                            {/* Custom Date Range Picker */}
-                                            {historyFilterMode === 'custom' && (
-                                                <div className="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800 px-2 pb-2">
-                                                    <div className="space-y-2">
-                                                        <div>
-                                                            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Dari Tanggal</label>
-                                                            <button
-                                                                onClick={() => setShowStartDatePicker(true)}
-                                                                className="w-full mt-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                                                            >
-                                                                {historyCustomDate.start ? new Date(historyCustomDate.start).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
-                                                            </button>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Sampai Tanggal</label>
-                                                            <button
-                                                                onClick={() => setShowEndDatePicker(true)}
-                                                                className="w-full mt-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition"
-                                                            >
-                                                                {historyCustomDate.end ? new Date(historyCustomDate.end).toLocaleDateString('id-ID') : 'Pilih Tanggal'}
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                        {/* Filter Dropdown */}
+                                        {isHistoryFilterOpen && (
+                                            <div
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="absolute right-0 top-12 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 z-[110] overflow-hidden animate-scale-up origin-top-right p-2"
+                                            >
+                                                <div className="space-y-1">
+                                                    {[
+                                                        { id: 'all', label: 'Semua' },
+                                                        { id: 'day', label: 'Hari Ini' },
+                                                        { id: 'week', label: 'Minggu Ini' },
+                                                        { id: 'month', label: 'Bulan Ini' },
+                                                        { id: 'custom', label: 'Custom Tanggal' }
+                                                    ].map((filterOption) => (
+                                                        <button
+                                                            key={filterOption.id}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setHistoryFilterMode(filterOption.id)
+                                                                if (filterOption.id !== 'custom') {
+                                                                    setIsHistoryFilterOpen(false)
+                                                                }
+                                                            }}
+                                                            className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between rounded-xl transition ${historyFilterMode === filterOption.id
+                                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                                                }`}
+                                                        >
+                                                            <span>{filterOption.label}</span>
+                                                            {historyFilterMode === filterOption.id && <Check size={16} />}
+                                                        </button>
+                                                    ))}
                                                 </div>
+                                                {/* Start/End Date Pickers are handled below in Modal body */}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Action Menu (3-dots) */}
+                                    <div className="relative" ref={historyMenuRef}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setIsHistoryMenuOpen(!isHistoryMenuOpen)
+                                                setIsHistoryFilterOpen(false) // Close filter if open
+                                            }}
+                                            className={`w-10 h-10 rounded-full flex items-center justify-center transition active:scale-95 ${isHistoryMenuOpen
+                                                ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                                                : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                                }`}
+                                        >
+                                            <span className="flex items-center justify-center w-full h-full">
+                                                <MoreVertical size={20} />
+                                            </span>
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        <AnimatePresence>
+                                            {isHistoryMenuOpen && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                    transition={{ duration: 0.15 }}
+                                                    className="absolute right-0 top-12 w-44 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 z-[110] overflow-hidden origin-top-right p-1"
+                                                >
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setIsHistoryMenuOpen(false)
+                                                            handleShareLink(selectedParticipantForHistory)
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center space-x-3 rounded-xl transition"
+                                                    >
+                                                        <Share2 size={16} className="text-slate-400" />
+                                                        <span>Bagikan Link</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setIsHistoryMenuOpen(false)
+                                                            setIsHistoryModalOpen(false) // Close history modal to reveal edit mode
+                                                            handleEditParticipantClick(selectedParticipantForHistory, e)
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center space-x-3 rounded-xl transition"
+                                                    >
+                                                        <Pencil size={16} className="text-slate-400" />
+                                                        <span>Edit</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setIsHistoryMenuOpen(false)
+                                                            setIsHistoryModalOpen(false) // Close history modal to reveal delete confirm
+                                                            handleDeleteParticipantClick(selectedParticipantForHistory, e)
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-3 rounded-xl transition mt-1"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                        <span>Hapus</span>
+                                                    </button>
+                                                </motion.div>
                                             )}
-                                        </div>
-                                    )}
+                                        </AnimatePresence>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Content */}
                             <div className="p-8 pt-2">
                                 {/* Date Pickers for Custom Filter */}
-                                <DatePicker
+                                < DatePicker
                                     isOpen={showStartDatePicker}
-                                    onClose={() => setShowStartDatePicker(false)}
+                                    onClose={() => setShowStartDatePicker(false)
+                                    }
                                     selectedDate={historyCustomDate.start}
                                     onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, start: date }))}
                                 />
-                                <DatePicker
+                                < DatePicker
                                     isOpen={showEndDatePicker}
                                     onClose={() => setShowEndDatePicker(false)}
                                     selectedDate={historyCustomDate.end}
                                     onDateChange={(date) => setHistoryCustomDate(prev => ({ ...prev, end: date }))}
                                 />
 
-                                {getFilteredHistory(selectedParticipantForHistory.transactions).length > 0 ? (
-                                    <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                        {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
-                                            <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl group hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900/30">
-                                                <div>
-                                                    <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">Rp {trx.amount.toLocaleString()}</p>
-                                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center space-x-1">
-                                                        <span>
-                                                            {trx.transaction_date
-                                                                ? new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
-                                                                : 'Tanggal tidak tersedia'}
+                                {
+                                    getFilteredHistory(selectedParticipantForHistory.transactions).length > 0 ? (
+                                        <div className="space-y-3 mt-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                            {getFilteredHistory(selectedParticipantForHistory.transactions).map((trx) => (
+                                                <div key={trx.id} className="flex justify-between items-center p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl group hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900/30">
+                                                    <div>
+                                                        <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">Rp {trx.amount.toLocaleString()}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center space-x-1">
+                                                            <span>
+                                                                {trx.transaction_date
+                                                                    ? new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                                                                    : 'Tanggal tidak tersedia'}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2 relative">
+                                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                                                            {trx.payment_method || 'Tunai'}
                                                         </span>
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center space-x-2 relative">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${trx.payment_method?.toLowerCase() === 'transfer' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}`}>
-                                                        {trx.payment_method || 'Tunai'}
-                                                    </span>
 
-                                                    {/* Delete Button (Direct) */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            setTransactionToDelete(trx)
-                                                            setIsDeleteTransactionModalOpen(true)
-                                                        }}
-                                                        className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400 flex items-center justify-center transition"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-
-                                                    {trx.receipt_url && (
-                                                        <a
-                                                            href={trx.receipt_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95 border border-slate-100 dark:border-slate-800"
-                                                            title="Lihat Bukti"
+                                                        {/* Delete Button (Direct) */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                setTransactionToDelete(trx)
+                                                                setIsDeleteTransactionModalOpen(true)
+                                                            }}
+                                                            className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400 flex items-center justify-center transition"
                                                         >
-                                                            <ReceiptText size={14} />
-                                                        </a>
-                                                    )}
+                                                            <Trash2 size={16} />
+                                                        </button>
+
+                                                        {trx.receipt_url && (
+                                                            <a
+                                                                href={trx.receipt_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm hover:scale-105 transition hover:shadow-md active:scale-95 border border-slate-100 dark:border-slate-800"
+                                                                title="Lihat Bukti"
+                                                            >
+                                                                <ReceiptText size={14} />
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                                        <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
-                                            <ReceiptText size={40} className="text-slate-300 dark:text-slate-600" />
+                                            ))}
                                         </div>
-                                        <h4 className="text-slate-800 dark:text-white font-bold text-lg mb-2">Belum ada transaksi</h4>
-                                        <p className="text-slate-400 dark:text-slate-500 text-sm max-w-[200px] leading-relaxed">
-                                            Peserta ini belum melakukan pembayaran apapun untuk saat ini.
-                                        </p>
-                                    </div>
-                                )}
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                                            <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 animate-pulse-slow">
+                                                <ReceiptText size={40} className="text-slate-300 dark:text-slate-600" />
+                                            </div>
+                                            <h4 className="text-slate-800 dark:text-white font-bold text-lg mb-2">Belum ada transaksi</h4>
+                                            <p className="text-slate-400 dark:text-slate-500 text-sm max-w-[200px] leading-relaxed">
+                                                Peserta ini belum melakukan pembayaran apapun untuk saat ini.
+                                            </p>
+                                        </div>
+                                    )
+                                }
 
                                 {/* Footer Button */}
                                 <div className="mt-8">
@@ -1565,11 +1575,11 @@ export default function GroupDetail() {
                                         Tutup
                                     </button>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
+                            </div >
+                        </motion.div >
+                    </motion.div >
                 )}
-            </AnimatePresence>
+            </AnimatePresence >
             {/* Delete Confirmation Modal */}
             {
                 isDeleteModalOpen && (
@@ -1797,6 +1807,6 @@ export default function GroupDetail() {
                 participant={shareParticipant}
                 slug={shareParticipant?.slug}
             />
-        </motion.div>
+        </motion.div >
     )
 }
