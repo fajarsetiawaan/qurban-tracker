@@ -875,7 +875,7 @@ export default function GroupDetail() {
                                         setSelectedParticipantForHistory(participant)
                                         setIsHistoryModalOpen(true)
                                     }}
-                                    className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md dark:hover:shadow-slate-950/20 transition-all duration-300 cursor-pointer relative group"
+                                    className={`bg-white/80 dark:bg-slate-900/60 backdrop-blur-lg p-5 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center space-x-5 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 hover:shadow-md dark:hover:shadow-slate-950/20 transition-all duration-300 cursor-pointer relative group ${activeParticipantDropdown === participant.id ? 'z-40' : 'z-10'}`}
                                 >
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-[2rem] ${percentage >= 100 ? 'bg-emerald-500' : 'bg-transparent'} transition-colors duration-300`} />
 
@@ -911,7 +911,7 @@ export default function GroupDetail() {
                                     </div>
 
                                     {/* Action Menu */}
-                                    <div className="relative pl-1">
+                                    <div className="relative pl-1" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                                         <motion.button
                                             whileTap={{ scale: 0.9 }}
                                             data-dropdown-trigger
@@ -933,8 +933,7 @@ export default function GroupDetail() {
                                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                                                     data-dropdown
-                                                    className={`absolute right-0 w-44 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden ${idx >= data.participants.length - 2 ? 'bottom-full mb-2 origin-bottom-right' : 'top-10 origin-top-right'
-                                                        }`}
+                                                    className="absolute right-0 bottom-full mb-2 w-44 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-50 overflow-hidden origin-bottom-right"
                                                 >
                                                     <button
                                                         onClick={(e) => {
