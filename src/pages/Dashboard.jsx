@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
-import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard, Moon, Sun } from 'lucide-react'
+import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard, Moon, Sun, Tag, FileText, ArrowDownUp, History } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ThemeToggle from '../components/ThemeToggle'
 import { useTheme } from '../contexts/ThemeContext'
@@ -85,6 +85,44 @@ export default function Dashboard() {
     const [lastQuickTrx, setLastQuickTrx] = useState(null)
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [showCalculator, setShowCalculator] = useState(false)
+    const [quickTrxMode, setQuickTrxMode] = useState('setoran') // 'setoran' | 'pengeluaran'
+    const [showModeDropdown, setShowModeDropdown] = useState(false)
+    const [expenseFormData, setExpenseFormData] = useState({
+        group_id: '',
+        category: 'Pembelian Hewan',
+        description: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        method: 'Tunai',
+        receipt: null
+    })
+    const [expenseLoading, setExpenseLoading] = useState(false)
+    const [showExpenseCategoryModal, setShowExpenseCategoryModal] = useState(false)
+    const [isAllTrxModalOpen, setIsAllTrxModalOpen] = useState(false)
+    const [allTrxSearch, setAllTrxSearch] = useState('')
+    const [allTrxFilterType, setAllTrxFilterType] = useState('Semua') // 'Semua' | 'setoran' | 'pengeluaran'
+    const [activeTrxMenuId, setActiveTrxMenuId] = useState(null)
+    const [expandedTrxId, setExpandedTrxId] = useState(null)
+    const [longPressingId, setLongPressingId] = useState(null)
+    const timerRef = useRef(null)
+
+    // Transaction Edit & Delete Confirmation State
+    const [isTrxDeleteConfirmOpen, setIsTrxDeleteConfirmOpen] = useState(false)
+    const [trxToDelete, setTrxToDelete] = useState(null)
+    const [isTrxEditModalOpen, setIsTrxEditModalOpen] = useState(false)
+    const [trxToEdit, setTrxToEdit] = useState(null)
+    const [editTrxFormData, setEditTrxFormData] = useState({
+        group_id: '',
+        participant_id: '',
+        amount: '',
+        category: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0],
+        method: 'Tunai',
+        receipt: null
+    })
+    const [isTrxSaveConfirmOpen, setIsTrxSaveConfirmOpen] = useState(false)
+    const [trxUpdateLoading, setTrxUpdateLoading] = useState(false)
 
     // History & Notification State
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
@@ -124,12 +162,16 @@ export default function Dashboard() {
 
             if (error) throw error
 
-            setNotificationTransactions(data.map(trx => ({
-                ...trx,
-                formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
-                participantName: trx.participants?.name || 'Unknown',
-                groupName: trx.participants?.groups?.name || 'Unknown'
-            })))
+            setNotificationTransactions(data.map(trx => {
+                const isExpense = trx.type === 'pengeluaran'
+                return {
+                    ...trx,
+                    formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
+                    participantName: isExpense ? (trx.category || 'Pengeluaran') : (trx.participants?.name || 'Unknown'),
+                    groupName: isExpense ? (trx.description || trx.category) : (trx.participants?.groups?.name || 'Unknown'),
+                    isExpense
+                }
+            }))
         } catch (error) {
             console.error('Error fetching notifications:', error)
         } finally {
@@ -157,13 +199,17 @@ export default function Dashboard() {
 
             if (error) throw error
 
-            const formatted = data.map(trx => ({
-                ...trx,
-                formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
-                participantName: trx.participants?.name || 'Unknown',
-                groupName: trx.participants?.groups?.name || 'Unknown',
-                groupId: trx.participants?.group_id
-            }))
+            const formatted = data.map(trx => {
+                const isExpense = trx.type === 'pengeluaran'
+                return {
+                    ...trx,
+                    formattedAmount: `Rp ${trx.amount.toLocaleString('id-ID')}`,
+                    participantName: isExpense ? (trx.category || 'Pengeluaran') : (trx.participants?.name || 'Unknown'),
+                    groupName: isExpense ? (trx.description || trx.category) : (trx.participants?.groups?.name || 'Unknown'),
+                    groupId: trx.participants?.group_id,
+                    isExpense
+                }
+            })
 
             setHistoryTransactions(formatted)
         } catch (error) {
@@ -273,6 +319,169 @@ export default function Dashboard() {
             alert('Gagal menambahkan setoran: ' + error.message)
         } finally {
             setQuickTrxLoading(false)
+        }
+    }
+
+    /** @param {Event} e */
+    const handleExpenseSubmit = async (e) => {
+        e.preventDefault()
+        setExpenseLoading(true)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
+            if (!expenseFormData.category || !expenseFormData.amount) {
+                throw new Error('Mohon lengkapi kategori dan jumlah')
+            }
+
+            // Upload Receipt if exists
+            let receiptUrl = null
+            if (expenseFormData.receipt) {
+                const fileName = `${Date.now()}-${expenseFormData.receipt.name}`
+                const { error: uploadError } = await supabase.storage
+                    .from('receipts')
+                    .upload(fileName, expenseFormData.receipt, {
+                        cacheControl: '3600',
+                        upsert: false
+                    })
+                if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
+                const { data: urlData } = supabase.storage
+                    .from('receipts')
+                    .getPublicUrl(fileName)
+                receiptUrl = urlData.publicUrl
+            }
+
+            const rawAmount = unformatNumber(expenseFormData.amount)
+            const { data: newTrx, error } = await supabase
+                .from('transactions')
+                .insert([{
+                    type: 'pengeluaran',
+                    group_id: expenseFormData.group_id || null,
+                    category: expenseFormData.category,
+                    description: expenseFormData.description,
+                    amount: rawAmount,
+                    payment_method: expenseFormData.method,
+                    transaction_date: expenseFormData.date,
+                    receipt_url: receiptUrl,
+                    user_id: user.id,
+                    participant_id: null
+                }])
+                .select()
+                .single()
+
+            if (error) throw error
+
+            setLastQuickTrx({
+                ...newTrx,
+                participantName: expenseFormData.category,
+                formattedAmount: `Rp ${rawAmount.toLocaleString('id-ID')}`,
+                isExpense: true
+            })
+
+            fetchDashboardData()
+            setQuickTrxStep('invoice')
+
+        } catch (error) {
+            console.error('Error adding expense:', error)
+            alert('Gagal menambahkan pengeluaran: ' + error.message)
+        } finally {
+            setExpenseLoading(false)
+        }
+    }
+
+    const handleDeleteClick = (trx) => {
+        setTrxToDelete(trx)
+        setIsTrxDeleteConfirmOpen(true)
+        setActiveTrxMenuId(null)
+    }
+
+    const handleDeleteTransactionExec = async () => {
+        if (!trxToDelete) return
+        setTrxUpdateLoading(true)
+        try {
+            const { error } = await supabase
+                .from('transactions')
+                .delete()
+                .eq('id', trxToDelete.id)
+
+            if (error) throw error
+
+            fetchDashboardData()
+            fetchHistoryData()
+            setIsTrxDeleteConfirmOpen(false)
+            setTrxToDelete(null)
+        } catch (error) {
+            console.error('Error deleting transaction:', error)
+            alert('Gagal menghapus transaksi: ' + error.message)
+        } finally {
+            setTrxUpdateLoading(false)
+        }
+    }
+
+    const handleEditClick = (trx) => {
+        setTrxToEdit(trx)
+        setEditTrxFormData({
+            group_id: trx.group_id || '',
+            participant_id: trx.participant_id || '',
+            amount: formatNumber(trx.amount.toString()),
+            category: trx.category || '',
+            description: trx.description || '',
+            date: trx.transaction_date,
+            method: trx.payment_method || 'Tunai',
+            receipt: null
+        })
+        setIsTrxEditModalOpen(true)
+        setActiveTrxMenuId(null)
+    }
+
+    const handleUpdateTransactionExec = async () => {
+        if (!trxToEdit) return
+        setTrxUpdateLoading(true)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) throw new Error('User not authenticated')
+
+            let receiptUrl = trxToEdit.receipt_url
+            if (editTrxFormData.receipt) {
+                const fileName = `${Date.now()}-${editTrxFormData.receipt.name}`
+                const { error: uploadError } = await supabase.storage
+                    .from('receipts')
+                    .upload(fileName, editTrxFormData.receipt)
+                if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`)
+                const { data: urlData } = supabase.storage
+                    .from('receipts')
+                    .getPublicUrl(fileName)
+                receiptUrl = urlData.publicUrl
+            }
+
+            const updateData = {
+                amount: unformatNumber(editTrxFormData.amount),
+                transaction_date: editTrxFormData.date,
+                payment_method: editTrxFormData.method,
+                description: editTrxFormData.description,
+                category: editTrxFormData.category,
+                group_id: editTrxFormData.group_id || null,
+                participant_id: editTrxFormData.participant_id || null,
+                receipt_url: receiptUrl
+            }
+
+            const { error } = await supabase
+                .from('transactions')
+                .update(updateData)
+                .eq('id', trxToEdit.id)
+
+            if (error) throw error
+
+            setIsTrxEditModalOpen(false)
+            setIsTrxSaveConfirmOpen(false)
+            setTrxToEdit(null)
+            fetchDashboardData()
+            fetchHistoryData()
+        } catch (error) {
+            console.error('Error updating transaction:', error)
+            alert('Gagal mengupdate transaksi: ' + error.message)
+        } finally {
+            setTrxUpdateLoading(false)
         }
     }
 
@@ -437,12 +646,15 @@ export default function Dashboard() {
             // 4. Fetch All Transactions for Global Stats & Growth
             const { data: allTransactions, error: trxError } = await supabase
                 .from('transactions')
-                .select('amount, created_at')
+                .select('amount, created_at, type')
 
             if (trxError) throw trxError
 
             if (allTransactions) {
-                const totalGlobal = allTransactions.reduce((sum, t) => sum + (t.amount || 0), 0)
+                const totalGlobal = allTransactions.reduce((sum, t) => {
+                    const amt = t.amount || 0
+                    return t.type === 'pengeluaran' ? sum - amt : sum + amt
+                }, 0)
                 setTotalSavings(totalGlobal)
 
                 // Calculate Growth
@@ -462,10 +674,11 @@ export default function Dashboard() {
                     const tMonth = tDate.getMonth()
                     const tYear = tDate.getFullYear()
 
+                    const signedAmount = t.type === 'pengeluaran' ? -(t.amount || 0) : (t.amount || 0)
                     if (tMonth === currentMonth && tYear === currentYear) {
-                        currentMonthTotal += (t.amount || 0)
+                        currentMonthTotal += signedAmount
                     } else if (tMonth === lastMonth && tYear === lastMonthYear) {
-                        lastMonthTotal += (t.amount || 0)
+                        lastMonthTotal += signedAmount
                     }
                 })
 
@@ -1482,8 +1695,8 @@ export default function Dashboard() {
             }
 
             {/* Quick Transaction Modal */}
-            {
-                isQuickTransactionModalOpen && (
+            <AnimatePresence>
+                {isQuickTransactionModalOpen && (
                     <div
                         onClick={() => setIsQuickTransactionModalOpen(false)}
                         className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
@@ -1506,16 +1719,67 @@ export default function Dashboard() {
                             </div>
 
                             <div className="flex justify-between items-center px-6 pb-4 pt-2 border-b border-slate-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
-                                <h2 className="text-xl font-black text-slate-800 dark:text-white">
-                                    {quickTrxStep === 'form' ? 'Tambah Setoran' : 'Detail Transaksi'}
-                                </h2>
+                                <div className="relative">
+                                    {quickTrxStep === 'form' ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowModeDropdown(!showModeDropdown)}
+                                            className="flex items-center gap-1.5 text-lg font-black text-slate-800 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+                                        >
+                                            {quickTrxMode === 'setoran' ? 'Tambah Setoran' : 'Tambah Pengeluaran'}
+                                            <ChevronDown size={16} className={`transition-transform duration-200 ${showModeDropdown ? 'rotate-180' : ''}`} />
+                                        </button>
+                                    ) : (
+                                        <h2 className="text-lg font-black text-slate-800 dark:text-white">Detail Transaksi</h2>
+                                    )}
+
+                                    {/* Mode Dropdown */}
+                                    <AnimatePresence>
+                                        {showModeDropdown && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute left-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 p-1.5 z-50"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setQuickTrxMode('setoran'); setShowModeDropdown(false) }}
+                                                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-bold transition whitespace-nowrap ${quickTrxMode === 'setoran' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <TrendingUp size={16} />
+                                                    Tambah Setoran
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setQuickTrxMode('pengeluaran'); setShowModeDropdown(false) }}
+                                                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-bold transition whitespace-nowrap ${quickTrxMode === 'pengeluaran' ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <ArrowDownUp size={16} />
+                                                    Tambah Pengeluaran
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                                 <button
                                     onClick={() => {
                                         setIsQuickTransactionModalOpen(false)
                                         setQuickTrxStep('form')
+                                        setShowModeDropdown(false)
                                         setQuickTrxFormData({
                                             group_id: '',
                                             participant_id: '',
+                                            amount: '',
+                                            date: new Date().toISOString().split('T')[0],
+                                            method: 'Tunai',
+                                            receipt: null
+                                        })
+                                        setExpenseFormData({
+                                            group_id: '',
+                                            category: 'Pembelian Hewan',
+                                            description: '',
                                             amount: '',
                                             date: new Date().toISOString().split('T')[0],
                                             method: 'Tunai',
@@ -1529,7 +1793,7 @@ export default function Dashboard() {
                             </div>
 
                             <div className="overflow-y-auto flex-1 p-6 pt-2">
-                                {quickTrxStep === 'form' && (
+                                {quickTrxStep === 'form' && quickTrxMode === 'setoran' && (
                                     <form onSubmit={handleQuickTransactionSubmit} className="space-y-5 pt-2 pb-4">
                                         {/* Group Selection */}
                                         <div className="space-y-2">
@@ -1663,29 +1927,180 @@ export default function Dashboard() {
                                     </form>
                                 )}
 
+                                {/* ===== EXPENSE FORM ===== */}
+                                {quickTrxStep === 'form' && quickTrxMode === 'pengeluaran' && (
+                                    <form onSubmit={handleExpenseSubmit} className="space-y-5 pt-2 pb-4">
+                                        {/* Category Selection */}
+                                        <div className="space-y-2">
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                <Tag size={14} />
+                                                <span>Kategori</span>
+                                            </span>
+                                            <div className="relative">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowExpenseCategoryModal(!showExpenseCategoryModal)}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-red-500 font-bold text-slate-700 dark:text-slate-200"
+                                                >
+                                                    <span>{expenseFormData.category}</span>
+                                                    <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${showExpenseCategoryModal ? 'rotate-180' : ''}`} />
+                                                </button>
+
+                                                {/* Category Dropdown */}
+                                                <AnimatePresence>
+                                                    {showExpenseCategoryModal && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                            exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                                                            transition={{ duration: 0.15 }}
+                                                            className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 p-1.5 z-50"
+                                                        >
+                                                            {['Pembelian Hewan', 'Operasional', 'Lainnya'].map(cat => (
+                                                                <button
+                                                                    key={cat}
+                                                                    type="button"
+                                                                    onClick={() => { setExpenseFormData({ ...expenseFormData, category: cat }); setShowExpenseCategoryModal(false) }}
+                                                                    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition whitespace-nowrap ${expenseFormData.category === cat ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+                                                                >
+                                                                    {cat}
+                                                                </button>
+                                                            ))}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        </div>
+
+                                        {/* Description */}
+                                        <div className="space-y-2">
+                                            <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                <FileText size={14} />
+                                                <span>Informasi</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={expenseFormData.description}
+                                                onChange={(e) => setExpenseFormData({ ...expenseFormData, description: e.target.value })}
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition"
+                                                placeholder="Misal: Uang muka, pelunasan, jagal, tenda..."
+                                            />
+                                        </div>
+
+                                        {/* Amount */}
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Jumlah Pengeluaran</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-3.5 text-red-600 dark:text-red-500 font-bold text-lg">Rp</span>
+                                                <input
+                                                    type="text"
+                                                    value={expenseFormData.amount}
+                                                    onClick={() => setShowCalculator(true)}
+                                                    readOnly={true}
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-red-50/50 dark:bg-slate-800 border-2 border-red-100 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 text-xl font-bold text-red-800 dark:text-red-400 placeholder-red-200/50 dark:placeholder-slate-600 transition-all cursor-pointer caret-transparent"
+                                                    placeholder="0"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Date */}
+                                        <div className="space-y-2">
+                                            <span className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                <Calendar size={14} />
+                                                <span>Tanggal</span>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowDatePicker(true)}
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center"
+                                            >
+                                                <span>
+                                                    {new Date(expenseFormData.date + 'T00:00:00').toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric'
+                                                    })}
+                                                </span>
+                                                <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400" />
+                                            </button>
+                                        </div>
+
+                                        {/* Receipt */}
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Bukti / Nota (Opsional)</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => setExpenseFormData({ ...expenseFormData, receipt: e.target.files[0] })}
+                                                className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-red-100 dark:file:bg-red-900/40 file:text-red-700 dark:file:text-red-400 hover:file:bg-red-200 transition"
+                                            />
+                                        </div>
+
+                                        {/* Method */}
+                                        <div className="space-y-2">
+                                            <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Metode Pembayaran</span>
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setExpenseFormData({ ...expenseFormData, method: 'Tunai' })}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${expenseFormData.method === 'Tunai' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <Banknote size={18} />
+                                                    <span>Tunai</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setExpenseFormData({ ...expenseFormData, method: 'Transfer' })}
+                                                    className={`flex-1 py-3.5 rounded-xl font-bold transition flex items-center justify-center space-x-2 active:scale-[0.98] ${expenseFormData.method === 'Transfer' ? 'bg-slate-800 dark:bg-slate-700 text-white shadow-lg shadow-slate-200 dark:shadow-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                                                >
+                                                    <CreditCard size={18} />
+                                                    <span>Transfer</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={expenseLoading}
+                                            className="w-full bg-red-500 dark:bg-red-600 text-white py-4 rounded-xl font-bold mt-6 hover:bg-red-600 dark:hover:bg-red-700 disabled:opacity-70 shadow-lg shadow-red-200 dark:shadow-none transition active:scale-[0.98]"
+                                        >
+                                            {expenseLoading ? 'Menyimpan...' : 'Simpan Pengeluaran'}
+                                        </button>
+                                    </form>
+                                )}
+
                                 {quickTrxStep === 'invoice' && lastQuickTrx && (
                                     <div className="flex flex-col items-center pt-2 pb-4">
                                         <div className="bg-white w-full p-0 relative">
                                             <div className="text-center pb-8">
-                                                <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4 animate-bounce-short">
-                                                    <CheckCircle className="text-emerald-600" size={40} />
+                                                <div className={`mx-auto w-20 h-20 ${lastQuickTrx.isExpense ? 'bg-red-100' : 'bg-emerald-100'} rounded-full flex items-center justify-center mb-4 animate-bounce-short`}>
+                                                    <CheckCircle className={lastQuickTrx.isExpense ? 'text-red-600' : 'text-emerald-600'} size={40} />
                                                 </div>
-                                                <h3 className="text-3xl font-bold text-slate-800 tracking-tight">{lastQuickTrx.formattedAmount}</h3>
-                                                <p className="text-emerald-600 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-full inline-block mt-2">BERHASIL</p>
+                                                <h3 className="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{lastQuickTrx.formattedAmount}</h3>
+                                                <p className={`${lastQuickTrx.isExpense ? 'text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400' : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400'} font-bold text-sm px-3 py-1 rounded-full inline-block mt-2`}>
+                                                    {lastQuickTrx.isExpense ? 'PENGELUARAN BERHASIL' : 'BERHASIL'}
+                                                </p>
                                             </div>
 
-                                            <div className="bg-slate-50 rounded-2xl p-5 space-y-4">
+                                            <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 space-y-4">
                                                 <div className="flex justify-between">
-                                                    <span className="text-slate-500 text-sm">Tanggal</span>
-                                                    <span className="font-medium text-slate-800 text-sm">{new Date((lastQuickTrx.transaction_date || lastQuickTrx.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">Tanggal</span>
+                                                    <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{new Date((lastQuickTrx.transaction_date || lastQuickTrx.created_at) + 'T00:00:00').toLocaleDateString('id-ID')}</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span className="text-slate-500 text-sm">Pengirim</span>
-                                                    <span className="font-bold text-slate-800 text-sm">{lastQuickTrx.participantName}</span>
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">{lastQuickTrx.isExpense ? 'Kategori' : 'Pengirim'}</span>
+                                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{lastQuickTrx.participantName}</span>
                                                 </div>
+                                                {lastQuickTrx.isExpense && lastQuickTrx.description && (
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500 dark:text-slate-400 text-sm">Informasi</span>
+                                                        <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{lastQuickTrx.description}</span>
+                                                    </div>
+                                                )}
                                                 <div className="flex justify-between">
-                                                    <span className="text-slate-500 text-sm">Metode</span>
-                                                    <span className="font-medium text-slate-800 text-sm">{lastQuickTrx.payment_method}</span>
+                                                    <span className="text-slate-500 dark:text-slate-400 text-sm">Metode</span>
+                                                    <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">{lastQuickTrx.payment_method}</span>
                                                 </div>
 
                                                 {lastQuickTrx.receipt_url && (
@@ -1694,9 +2109,9 @@ export default function Dashboard() {
                                                             href={lastQuickTrx.receipt_url}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-xs font-bold text-emerald-600 hover:underline flex items-center justify-center"
+                                                            className={`text-xs font-bold ${lastQuickTrx.isExpense ? 'text-red-600' : 'text-emerald-600'} hover:underline flex items-center justify-center`}
                                                         >
-                                                            <CheckCircle size={12} className="mr-1" /> Lihat Bukti Transfer
+                                                            <CheckCircle size={12} className="mr-1" /> {lastQuickTrx.isExpense ? 'Lihat Bukti / Nota' : 'Lihat Bukti Transfer'}
                                                         </a>
                                                     </div>
                                                 )}
@@ -1725,24 +2140,270 @@ export default function Dashboard() {
                             </div>
                         </motion.div>
                     </div>
-                )
-            }
+                )}
+            </AnimatePresence>
+
+            {/* Edit Transaction Modal */}
+            <AnimatePresence>
+                {isTrxEditModalOpen && trxToEdit && (
+                    <div
+                        onClick={() => setIsTrxEditModalOpen(false)}
+                        className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center bg-slate-900/40 p-0 sm:p-4 backdrop-blur-md animate-fade-in"
+                    >
+                        <motion.div
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={{ top: 0, bottom: 0.2 }}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                if (offset.y > 200 || velocity.y > 800) {
+                                    setIsTrxEditModalOpen(false);
+                                }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm sm:rounded-[2rem] rounded-t-[2rem] shadow-2xl overflow-hidden animate-slide-up flex flex-col max-h-[85vh] border-t sm:border border-slate-100 dark:border-slate-800"
+                        >
+                            {/* Drag Handle */}
+                            <div className="w-full flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
+                                <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                            </div>
+
+                            <div className="flex justify-between items-center px-6 pb-4 pt-2 border-b border-slate-100 dark:border-slate-800 flex-none bg-white dark:bg-slate-900 z-10 sticky top-0">
+                                <h2 className="text-lg font-black text-slate-800 dark:text-white">Edit {trxToEdit.type === 'setoran' ? 'Setoran' : 'Pengeluaran'}</h2>
+                                <button
+                                    onClick={() => setIsTrxEditModalOpen(false)}
+                                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="overflow-y-auto flex-1 p-6 pt-2">
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault()
+                                        setIsTrxSaveConfirmOpen(true)
+                                    }}
+                                    className="space-y-5 pt-2 pb-4"
+                                >
+                                    {/* Type specific fields */}
+                                    {trxToEdit.type === 'setoran' ? (
+                                        <>
+                                            {/* Group Selection */}
+                                            <div className="space-y-2">
+                                                <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                    <Users size={14} />
+                                                    <span>Pilih Group</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsQuickTrxGroupModalOpen(true)}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
+                                                >
+                                                    <span>
+                                                        {editTrxFormData.group_id
+                                                            ? groups.find(g => g.id === editTrxFormData.group_id)?.name + ` (${groups.find(g => g.id === editTrxFormData.group_id)?.target_animal})`
+                                                            : '-- Pilih Group --'}
+                                                    </span>
+                                                    <ChevronDown size={16} />
+                                                </button>
+                                            </div>
+
+                                            {/* Participant Selection */}
+                                            <div className="space-y-2">
+                                                <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                    <User size={14} />
+                                                    <span>Pilih Peserta</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => editTrxFormData.group_id && setIsQuickTrxParticipantModalOpen(true)}
+                                                    disabled={!editTrxFormData.group_id}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 disabled:opacity-50"
+                                                >
+                                                    <span>
+                                                        {editTrxFormData.participant_id && editTrxFormData.group_id
+                                                            ? groups.find(g => g.id === editTrxFormData.group_id)?.participants.find(p => p.id === editTrxFormData.participant_id)?.name
+                                                            : '-- Pilih Peserta --'}
+                                                    </span>
+                                                    <ChevronDown size={16} />
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Category Selection */}
+                                            <div className="space-y-2">
+                                                <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                                    <Layout size={14} />
+                                                    <span>Kategori</span>
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowExpenseCategoryModal(true)}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-left flex justify-between items-center transition focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200"
+                                                >
+                                                    <span>{editTrxFormData.category}</span>
+                                                    <ChevronDown size={16} />
+                                                </button>
+                                            </div>
+
+                                            {/* Description */}
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Keterangan (Opsional)</label>
+                                                <textarea
+                                                    value={editTrxFormData.description}
+                                                    onChange={(e) => setEditTrxFormData({ ...editTrxFormData, description: e.target.value })}
+                                                    className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 resize-none h-20"
+                                                    placeholder="Contoh: Pembelian bibit domba..."
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Common fields (Amount, Date, Method) */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Jumlah</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-3.5 text-emerald-600 dark:text-emerald-500 font-bold text-lg">Rp</span>
+                                            <input
+                                                type="text"
+                                                value={editTrxFormData.amount}
+                                                onClick={() => setShowCalculator(true)}
+                                                readOnly
+                                                className="w-full pl-12 pr-4 py-3.5 bg-emerald-50/50 dark:bg-slate-800 border-2 border-emerald-100 dark:border-slate-700 rounded-xl focus:outline-none focus:border-emerald-500 text-xl font-bold text-emerald-800 dark:text-emerald-400 cursor-pointer"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="flex items-center space-x-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">
+                                            <Calendar size={14} />
+                                            <span>Tanggal</span>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowDatePicker(true)}
+                                            className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-slate-700 dark:text-slate-200 text-left flex justify-between items-center"
+                                        >
+                                            <span>{new Date(editTrxFormData.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                            <ChevronLeft size={16} className="rotate-[-90deg] text-slate-400" />
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Metode Pembayaran</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {['Tunai', 'Transfer'].map((m) => (
+                                                <button
+                                                    key={m}
+                                                    type="button"
+                                                    onClick={() => setEditTrxFormData({ ...editTrxFormData, method: m })}
+                                                    className={`py-3 rounded-xl font-bold transition-all ${editTrxFormData.method === m ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 hover:bg-slate-100'}`}
+                                                >
+                                                    {m}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-emerald-600 text-white py-4 rounded-xl font-black shadow-lg shadow-emerald-200 mt-4 active:scale-95 transition"
+                                    >
+                                        Simpan Perubahan
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Confirmation Modal (Himbauan / Apa kamu yakin?) */}
+            <AnimatePresence>
+                {(isTrxDeleteConfirmOpen || isTrxSaveConfirmOpen) && (
+                    <div
+                        className="fixed inset-0 z-[400] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-6"
+                        onClick={() => {
+                            setIsTrxDeleteConfirmOpen(false)
+                            setIsTrxSaveConfirmOpen(false)
+                        }}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2rem] p-8 shadow-2xl text-center border border-slate-100 dark:border-slate-800"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={`w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center ${isTrxDeleteConfirmOpen ? 'bg-red-50 text-red-500 dark:bg-red-900/20' : 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20'}`}>
+                                {isTrxDeleteConfirmOpen ? <Trash2 size={32} /> : <CheckCircle size={32} />}
+                            </div>
+                            <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">
+                                {isTrxDeleteConfirmOpen ? 'Himbauan' : 'Konfirmasi'}
+                            </h3>
+                            <p className="text-slate-500 dark:text-slate-400 font-bold text-sm leading-relaxed mb-8">
+                                {isTrxDeleteConfirmOpen
+                                    ? 'Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.'
+                                    : 'Apa kamu yakin ingin menyimpan perubahan pada transaksi ini?'}
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={isTrxDeleteConfirmOpen ? handleDeleteTransactionExec : handleUpdateTransactionExec}
+                                    disabled={trxUpdateLoading}
+                                    className={`w-full py-4 rounded-xl font-black text-white shadow-lg transition active:scale-95 disabled:opacity-50 ${isTrxDeleteConfirmOpen ? 'bg-red-600 shadow-red-200 dark:shadow-red-900/20' : 'bg-emerald-600 shadow-emerald-200 dark:shadow-emerald-900/20'}`}
+                                >
+                                    {trxUpdateLoading ? 'Memproses...' : (isTrxDeleteConfirmOpen ? 'Ya, Hapus' : 'Ya, Simpan')}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsTrxDeleteConfirmOpen(false)
+                                        setIsTrxSaveConfirmOpen(false)
+                                    }}
+                                    className="w-full py-4 rounded-xl font-black text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition"
+                                >
+                                    Batal
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Custom Date Picker Modal */}
             <DatePicker
                 isOpen={showDatePicker}
                 onClose={() => setShowDatePicker(false)}
-                selectedDate={quickTrxFormData.date}
-                onDateChange={(date) => setQuickTrxFormData({ ...quickTrxFormData, date })}
+                selectedDate={isTrxEditModalOpen ? editTrxFormData.date : (quickTrxMode === 'pengeluaran' ? expenseFormData.date : quickTrxFormData.date)}
+                onDateChange={(date) => {
+                    if (isTrxEditModalOpen) {
+                        setEditTrxFormData({ ...editTrxFormData, date })
+                    } else if (quickTrxMode === 'setoran') {
+                        setQuickTrxFormData({ ...quickTrxFormData, date })
+                    } else {
+                        setExpenseFormData({ ...expenseFormData, date })
+                    }
+                    setShowDatePicker(false)
+                }}
             />
 
             {/* Calculator Modal */}
             <CalculatorModal
                 isOpen={showCalculator}
                 onClose={() => setShowCalculator(false)}
-                onConfirm={(val) => setQuickTrxFormData({ ...quickTrxFormData, amount: val })}
-                initialValue={quickTrxFormData.amount}
-                title="Masukkan Jumlah Setoran"
+                onConfirm={(val) => {
+                    if (isTrxEditModalOpen) {
+                        setEditTrxFormData({ ...editTrxFormData, amount: formatNumber(val) })
+                    } else if (quickTrxMode === 'setoran') {
+                        setQuickTrxFormData({ ...quickTrxFormData, amount: formatNumber(val) })
+                    } else {
+                        setExpenseFormData({ ...expenseFormData, amount: formatNumber(val) })
+                    }
+                    setShowCalculator(false)
+                }}
+                initialValue={isTrxEditModalOpen ? editTrxFormData.amount : (quickTrxMode === 'pengeluaran' ? expenseFormData.amount : quickTrxFormData.amount)}
+                title={isTrxEditModalOpen ? 'Edit Jumlah' : (quickTrxMode === 'pengeluaran' ? 'Masukkan Jumlah Pengeluaran' : 'Masukkan Jumlah Setoran')}
             />
 
             {/* History Modal */}
@@ -1821,16 +2482,19 @@ export default function Dashboard() {
                                     <div className="text-center py-10 text-slate-400 dark:text-slate-500">Loading...</div>
                                 ) : historyTransactions.length > 0 ? (
                                     historyTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4 rounded-3xl shadow-sm dark:shadow-none flex justify-between items-center hover:shadow-md transition-all duration-300">
+                                        <div key={trx.id} className={`${trx.isExpense ? 'bg-red-50/50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30' : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-700'} border p-4 rounded-3xl shadow-sm dark:shadow-none flex justify-between items-center hover:shadow-md transition-all duration-300`}>
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
                                                     {new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    {trx.isExpense && <span className="ml-1.5 text-red-500 dark:text-red-400">• Pengeluaran</span>}
                                                 </p>
                                                 <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-0.5">{trx.participantName}</h4>
                                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{trx.groupName} • {trx.payment_method || 'Tunai'}</p>
                                             </div>
                                             <div className="text-right">
-                                                <span className="block font-black text-emerald-600 dark:text-emerald-400 text-base">{trx.formattedAmount}</span>
+                                                <span className={`block font-black text-base ${trx.isExpense ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                    {trx.isExpense ? '-' : '+'}{trx.formattedAmount}
+                                                </span>
                                                 {trx.receipt_url && (
                                                     <a href={trx.receipt_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 dark:text-blue-400 hover:underline mt-1 inline-block">Lihat Bukti</a>
                                                 )}
@@ -2026,19 +2690,25 @@ export default function Dashboard() {
                                     <div className="text-center py-10 text-slate-400 dark:text-slate-500">Loading...</div>
                                 ) : notificationTransactions.length > 0 ? (
                                     notificationTransactions.map((trx) => (
-                                        <div key={trx.id} className="bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 p-4 rounded-3xl flex items-start space-x-4">
-                                            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-2xl text-emerald-600 dark:text-emerald-400 flex-none shadow-sm shadow-emerald-100 dark:shadow-none">
+                                        <div key={trx.id} className={`${trx.isExpense ? 'bg-red-50/50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30' : 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30'} border p-4 rounded-3xl flex items-start space-x-4`}>
+                                            <div className={`${trx.isExpense ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 shadow-red-100' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shadow-emerald-100'} p-3 rounded-2xl flex-none shadow-sm dark:shadow-none`}>
                                                 <Bell size={20} className="fill-current" />
                                             </div>
                                             <div className="flex-1 pt-1">
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <h4 className="font-black text-slate-800 dark:text-emerald-100 text-sm">Setoran Baru!</h4>
+                                                    <h4 className={`font-black text-sm ${trx.isExpense ? 'text-red-700 dark:text-red-300' : 'text-slate-800 dark:text-emerald-100'}`}>
+                                                        {trx.isExpense ? 'Pengeluaran Baru!' : 'Setoran Baru!'}
+                                                    </h4>
                                                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-700">
                                                         {new Date(trx.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                 </div>
                                                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                                                    <span className="font-bold text-slate-800 dark:text-white">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600 dark:text-emerald-400">{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.
+                                                    {trx.isExpense ? (
+                                                        <><span className="font-bold text-slate-800 dark:text-white">{trx.participantName}</span> — <span className="font-bold text-red-600 dark:text-red-400">-{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.{trx.description ? ` (${trx.description})` : ''}</>
+                                                    ) : (
+                                                        <><span className="font-bold text-slate-800 dark:text-white">{trx.participantName}</span> baru saja menyetor <span className="font-bold text-emerald-600 dark:text-emerald-400">{trx.formattedAmount}</span> via {trx.payment_method || 'Tunai'}.</>
+                                                    )}
                                                 </p>
                                             </div>
                                         </div>
@@ -2133,6 +2803,21 @@ export default function Dashboard() {
                                     </div>
                                     <span className="font-bold text-slate-700 dark:text-slate-200">Tentang</span>
                                 </button>
+
+                                <button
+                                    onClick={() => {
+                                        setAllTrxSearch('')
+                                        setAllTrxFilterType('Semua')
+                                        setIsAllTrxModalOpen(true)
+                                        fetchHistoryData()
+                                    }}
+                                    className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
+                                >
+                                    <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                        <History size={24} />
+                                    </div>
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">Daftar Transaksi</span>
+                                </button>
                             </div>
 
                             {/* Logout Button */}
@@ -2147,6 +2832,258 @@ export default function Dashboard() {
                             <div className="text-center text-xs text-slate-400 dark:text-slate-600 mt-8">
                                 Version 1.2.14
                             </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* All Transactions Modal */}
+            <AnimatePresence>
+                {isAllTrxModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, x: '100%' }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="fixed inset-0 z-[250] bg-slate-50 dark:bg-slate-950 flex flex-col"
+                    >
+                        <div className="px-6 py-4 flex justify-between items-center bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex-none">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        setIsAllTrxModalOpen(false)
+                                        setAllTrxSearch('')
+                                    }}
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500 dark:text-slate-400 transition"
+                                >
+                                    <ChevronLeft size={24} />
+                                </button>
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-white">Daftar Transaksi</h2>
+                            </div>
+                        </div>
+
+                        {/* Search and Filter */}
+                        <div className="p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 space-y-4 flex-none">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Cari transaksi..."
+                                    value={allTrxSearch}
+                                    onChange={(e) => setAllTrxSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-medium text-slate-700 dark:text-slate-200"
+                                />
+                            </div>
+                            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                                {['Semua', 'setoran', 'pengeluaran'].map((type) => (
+                                    <button
+                                        key={type}
+                                        onClick={() => setAllTrxFilterType(type)}
+                                        className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition ${allTrxFilterType === type
+                                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200 dark:shadow-none'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700'
+                                            }`}
+                                    >
+                                        {type === 'Semua' ? 'Semua' : type === 'setoran' ? 'Setoran' : 'Pengeluaran'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Transaction List */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {historyTransactions
+                                .filter(trx => {
+                                    const matchesSearch = trx.participantName.toLowerCase().includes(allTrxSearch.toLowerCase()) ||
+                                        trx.groupName.toLowerCase().includes(allTrxSearch.toLowerCase())
+                                    const matchesType = allTrxFilterType === 'Semua' || trx.type === allTrxFilterType
+                                    return matchesSearch && matchesType
+                                })
+                                .map((trx) => {
+                                    const isExpanded = expandedTrxId === trx.id;
+                                    const isLongPressing = longPressingId === trx.id;
+
+                                    const handlePointerDown = () => {
+                                        // Clear any existing timer just in case
+                                        if (timerRef.current) clearTimeout(timerRef.current);
+
+                                        setLongPressingId(trx.id);
+                                        timerRef.current = setTimeout(() => {
+                                            setActiveTrxMenuId(trx.id);
+                                            setLongPressingId(null);
+                                            timerRef.current = null;
+                                            if (window.navigator.vibrate) window.navigator.vibrate(50);
+                                        }, 1200); // 1.2 seconds hold
+                                    };
+
+                                    const handlePointerUp = (e) => {
+                                        if (timerRef.current) {
+                                            // Finger/Mouse released before timer finished -> this is a tap
+                                            clearTimeout(timerRef.current);
+                                            timerRef.current = null;
+                                            setLongPressingId(null);
+
+                                            // Handle tap logic (only if action menu is not already open)
+                                            if (!activeTrxMenuId) {
+                                                setExpandedTrxId(isExpanded ? null : trx.id);
+                                            }
+                                        }
+                                    };
+
+                                    const handlePointerCancel = () => {
+                                        if (timerRef.current) {
+                                            clearTimeout(timerRef.current);
+                                            timerRef.current = null;
+                                            setLongPressingId(null);
+                                        }
+                                    };
+
+                                    return (
+                                        <div
+                                            key={trx.id}
+                                            className={`bg-white dark:bg-slate-900 border ${isExpanded ? 'border-emerald-500 dark:border-emerald-500 shadow-md scale-[1.02]' : 'border-slate-100 dark:border-slate-800 shadow-sm'} ${isLongPressing ? 'ring-4 ring-emerald-500/20 scale-[0.98]' : ''} p-5 rounded-[2rem] relative overflow-visible group flex flex-col gap-3 cursor-pointer transition-all duration-300 active:scale-[0.98] hover:bg-slate-50 dark:hover:bg-slate-800 touch-none select-none`}
+                                            onPointerDown={handlePointerDown}
+                                            onPointerUp={handlePointerUp}
+                                            onPointerLeave={handlePointerCancel}
+                                            onPointerCancel={handlePointerCancel}
+                                            onContextMenu={(e) => e.preventDefault()}
+                                        >
+                                            {/* Card Header & Amount */}
+                                            <div className="flex justify-between items-start pointer-events-none">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">
+                                                        {new Date(trx.transaction_date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-slate-800 dark:text-white text-sm">{trx.participantName}</h4>
+                                                        {trx.type === 'pengeluaran' && (
+                                                            <span className="px-2 py-0.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[9px] font-black rounded-full uppercase">Pengeluaran</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`font-black text-sm ${trx.type === 'pengeluaran' ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                        {trx.type === 'pengeluaran' ? '-' : '+'}{trx.formattedAmount}
+                                                    </span>
+
+                                                    {/* Hidden Trigger Position (Action Menu) */}
+                                                    <div className="relative pointer-events-auto">
+                                                        <AnimatePresence>
+                                                            {activeTrxMenuId === trx.id && (
+                                                                <>
+                                                                    <div
+                                                                        className="fixed inset-0 z-[260]"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            setActiveTrxMenuId(null)
+                                                                        }}
+                                                                    />
+                                                                    <motion.div
+                                                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                                        className="absolute right-0 top-0 w-40 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 z-[270] overflow-hidden"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                handleEditClick(trx)
+                                                                            }}
+                                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                                                                        >
+                                                                            <Pencil size={16} className="text-blue-500" />
+                                                                            <span>Edit</span>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                handleDeleteClick(trx)
+                                                                            }}
+                                                                            className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition border-t border-slate-50 dark:border-slate-700"
+                                                                        >
+                                                                            <Trash2 size={16} />
+                                                                            <span>Hapus</span>
+                                                                        </button>
+                                                                    </motion.div>
+                                                                </>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Long Press Progress Bar (Visual Feedback) */}
+                                            {isLongPressing && (
+                                                <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800 overflow-hidden rounded-t-[2rem]">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: '100%' }}
+                                                        transition={{ duration: 1.2, ease: "linear" }}
+                                                        className="h-full bg-emerald-500"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Collapsed view shows just group name */}
+                                            {!isExpanded && (
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-1 pointer-events-none">{trx.groupName}</p>
+                                            )}
+
+                                            {/* Expanded Content */}
+                                            <AnimatePresence>
+                                                {isExpanded && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden pointer-events-none"
+                                                    >
+                                                        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Kelompok</p>
+                                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{trx.groupName}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Metode</p>
+                                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{trx.payment_method || 'Tunai'}</p>
+                                                            </div>
+                                                            {trx.type === 'pengeluaran' && (
+                                                                <div className="col-span-2">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Kategori</p>
+                                                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{trx.category || '-'}</p>
+                                                                </div>
+                                                            )}
+                                                            {trx.description && (
+                                                                <div className="col-span-2">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Keterangan</p>
+                                                                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{trx.description}</p>
+                                                                </div>
+                                                            )}
+                                                            {trx.receipt_url && (
+                                                                <div className="col-span-2 mt-2 pointer-events-auto">
+                                                                    <a
+                                                                        href={trx.receipt_url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/30 transition"
+                                                                    >
+                                                                        <ReceiptText size={14} />
+                                                                        Lihat Bukti Kwitansi
+                                                                    </a>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    );
+                                })}
+
+                            {historyTransactions.length === 0 && (
+                                <div className="text-center py-20 text-slate-400 italic">Belum ada transaksi</div>
+                            )}
                         </div>
                     </motion.div>
                 )}
