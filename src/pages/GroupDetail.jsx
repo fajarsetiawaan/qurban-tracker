@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -130,6 +130,9 @@ export default function GroupDetail() {
     const [isHistoryMenuOpen, setIsHistoryMenuOpen] = useState(false)
     const historyMenuRef = useRef(null)
 
+    // Duplicate Name Alert State
+    const [duplicateNameAlert, setDuplicateNameAlert] = useState(null)
+
     // Pre-fill form when Edit Modal opens
     useEffect(() => {
         if (isEditModalOpen && data) {
@@ -246,6 +249,17 @@ export default function GroupDetail() {
 
     const handleAddParticipant = async (e) => {
         e.preventDefault()
+
+        // Check for duplicate name within this group
+        const trimmedName = newParticipant.name.trim()
+        const isDuplicate = data?.participants?.some(
+            p => p.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        )
+        if (isDuplicate) {
+            setDuplicateNameAlert(trimmedName)
+            return
+        }
+
         setAddParticipantLoading(true)
         try {
             const { data: { user } } = await supabase.auth.getUser()
@@ -255,7 +269,7 @@ export default function GroupDetail() {
                 .from('participants')
                 .insert({
                     group_id: id,
-                    name: newParticipant.name,
+                    name: trimmedName,
                     phone: newParticipant.phone,
                     user_id: user.id
                 })
@@ -384,7 +398,7 @@ export default function GroupDetail() {
         } catch (error) {
             console.error('Error fetching detail:', error)
         } finally {
-            setTimeout(() => setLoading(false), 500)
+            setLoading(false)
         }
     }
 
@@ -687,18 +701,24 @@ export default function GroupDetail() {
         setIsShareModalOpen(true)
     }
 
+    // useMemo MUST be called before any early returns (Rules of Hooks)
+    const chartData = useMemo(() => [
+        { name: 'Terkumpul', value: data?.totalCollected ?? 0, color: '#10B981' },
+        { name: 'Kekurangan', value: data?.shortage ?? 0, color: isDarkMode ? '#1E293B' : '#F1F5F9' }
+    ], [data?.totalCollected, data?.shortage, isDarkMode])
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50 pb-20">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
                 <div className="bg-transparent p-6 sticky top-0 z-10 flex items-center">
                     <Skeleton className="h-8 w-8 mr-3 rounded-full" />
                 </div>
                 <div className="p-6 space-y-6">
-                    <div className="bg-white p-8 rounded-3xl shadow-sm flex flex-col items-center">
+                    <div className="bg-white dark:bg-slate-900/60 p-8 rounded-3xl shadow-sm dark:shadow-none flex flex-col items-center">
                         <Skeleton className="h-56 w-56 rounded-full" />
                     </div>
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="bg-white p-5 rounded-3xl shadow-sm flex items-center space-x-4">
+                        <div key={i} className="bg-white dark:bg-slate-900/60 p-5 rounded-3xl shadow-sm dark:shadow-none flex items-center space-x-4">
                             <Skeleton className="h-12 w-12 rounded-full" />
                             <div className="flex-1 space-y-2">
                                 <Skeleton className="h-4 w-1/2" />
@@ -712,11 +732,6 @@ export default function GroupDetail() {
     }
 
     if (!data) return <div className="p-4 text-center">Group tidak ditemukan</div>
-
-    const chartData = [
-        { name: 'Terkumpul', value: data.totalCollected, color: '#10B981' },
-        { name: 'Kekurangan', value: data.shortage, color: isDarkMode ? '#1E293B' : '#F1F5F9' }
-    ]
 
     // Use target_participants if available and > 0, otherwise fallback to current participants length (or 1 to avoid division by zero)
     const divisor = (data.target_participants && data.target_participants > 0)
@@ -987,7 +1002,7 @@ export default function GroupDetail() {
                             dragConstraints={{ top: 0, bottom: 0 }}
                             dragElastic={{ top: 0, bottom: 0.2 }}
                             onDragEnd={(e, { offset, velocity }) => {
-                                if (offset.y > 100 || velocity.y > 500) {
+                                if (offset.y > 200 || velocity.y > 800) {
                                     resetModal();
                                 }
                             }}
@@ -1288,7 +1303,7 @@ export default function GroupDetail() {
             {
                 isAddParticipantModalOpen && (
                     <div
-                        onClick={() => setIsAddParticipantModalOpen(false)}
+                        onClick={() => { setIsAddParticipantModalOpen(false); setNewParticipant({ name: '', phone: '' }) }}
                         className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
                         <div
@@ -1297,7 +1312,7 @@ export default function GroupDetail() {
                         >
                             <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
                                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">Tambah Peserta</h2>
-                                <button onClick={() => setIsAddParticipantModalOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
+                                <button onClick={() => { setIsAddParticipantModalOpen(false); setNewParticipant({ name: '', phone: '' }) }} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded-full transition-colors">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -1707,6 +1722,66 @@ export default function GroupDetail() {
                     </div>
                 )
             }
+            {/* Duplicate Name Alert Popup */}
+            <AnimatePresence>
+                {duplicateNameAlert && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={() => setDuplicateNameAlert(null)}
+                        className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 dark:bg-black/70 p-6 backdrop-blur-lg"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.85, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 10 }}
+                            transition={{ type: 'spring', damping: 22, stiffness: 350 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 w-full max-w-xs rounded-[2rem] shadow-2xl dark:shadow-none overflow-hidden border border-slate-100 dark:border-slate-800 relative"
+                        >
+                            {/* Decorative top gradient bar */}
+                            <div className="h-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500" />
+
+                            <div className="px-7 pt-7 pb-6 text-center">
+                                {/* Icon with glow effect */}
+                                <div className="relative mx-auto mb-5 w-fit">
+                                    <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl scale-150" />
+                                    <div className="relative w-14 h-14 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/20 rounded-2xl flex items-center justify-center border border-amber-200/50 dark:border-amber-700/30 shadow-sm">
+                                        <Users size={24} className="text-amber-500 dark:text-amber-400" />
+                                    </div>
+                                </div>
+
+                                <h3 className="text-lg font-black text-slate-800 dark:text-white mb-1.5 tracking-tight">Nama Sudah Terdaftar</h3>
+                                <p className="text-slate-500 dark:text-slate-400 text-[13px] leading-relaxed mb-5">
+                                    <strong className="text-slate-700 dark:text-slate-200">"{duplicateNameAlert}"</strong> sudah ada di grup ini. Tambahkan pembeda agar mudah dibedakan.
+                                </p>
+
+                                {/* Suggestion chips */}
+                                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                                    <span className="inline-flex items-center px-3.5 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-200/50 dark:border-emerald-700/30">
+                                        {duplicateNameAlert} A
+                                    </span>
+                                    <span className="inline-flex items-center px-3.5 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-full border border-blue-200/50 dark:border-blue-700/30">
+                                        {duplicateNameAlert} (2)
+                                    </span>
+                                    <span className="inline-flex items-center px-3.5 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-xs font-bold rounded-full border border-purple-200/50 dark:border-purple-700/30">
+                                        {duplicateNameAlert} Jr
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => setDuplicateNameAlert(null)}
+                                    className="w-full py-3 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30 active:scale-[0.97]"
+                                >
+                                    Mengerti, Saya Ubah
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Calculator Modal */}
             <CalculatorModal
                 isOpen={showCalculator}

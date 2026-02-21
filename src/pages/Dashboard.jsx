@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { Plus, Search, SlidersHorizontal, MoreHorizontal, X, ChevronDown, CheckCircle, User, LogOut, Wallet, TrendingUp, Settings, Info, Bell, Mail, Phone, Building, MapPin, MoreVertical, Pencil, Trash2, Home, ReceiptText, ChevronLeft, Users, Calendar, Banknote, CreditCard, Moon, Sun } from 'lucide-react'
@@ -9,6 +9,16 @@ import Skeleton from '../components/Skeleton'
 import { formatNumber, unformatNumber } from '../lib/utils'
 import DatePicker from '../components/DatePicker'
 import CalculatorModal from '../components/CalculatorModal'
+
+/** @param {number} number */
+const formatRupiah = (number) => {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(number)
+}
 
 export default function Dashboard() {
     const navigate = useNavigate()
@@ -266,15 +276,7 @@ export default function Dashboard() {
         }
     }
 
-    // Helper for Currency Formatting
-    const formatRupiah = (number) => {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(number)
-    }
+    // formatRupiah moved to module scope for performance (no component state dependency)
 
     useEffect(() => {
         fetchDashboardData()
@@ -651,13 +653,12 @@ export default function Dashboard() {
 
 
 
-    // Filter Logic...
-    // Filter Logic - Filter by both status (animal type) and year
-    const filteredGroups = groups.filter(group => {
+    // Memoized filter — only recalculates when groups, filterStatus, or filterYear change
+    const filteredGroups = useMemo(() => groups.filter(group => {
         const matchStatus = filterStatus === 'Semua' || group.target_animal.toLowerCase() === filterStatus.toLowerCase()
         const matchYear = filterYear === 'Semua' || (group.qurban_year || 2026) === parseInt(filterYear)
         return matchStatus && matchYear
-    })
+    }), [groups, filterStatus, filterYear])
 
     // Helper for year badge colors
     const getYearBadgeStyle = (year) => {
@@ -887,14 +888,14 @@ export default function Dashboard() {
                         loading ? (
                             <div className="space-y-4">
                                 {[1, 2].map(i => (
-                                    <div key={i} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                                    <div key={i} className="bg-white dark:bg-slate-900/60 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
                                         <Skeleton className="h-6 w-1/2 mb-3" />
                                         <Skeleton className="h-2 w-full rounded-full" />
                                     </div>
                                 ))}
                             </div>
                         ) : groups.length === 0 ? (
-                            <div className="text-center py-10 bg-white rounded-3xl border border-dashed border-slate-200">
+                            <div className="text-center py-10 bg-white dark:bg-slate-900/60 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
                                 <p className="text-slate-400 italic mb-4">Belum ada group qurban</p>
                                 <Link to="/onboarding" className="text-emerald-600 font-bold text-sm">Buat Sekarang</Link>
                             </div>
@@ -1111,7 +1112,7 @@ export default function Dashboard() {
                 isAccountModalOpen && (
                     <div
                         onClick={() => setIsAccountModalOpen(false)}
-                        className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                        className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
@@ -1332,7 +1333,7 @@ export default function Dashboard() {
                 isSettingsModalOpen && (
                     <div
                         onClick={() => setIsSettingsModalOpen(false)}
-                        className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                        className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
@@ -1370,7 +1371,7 @@ export default function Dashboard() {
                 isAboutModalOpen && (
                     <div
                         onClick={() => setIsAboutModalOpen(false)}
-                        className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
+                        className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md animate-fade-in"
                     >
                         <div
                             onClick={(e) => e.stopPropagation()}
@@ -1495,7 +1496,7 @@ export default function Dashboard() {
                             dragConstraints={{ top: 0, bottom: 0 }}
                             dragElastic={{ top: 0, bottom: 0.2 }}
                             onDragEnd={(e, { offset, velocity }) => {
-                                if (offset.y > 100 || velocity.y > 500) {
+                                if (offset.y > 200 || velocity.y > 800) {
                                     setIsQuickTransactionModalOpen(false);
                                 }
                             }}
@@ -1767,7 +1768,7 @@ export default function Dashboard() {
                             dragConstraints={{ top: 0, bottom: 0 }}
                             dragElastic={0.2}
                             onDragEnd={(e, info) => {
-                                if (info.offset.y > 100) {
+                                if (info.offset.y > 200) {
                                     setIsHistoryModalOpen(false);
                                 }
                             }}
@@ -2005,7 +2006,7 @@ export default function Dashboard() {
                             dragConstraints={{ top: 0, bottom: 0 }}
                             dragElastic={0.2}
                             onDragEnd={(e, info) => {
-                                if (info.offset.y > 100) {
+                                if (info.offset.y > 200) {
                                     setIsNotificationModalOpen(false);
                                 }
                             }}
@@ -2103,7 +2104,6 @@ export default function Dashboard() {
                                     onClick={() => {
                                         fetchUserProfile()
                                         setIsAccountModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
                                     }}
                                     className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
                                 >
@@ -2116,7 +2116,6 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => {
                                         setIsSettingsModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
                                     }}
                                     className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
                                 >
@@ -2129,7 +2128,6 @@ export default function Dashboard() {
                                 <button
                                     onClick={() => {
                                         setIsAboutModalOpen(true)
-                                        setIsAccountDropdownOpen(false)
                                     }}
                                     className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-[0.98]"
                                 >

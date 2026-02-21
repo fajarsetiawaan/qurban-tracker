@@ -1,16 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { supabase } from './lib/supabase'
 import MobileLayout from './components/Layout/MobileLayout'
 import SplashScreen from './components/SplashScreen'
-import Dashboard from './pages/Dashboard'
-import Login from './pages/Login'
-import Onboarding from './pages/Onboarding'
-import GroupDetail from './pages/GroupDetail'
 import { ThemeProvider } from './contexts/ThemeContext'
 
-import PublicParticipant from './pages/PublicParticipant'
+// Lazy-loaded pages — each becomes its own chunk for faster initial load
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Login = lazy(() => import('./pages/Login'))
+const Onboarding = lazy(() => import('./pages/Onboarding'))
+const GroupDetail = lazy(() => import('./pages/GroupDetail'))
+const PublicParticipant = lazy(() => import('./pages/PublicParticipant'))
 
 function App() {
   const [session, setSession] = useState(null)
@@ -76,23 +77,34 @@ function App() {
   )
 }
 
+/** Lightweight spinner shown while lazy chunks load */
+function PageLoader() {
+  return (
+    <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="w-8 h-8 border-3 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+    </div>
+  )
+}
+
 function AppContent({ session }) {
   const location = useLocation()
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/p/:slug" element={<PublicParticipant />} />
-        <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+    <AnimatePresence mode="popLayout">
+      <Suspense fallback={<PageLoader />}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/p/:slug" element={<PublicParticipant />} />
+          <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
 
-        <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
-          <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
-          <Route path="/groups/:id" element={<GroupDetail />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-        </Route>
-      </Routes>
+          <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/groups" element={<div className="p-4">Halaman Kelompok</div>} />
+            <Route path="/account" element={<div className="p-4">Halaman Akun</div>} />
+            <Route path="/groups/:id" element={<GroupDetail />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </AnimatePresence>
   )
 }
