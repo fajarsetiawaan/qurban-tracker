@@ -944,7 +944,7 @@ export default function Dashboard() {
                                                 to={`/groups/${group.id}`}
                                                 className="block bg-white dark:bg-slate-900/60 backdrop-blur-lg rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.05)] dark:shadow-none border border-slate-100/80 dark:border-slate-800/50 hover:border-emerald-200/80 hover:shadow-[0_8px_30px_-8px_rgba(16,185,129,0.15)] transition-all duration-400 relative overflow-hidden p-6"
                                             >
-                                                {/* Row 1: Badges + Menu */}
+                                                {/* Row 1: Badges */}
                                                 <div className="flex justify-between items-center mb-3">
                                                     <div className="flex items-center gap-2.5">
                                                         <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide ${animalColor === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
@@ -956,22 +956,9 @@ export default function Dashboard() {
                                                             {group.participantCount} Peserta
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 text-emerald-600 uppercase tracking-wide">
-                                                            Periode {group.qurban_year || 2026}
-                                                        </span>
-                                                        <button
-                                                            data-dropdown-trigger
-                                                            onClick={(e) => {
-                                                                e.preventDefault()
-                                                                e.stopPropagation()
-                                                                setActiveDropdown(activeDropdown === group.id ? null : group.id)
-                                                            }}
-                                                            className="w-8 h-8 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-600 hover:text-slate-500 transition-all duration-300"
-                                                        >
-                                                            <MoreVertical size={18} />
-                                                        </button>
-                                                    </div>
+                                                    <span className="text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
+                                                        Periode {group.qurban_year || 2026}
+                                                    </span>
                                                 </div>
 
                                                 {/* Row 2: Group Name */}
@@ -998,33 +985,10 @@ export default function Dashboard() {
                                                     </span>
                                                 </div>
                                             </Link>
-
-                                            {/* Dropdown Menu */}
-                                            {activeDropdown === group.id && (
-                                                <div data-dropdown className="absolute right-4 top-14 w-40 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-2 z-20 animate-scale-up">
-                                                    <button
-                                                        onClick={(e) => openEditModal(group, e)}
-                                                        className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-                                                    >
-                                                        <Pencil size={16} />
-                                                        <span>Edit</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.preventDefault()
-                                                            e.stopPropagation()
-                                                            handleDeleteGroup(group, e)
-                                                        }}
-                                                        className="w-full flex items-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition whitespace-nowrap"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                        <span>Hapus Group</span>
-                                                    </button>
-                                                </div>
-                                            )}
                                         </li>
                                     )
-                                })}
+                                })
+                                }
                             </ul>
                         )
                     }
