@@ -20,6 +20,21 @@ export default function Login() {
     const [address, setAddress] = useState('')
     const navigate = useNavigate()
 
+    const handleOAuthLogin = async (provider) => {
+        try {
+            setLoading(true)
+            setError(null)
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: provider,
+            })
+            if (error) throw error
+        } catch (error) {
+            setError(error.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleAuth = async (e) => {
         e.preventDefault()
         setLoading(true)
@@ -65,7 +80,7 @@ export default function Login() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen bg-[#F0FDF4] dark:bg-slate-950 flex items-center justify-center p-6 relative overflow-y-auto font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900"
+            className="min-h-screen bg-[#F0FDF4] dark:bg-slate-950 flex flex-col items-center justify-center p-6 pb-24 relative overflow-y-auto font-sans selection:bg-emerald-200 dark:selection:bg-emerald-900"
         >
             {/* Ambient Mesh Gradient Background */}
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/40 dark:bg-emerald-900/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] animate-blob"></div>
@@ -214,6 +229,18 @@ export default function Login() {
                             />
                         </div>
 
+                        {!isSignUp && (
+                            <div className="flex justify-end -mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/forgot-password')}
+                                    className="text-xs font-bold text-emerald-600 dark:text-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors duration-300 underline decoration-1 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2"
+                                >
+                                    Lupa Password?
+                                </button>
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -224,22 +251,51 @@ export default function Login() {
                     </form>
                 )}
 
-                <div className="mt-8 text-center">
+                <div className="mt-6 text-center">
                     {!isRegistered && ( // Hide toggle button when success state is active
-                        <button
-                            onClick={() => {
-                                setIsSignUp(!isSignUp)
-                                setError(null)
-                                setSuccessMsg(null)
-                            }}
-                            className="text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors duration-300"
-                        >
-                            {isSignUp ? (
-                                <span>Sudah punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Masuk disini</span></span>
-                            ) : (
-                                <span>Belum punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Daftar sekarang</span></span>
-                            )}
-                        </button>
+                        <>
+                            <div className="relative mb-6">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-slate-200 dark:border-slate-700/50"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-4 bg-white/60 dark:bg-slate-900/60 text-slate-400 font-medium">
+                                        Atau lanjutkan dengan
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => handleOAuthLogin('google')}
+                                type="button"
+                                className="w-full h-14 inline-flex justify-center items-center gap-3 border-2 border-slate-200/60 dark:border-slate-700/60 rounded-2xl bg-white dark:bg-slate-800 shadow-sm hover:bg-slate-50 hover:border-emerald-200 dark:hover:bg-slate-700 transition-all duration-300 transform active:scale-[0.98] group"
+                            >
+                                <div className="bg-white p-1 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-110 transition-transform duration-300">
+                                    <svg className="w-5 h-5" viewBox="0 0 48 48">
+                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                        <path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z" />
+                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                                    </svg>
+                                </div>
+                                <span className="text-[15px] font-bold text-slate-700 dark:text-slate-200 tracking-wide">Lanjutkan dengan Google</span>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setIsSignUp(!isSignUp)
+                                    setError(null)
+                                    setSuccessMsg(null)
+                                }}
+                                className="mt-5 text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors duration-300"
+                            >
+                                {isSignUp ? (
+                                    <span>Sudah punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Masuk disini</span></span>
+                                ) : (
+                                    <span>Belum punya akun? <span className="text-emerald-600 dark:text-emerald-500 underline decoration-2 decoration-emerald-200 dark:decoration-emerald-900 underline-offset-2">Daftar sekarang</span></span>
+                                )}
+                            </button>
+                        </>
                     )}
                 </div>
             </div>

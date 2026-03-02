@@ -12,6 +12,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Onboarding = lazy(() => import('./pages/Onboarding'))
 const GroupDetail = lazy(() => import('./pages/GroupDetail'))
 const PublicParticipant = lazy(() => import('./pages/PublicParticipant'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'))
 
 function App() {
   const [session, setSession] = useState(null)
@@ -95,6 +97,8 @@ function AppContent({ session }) {
         <Routes location={location} key={location.pathname}>
           <Route path="/p/:slug" element={<PublicParticipant />} />
           <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+          <Route path="/forgot-password" element={session ? <Navigate to="/" /> : <ForgotPassword />} />
+          <Route path="/update-password" element={session ? <UpdatePassword /> : <Navigate to="/login" />} />
 
           <Route element={session ? <MobileLayout /> : <Navigate to="/login" />}>
             <Route path="/" element={<Dashboard />} />
